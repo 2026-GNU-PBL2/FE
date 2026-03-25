@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* 스크롤바 숨김 (가로 전용 포함) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
