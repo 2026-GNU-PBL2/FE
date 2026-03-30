@@ -1,71 +1,61 @@
 import { create } from "zustand";
-import { createJSONStorage, devtools, persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
-export type SocialProvider = "google" | "kakao" | "naver";
+export type UserRole = "CUSTOMER" | "ADMIN";
+export type UserStatus = "PENDING_SIGNUP" | "ACTIVE" | "SUSPENDED";
+export type AuthSocialProvider = "kakao" | "naver" | "google" | null;
 
 export interface AuthUser {
-  id: number | string;
-  email: string;
-  nickname: string;
-  profileImage?: string;
-  provider: SocialProvider;
-}
-
-interface SetAuthPayload {
-  accessToken: string;
-  user: AuthUser;
+  id: number;
+  nickname: string | null;
+  submateEmail: string | null;
+  phoneNumber: string | null;
+  role: UserRole;
+  status: UserStatus;
 }
 
 interface AuthState {
   accessToken: string | null;
   user: AuthUser | null;
+  socialProvider: AuthSocialProvider;
   isAuthenticated: boolean;
-  setAuth: (payload: SetAuthPayload) => void;
+  setAuth: (payload: {
+    accessToken: string;
+    user: AuthUser;
+    socialProvider: Exclude<AuthSocialProvider, null>;
+  }) => void;
   clearAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
-  devtools(
-    persist(
-      (set) => ({
-        accessToken: null,
-        user: null,
-        isAuthenticated: false,
+  persist(
+    (set) => ({
+      accessToken: null,
+      user: null,
+      socialProvider: null,
+      isAuthenticated: false,
 
-        setAuth: ({ accessToken, user }) =>
-          set(
-            {
-              accessToken,
-              user,
-              isAuthenticated: true,
-            },
-            false,
-            "auth/setAuth",
-          ),
-
-        clearAuth: () =>
-          set(
-            {
-              accessToken: null,
-              user: null,
-              isAuthenticated: false,
-            },
-            false,
-            "auth/clearAuth",
-          ),
-      }),
-      {
-        name: "submate-auth-storage",
-        storage: createJSONStorage(() => localStorage),
-        partialize: (state) => ({
-          accessToken: state.accessToken,
-          user: state.user,
-          isAuthenticated: state.isAuthenticated,
-        }),
+      setAuth: ({ accessToken, user, socialProvider }) => {
+        set({
+          accessToken,
+          user,
+          socialProvider,
+          isAuthenticated: true,
+        });
       },
-    ),
+
+      clearAuth: () => {
+        set({
+          accessToken: null,
+          user: null,
+          socialProvider: null,
+          isAuthenticated: false,
+        });
+      },
+    }),
     {
-      name: "AuthStore",
+      name: "submate-auth-storage",
+      storage: createJSONStorage(() => localStorage),
     },
   ),
 );

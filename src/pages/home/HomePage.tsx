@@ -10,6 +10,7 @@ import {
   getPartyRecruitListPath,
 } from "@/mocks/ott";
 import type { OttSlug, OttType, WaitingParty } from "@/types/ott";
+import { useAuthStore } from "@/stores/authStore";
 
 function shouldUseNestedCircle(slug: OttSlug) {
   return (
@@ -225,6 +226,8 @@ function RecruitSection({
     </section>
   );
 }
+
+console.log(useAuthStore.getState());
 
 export default function HomePage() {
   const [selectedOtt, setSelectedOtt] = useState<OttType>("유튜브");

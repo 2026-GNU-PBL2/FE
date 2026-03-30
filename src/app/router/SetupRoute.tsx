@@ -1,8 +1,7 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 
-export default function ProtectedRoute() {
-  const location = useLocation();
+export default function SetupRoute() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
@@ -10,16 +9,16 @@ export default function ProtectedRoute() {
   const isLoggedIn = Boolean(accessToken) && isAuthenticated;
 
   if (!isLoggedIn) {
-    return <Navigate to="/log-in" replace state={{ from: location }} />;
-  }
-
-  if (user?.status === "PENDING_SIGNUP") {
-    return <Navigate to="/setup/intro" replace />;
-  }
-
-  if (user?.status !== "ACTIVE") {
     return <Navigate to="/log-in" replace />;
   }
 
-  return <Outlet />;
+  if (user?.status === "PENDING_SIGNUP") {
+    return <Outlet />;
+  }
+
+  if (user?.status === "ACTIVE") {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Navigate to="/log-in" replace />;
 }

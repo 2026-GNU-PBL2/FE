@@ -23,7 +23,7 @@ export default function SetupSecurityPage() {
   const [firstPin, setFirstPin] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [shakeKey, setShakeKey] = useState(0);
-  const [pressedKeyId, setPressedKeyId] = useState<string | null>(null);
+  const [pressedKeyIds, setPressedKeyIds] = useState<string[]>([]);
   const [visibleDigitIndex, setVisibleDigitIndex] = useState<number | null>(
     null,
   );
@@ -36,10 +36,8 @@ export default function SetupSecurityPage() {
   const pressEffectTimerRef = useRef<number | null>(null);
 
   const keypad = useMemo(() => {
-    void mode;
-    void shakeKey;
     return createRandomKeypad();
-  }, [mode, shakeKey]);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -63,7 +61,9 @@ export default function SetupSecurityPage() {
     if (activePin.length >= PIN_LENGTH) return;
 
     setErrorMessage("");
-    setPressedKeyId(keyId);
+
+    const decoyKeyId = getRandomDecoyKeyId(keypad, keyId);
+    setPressedKeyIds(decoyKeyId ? [keyId, decoyKeyId] : [keyId]);
 
     const nextValue = activePin + digit;
     const nextIndex = activePin.length;
@@ -91,7 +91,7 @@ export default function SetupSecurityPage() {
     }
 
     pressEffectTimerRef.current = window.setTimeout(() => {
-      setPressedKeyId(null);
+      setPressedKeyIds([]);
     }, 120);
 
     if (nextValue.length === PIN_LENGTH) {
@@ -107,13 +107,14 @@ export default function SetupSecurityPage() {
           setMode("confirm");
           setVisibleDigitIndex(null);
           setVisibleDigitValue(null);
+          setPressedKeyIds([]);
           return;
         }
 
         if (nextValue === firstPin) {
           setSecurity({
-            password: firstPin,
-            passwordConfirm: nextValue,
+            pinNumber: firstPin,
+            pinNumberConfirm: nextValue,
           });
 
           navigate("/setup/complete");
@@ -128,6 +129,7 @@ export default function SetupSecurityPage() {
         setFirstPin("");
         setVisibleDigitIndex(null);
         setVisibleDigitValue(null);
+        setPressedKeyIds([]);
 
         if (navigator.vibrate) {
           navigator.vibrate(120);
@@ -140,6 +142,7 @@ export default function SetupSecurityPage() {
     setErrorMessage("");
     setVisibleDigitIndex(null);
     setVisibleDigitValue(null);
+    setPressedKeyIds([]);
 
     if (mode === "create") {
       setPin((prev) => prev.slice(0, -1));
@@ -157,7 +160,7 @@ export default function SetupSecurityPage() {
     setFirstPin("");
     setVisibleDigitIndex(null);
     setVisibleDigitValue(null);
-    setPressedKeyId(null);
+    setPressedKeyIds([]);
     setShakeKey((prev) => prev + 1);
   };
 
@@ -230,7 +233,7 @@ export default function SetupSecurityPage() {
               <p className="text-sm font-medium text-slate-600">
                 {mode === "create"
                   ? "입력 후 자동으로 확인 단계로 넘어갑니다."
-                  : "입력 내용이 일치하면 가입이 완료됩니다."}
+                  : "입력 내용이 일치하면 가입 확인 단계로 이동합니다."}
               </p>
             </div>
 
@@ -271,7 +274,7 @@ export default function SetupSecurityPage() {
                   );
                 }
 
-                const isPressed = pressedKeyId === item.id;
+                const isPressed = pressedKeyIds.includes(item.id);
 
                 return (
                   <button
@@ -396,6 +399,22 @@ function createRandomKeypad(): KeypadItem[] {
     { type: "digit", value: digits[9], id: "k10" },
     { type: "delete", id: "delete" },
   ];
+}
+
+function getRandomDecoyKeyId(keypad: KeypadItem[], pressedKeyId: string) {
+  const digitIds = keypad
+    .filter((item): item is Extract<KeypadItem, { type: "digit" }> => {
+      return item.type === "digit";
+    })
+    .map((item) => item.id)
+    .filter((id) => id !== pressedKeyId);
+
+  if (digitIds.length === 0) {
+    return null;
+  }
+
+  const randomIndex = Math.floor(Math.random() * digitIds.length);
+  return digitIds[randomIndex];
 }
 
 function shuffleArray<T>(array: T[]) {

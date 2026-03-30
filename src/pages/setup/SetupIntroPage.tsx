@@ -3,29 +3,95 @@ import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import SetupShell from "./SetupShell";
 import { useSetupStore } from "@/stores/setupStore";
+import { useAuthStore } from "@/stores/authStore";
 
-const providerLabelMap = {
-  google: "Google",
-  kakao: "Kakao",
-  naver: "Naver",
-};
+type DisplayProvider = "google" | "kakao" | "naver";
+
+function resolveDisplayProvider(
+  provider: string | null | undefined,
+): DisplayProvider | null {
+  if (!provider) return null;
+
+  const normalized = provider.toLowerCase();
+
+  if (normalized === "google") return "google";
+  if (normalized === "kakao") return "kakao";
+  if (normalized === "naver") return "naver";
+
+  return null;
+}
+
+function getProviderLabel(provider: DisplayProvider | null) {
+  if (provider === "google") return "Google";
+  if (provider === "kakao") return "Kakao";
+  if (provider === "naver") return "Naver";
+  return "Social";
+}
+
+function getProviderMeta(provider: DisplayProvider | null) {
+  if (provider === "google") {
+    return {
+      icon: "logos:google-icon",
+      badgeClassName: "bg-white ring-1 ring-slate-200",
+      iconWrapperClassName: "bg-white",
+    };
+  }
+
+  if (provider === "kakao") {
+    return {
+      icon: "simple-icons:kakaotalk",
+      badgeClassName: "bg-[#FEE500] ring-1 ring-black/5",
+      iconWrapperClassName: "bg-[#FEE500] text-[#1F1F1F]",
+    };
+  }
+
+  if (provider === "naver") {
+    return {
+      icon: "simple-icons:naver",
+      badgeClassName: "bg-[#03C75A] ring-1 ring-black/5",
+      iconWrapperClassName: "bg-[#03C75A] text-white",
+    };
+  }
+
+  return {
+    icon: "solar:user-bold-duotone",
+    badgeClassName: "bg-brand-main/10 ring-1 ring-brand-main/10",
+    iconWrapperClassName: "bg-brand-main/10 text-brand-main",
+  };
+}
 
 export default function SetupIntroPage() {
   const navigate = useNavigate();
+
+  const user = useAuthStore((state) => state.user);
+  const socialProvider = useAuthStore((state) => state.socialProvider);
+
   const { provider, socialEmail, profileImage, setProviderInfo } =
     useSetupStore();
 
-  useEffect(() => {
-    if (!provider) {
-      setProviderInfo({
-        provider: "google",
-        socialEmail: "submate.user@gmail.com",
-        profileImage: "",
-      });
-    }
-  }, [provider, setProviderInfo]);
+  const displayProvider = resolveDisplayProvider(socialProvider ?? provider);
+  const providerLabel = getProviderLabel(displayProvider);
+  const providerMeta = getProviderMeta(displayProvider);
 
-  const providerLabel = provider ? providerLabelMap[provider] : "Social";
+  useEffect(() => {
+    const resolvedProvider = resolveDisplayProvider(socialProvider ?? provider);
+
+    if (!resolvedProvider) return;
+
+    setProviderInfo({
+      provider: resolvedProvider,
+      socialEmail:
+        socialEmail || user?.submateEmail || "연결된 이메일 정보 없음",
+      profileImage: profileImage || "",
+    });
+  }, [
+    profileImage,
+    provider,
+    setProviderInfo,
+    socialEmail,
+    socialProvider,
+    user?.submateEmail,
+  ]);
 
   return (
     <SetupShell
@@ -43,7 +109,7 @@ export default function SetupIntroPage() {
         <>
           소셜 로그인은 완료됐습니다.
           <br />
-          Submate 이용에 필요한 정보만 간단하게 이어서 입력해 주세요.
+          Submate 이용에 필요한 정보만 이어서 입력해 주세요.
         </>
       }
       leftBottom={
@@ -60,7 +126,7 @@ export default function SetupIntroPage() {
           <div className="space-y-5">
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-brand-main/10 text-brand-main">
+                <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-slate-50">
                   {profileImage ? (
                     <img
                       src={profileImage}
@@ -68,11 +134,14 @@ export default function SetupIntroPage() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <Icon
-                      icon="solar:user-bold-duotone"
-                      width="28"
-                      height="28"
-                    />
+                    <div
+                      className={[
+                        "flex h-full w-full items-center justify-center rounded-2xl",
+                        providerMeta.iconWrapperClassName,
+                      ].join(" ")}
+                    >
+                      <Icon icon={providerMeta.icon} width="28" height="28" />
+                    </div>
                   )}
                 </div>
 
@@ -84,7 +153,7 @@ export default function SetupIntroPage() {
                     {providerLabel} 계정으로 로그인됨
                   </p>
                   <p className="mt-1 break-all text-sm text-slate-600">
-                    {socialEmail || "연결된 이메일 정보 없음"}
+                    "소셜 계정으로 간편하게 로그인 중입니다"
                   </p>
                 </div>
               </div>
@@ -96,18 +165,18 @@ export default function SetupIntroPage() {
               <div className="mt-4 space-y-4">
                 <SimpleStep
                   number="01"
-                  title="프로필 정보 입력"
-                  desc="아이디와 닉네임을 설정합니다"
+                  title="Submate 계정 설정"
+                  desc="서비스에서 사용할 서브메이트 이메일과 닉네임을 정합니다"
                 />
                 <SimpleStep
                   number="02"
-                  title="비밀번호 설정"
-                  desc="계정 보안을 위한 비밀번호를 만듭니다"
+                  title="휴대폰 인증"
+                  desc="본인 확인을 위해 휴대폰 번호를 인증합니다"
                 />
                 <SimpleStep
                   number="03"
-                  title="휴대폰 인증"
-                  desc="본인 확인 후 가입을 완료합니다"
+                  title="간편 비밀번호 설정"
+                  desc="로그인과 주요 인증에 사용할 4자리 번호를 설정합니다"
                 />
               </div>
             </div>
@@ -115,7 +184,8 @@ export default function SetupIntroPage() {
 
           <div className="mt-6 rounded-2xl border border-brand-sub/20 bg-brand-sub/10 px-4 py-3">
             <p className="text-sm font-semibold text-slate-800">
-              입력은 오래 걸리지 않아요. 바로 다음 단계로 진행해 주세요.
+              가입 후에는 파티 참여, 결제, 정산 내역 확인까지 바로 이용할 수
+              있습니다.
             </p>
           </div>
         </div>

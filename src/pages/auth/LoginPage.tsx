@@ -1,27 +1,17 @@
+// src/pages/auth/LoginPage.tsx
+
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { getSocialAuthorizeUrl, type LoginProvider } from "@/api/auth";
 import { useAuthStore } from "@/stores/authStore";
 
-type Provider = "kakao" | "naver" | "google";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
-
-// 프론트는 그냥 우리 백엔드 로그인 시작 엔드포인트로 이동
-
-const OAUTH_URL: Record<Provider, string> = {
-  kakao: `${API_BASE_URL}/api/auth/signin/kakao`,
-  naver: `${API_BASE_URL}/api/auth/signin/naver`,
-  google: `${API_BASE_URL}/api/auth/signin/google`,
-};
-
-function providerLabel(provider: Provider) {
+function providerLabel(provider: LoginProvider) {
   if (provider === "kakao") return "카카오";
   if (provider === "naver") return "네이버";
   return "Google";
 }
 
-function providerButtonText(provider: Provider) {
+function providerButtonText(provider: LoginProvider) {
   if (provider === "kakao") return "카카오로 시작하기";
   if (provider === "naver") return "네이버로 시작하기";
   return "Google로 시작하기";
@@ -56,7 +46,9 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);
+  const [loadingProvider, setLoadingProvider] = useState<LoginProvider | null>(
+    null,
+  );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const liveRef = useRef<HTMLParagraphElement | null>(null);
 
@@ -75,16 +67,23 @@ export default function LoginPage() {
     }
   }, [errorMsg]);
 
-  const onLogin = (provider: Provider) => {
+  const onLogin = (provider: LoginProvider) => {
     if (isLoading) return;
 
     try {
       setErrorMsg(null);
       setLoadingProvider(provider);
-      window.location.href = OAUTH_URL[provider];
+
+      const authorizeUrl = getSocialAuthorizeUrl(provider);
+
+      if (!authorizeUrl) {
+        throw new Error("Authorize URL not found");
+      }
+
+      window.location.href = authorizeUrl;
     } catch {
       setLoadingProvider(null);
-      setErrorMsg("로그인을 시작할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+      setErrorMsg("로그인을 시작할 수 없습니다. 설정값을 확인해 주세요.");
     }
   };
 
@@ -99,26 +98,23 @@ export default function LoginPage() {
             backgroundSize: "22px 22px",
           }}
         />
-
         <div className="absolute -top-32 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-brand-sub/25 blur-3xl" />
-        <div className="absolute -bottom-36 left-1/2 h-112 w-md -translate-x-1/2 rounded-full bg-brand-accent/20 blur-3xl" />
+        <div className="absolute -bottom-36 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-brand-accent/20 blur-3xl" />
         <div className="absolute -left-28 top-28 h-96 w-96 rounded-full bg-brand-sub/10 blur-3xl" />
         <div className="absolute -right-28 bottom-24 h-96 w-96 rounded-full bg-brand-accent/10 blur-3xl" />
-
         <div className="absolute inset-0 bg-linear-to-b from-white/0 via-white/0 to-white/35" />
       </div>
 
       <div className="relative mx-auto flex min-h-screen max-w-md items-center justify-center px-5 py-10">
         <section className="w-full">
-          <div className="relative overflow-hidden rounded-3xl bg-white shadow-[0_18px_60px_rgba(2,6,23,0.12)] ring-1 ring-black/5">
+          <div className="relative overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-black/5">
             <div className="h-1.5 w-full bg-linear-to-r from-brand-main via-brand-sub to-brand-accent" />
-            <div className="pointer-events-none absolute -top-20 left-1/2 h-48 w-lg -translate-x-1/2 rounded-full bg-linear-to-r from-brand-sub/10 via-white/25 to-brand-accent/10 blur-2xl" />
 
             <div className="px-7 pt-10">
               <div className="flex flex-col items-center">
                 <div className="relative mb-4">
                   <div className="absolute inset-0 -z-10 rounded-2xl bg-linear-to-br from-brand-sub/35 to-brand-accent/25 blur-md" />
-                  <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-white ring-1 ring-brand-main/10 shadow-sm">
+                  <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-brand-main/10">
                     <img
                       src="/images/logo-symbol.png"
                       alt="Submate Logo"
@@ -175,7 +171,7 @@ export default function LoginPage() {
                   onClick={() => onLogin("kakao")}
                   disabled={isLoading}
                   aria-busy={loadingProvider === "kakao"}
-                  className="group relative flex h-12 w-full items-center justify-center rounded-xl bg-[#FEE500] text-[15px] font-semibold text-[#1F1F1F] shadow-sm transition hover:brightness-[0.98] hover:shadow-[0_10px_26px_rgba(2,6,23,0.10)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-sub/25 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="relative flex h-12 w-full items-center justify-center rounded-xl bg-[#FEE500] text-[15px] font-semibold text-[#1F1F1F] shadow-sm transition hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-sub/25 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <span className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-black/5" />
                   <div className="flex items-center gap-2">
@@ -202,7 +198,7 @@ export default function LoginPage() {
                   onClick={() => onLogin("naver")}
                   disabled={isLoading}
                   aria-busy={loadingProvider === "naver"}
-                  className="group relative flex h-12 w-full items-center justify-center rounded-xl bg-[#03C75A] text-[15px] font-semibold text-white shadow-sm transition hover:brightness-[0.98] hover:shadow-[0_10px_26px_rgba(2,6,23,0.10)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-accent/25 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="relative flex h-12 w-full items-center justify-center rounded-xl bg-[#03C75A] text-[15px] font-semibold text-white shadow-sm transition hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-accent/25 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <span className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-black/5" />
                   <div className="flex items-center gap-2">
@@ -229,9 +225,9 @@ export default function LoginPage() {
                   onClick={() => onLogin("google")}
                   disabled={isLoading}
                   aria-busy={loadingProvider === "google"}
-                  className="group relative flex h-12 w-full items-center justify-center rounded-xl border border-slate-200 bg-white text-[15px] font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 hover:shadow-[0_10px_26px_rgba(2,6,23,0.08)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-sub/20 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="relative flex h-12 w-full items-center justify-center rounded-xl border border-slate-200 bg-white text-[15px] font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-sub/20 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  <span className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-black/5 opacity-0 transition group-hover:opacity-100" />
+                  <span className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-black/5 opacity-0 transition hover:opacity-100" />
                   <div className="flex items-center gap-2">
                     {loadingProvider === "google" ? (
                       <Spinner className="text-slate-700" />
@@ -270,19 +266,19 @@ export default function LoginPage() {
             <div className="border-t border-slate-100 px-7 py-5">
               <p className="text-center text-xs leading-relaxed text-slate-500">
                 로그인하면{" "}
-                <a
-                  href="/terms"
+                <Link
+                  to="/terms"
                   className="font-semibold text-brand-main hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-sub/30"
                 >
                   서비스 이용약관
-                </a>
+                </Link>
                 과{" "}
-                <a
-                  href="/privacy"
+                <Link
+                  to="/privacy"
                   className="font-semibold text-brand-main hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-sub/30"
                 >
                   개인정보 처리방침
-                </a>
+                </Link>
                 에 동의하게 됩니다.
               </p>
             </div>

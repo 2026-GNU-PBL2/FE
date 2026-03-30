@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import RouterRoot from "./RouterRoot";
 import HomePage from "@/pages/home/HomePage";
 import NotFoundPage from "@/pages/not-found/NotFoundPage";
@@ -16,6 +16,18 @@ import SetupCompletePage from "@/pages/setup/SetupCompletePage";
 import AboutPage from "@/pages/about/AboutPage";
 import EventPage from "@/pages/event/EventPage";
 import SupportPage from "@/pages/support/SupportPage";
+import ProtectedRoute from "./ProtectedRoute";
+import PublicRoute from "./PublicRoute";
+import SetupRoute from "./SetupRoute";
+import NotificationPage from "@/pages/notification/NotificationPage";
+import ProfileManagePage from "@/pages/my/ProfileManagePage";
+import PasswordManagePage from "@/pages/my/PasswordManagePage";
+import PaymentMethodManagePage from "@/pages/my/PaymentMethodManagePage";
+import MoneyManagePage from "@/pages/my/MoneyManagePage";
+import PaymentHistoryPage from "@/pages/my/PaymentHistoryPage";
+import PartyHistoryPage from "@/pages/my/PartyHistoryPage";
+import SettingsPage from "@/pages/my/SettingsPage";
+import Myparty from "@/pages/party/MyParty";
 
 const router = createBrowserRouter([
   {
@@ -28,43 +40,86 @@ const router = createBrowserRouter([
           { path: "/about", element: <AboutPage /> },
           { path: "/event", element: <EventPage /> },
           { path: "/support", element: <SupportPage /> },
-          { path: "/mypage", element: <MyPage /> },
           { path: "/parties", element: <PartyListPage /> },
-          { path: "/party/create/:ottSlug", element: <PartyCreatePage /> },
+          { path: "/parties/:type", element: <PartyListPage /> },
+        ],
+      },
+
+      {
+        element: <ProtectedRoute />,
+        children: [
           {
-            path: "/parties/:type",
-            element: <PartyListPage />,
+            element: <MainLayout />,
+            children: [
+              { path: "/notification", element: <NotificationPage /> },
+              {
+                path: "/mypage",
+                element: <MyPage />,
+                children: [
+                  { index: true, element: <Navigate to="profile" replace /> },
+                  { path: "profile", element: <ProfileManagePage /> },
+                  { path: "password", element: <PasswordManagePage /> },
+                  {
+                    path: "payment-method",
+                    element: <PaymentMethodManagePage />,
+                  },
+                  { path: "money", element: <MoneyManagePage /> },
+                  {
+                    path: "payment-history",
+                    element: <PaymentHistoryPage />,
+                  },
+                  { path: "party-history", element: <PartyHistoryPage /> },
+                  { path: "settings", element: <SettingsPage /> },
+                ],
+              },
+              { path: "/myparty", element: <Myparty /> },
+              { path: "/party/create/:ottSlug", element: <PartyCreatePage /> },
+            ],
           },
         ],
       },
+
       {
-        path: "/log-in",
-        element: <LoginPage />,
+        element: <PublicRoute />,
+        children: [
+          {
+            path: "/log-in",
+            element: <LoginPage />,
+          },
+        ],
       },
+
       {
-        path: "/log-in/callback",
+        path: "/oauth/:provider/callback",
         element: <SocialLoginCallbackPage />,
       },
+
       {
-        path: "/setup/intro",
-        element: <SetupIntroPage />,
+        element: <SetupRoute />,
+        children: [
+          {
+            path: "/setup/intro",
+            element: <SetupIntroPage />,
+          },
+          {
+            path: "/setup/profile",
+            element: <SetupProfilePage />,
+          },
+          {
+            path: "/setup/security",
+            element: <SetupSecurityPage />,
+          },
+          {
+            path: "/setup/phone",
+            element: <SetupPhonePage />,
+          },
+          {
+            path: "/setup/complete",
+            element: <SetupCompletePage />,
+          },
+        ],
       },
-      {
-        path: "/setup/profile",
-        element: <SetupProfilePage />,
-      },
-      {
-        path: "/setup/security",
-        element: <SetupSecurityPage />,
-      },
-      {
-        path: "/setup/phone",
-        element: <SetupPhonePage />,
-      },
-      {
-        path: "/setup/complete",
-        element: <SetupCompletePage />,
-      },
+
       {
         path: "*",
         element: <NotFoundPage />,

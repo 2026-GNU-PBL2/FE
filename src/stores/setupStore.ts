@@ -1,80 +1,93 @@
-// src/stores/setupStore.ts
-
 import { create } from "zustand";
 
-export type SocialProvider = "google" | "kakao" | "naver";
+export type SetupProvider = "google" | "kakao" | "naver" | null;
 
-interface SetupState {
-  provider: SocialProvider | null;
+type SetupStore = {
+  provider: SetupProvider;
   socialEmail: string;
   profileImage: string;
-  userId: string;
+
+  submateEmail: string;
   nickname: string;
-  password: string;
-  passwordConfirm: string;
-  phone: string;
+
+  phoneNumber: string;
   verificationCode: string;
   isPhoneVerified: boolean;
-  setProviderInfo: (payload: {
-    provider: SocialProvider;
-    socialEmail?: string;
-    profileImage?: string;
-  }) => void;
-  setProfile: (payload: { userId: string; nickname: string }) => void;
-  setSecurity: (payload: { password: string; passwordConfirm: string }) => void;
-  setPhone: (payload: { phone: string; verificationCode: string }) => void;
-  setPhoneVerified: (value: boolean) => void;
-  resetSetup: () => void;
-}
 
-const initialState = {
-  provider: null,
-  socialEmail: "",
-  profileImage: "",
-  userId: "",
-  nickname: "",
-  password: "",
-  passwordConfirm: "",
-  phone: "",
-  verificationCode: "",
-  isPhoneVerified: false,
+  pinNumber: string;
+  pinNumberConfirm: string;
+
+  setProviderInfo: (payload: {
+    provider: Exclude<SetupProvider, null>;
+    socialEmail: string;
+    profileImage: string;
+  }) => void;
+
+  setProfile: (payload: { submateEmail: string; nickname: string }) => void;
+
+  setPhone: (payload: {
+    phoneNumber: string;
+    verificationCode: string;
+  }) => void;
+
+  setPhoneVerified: (verified: boolean) => void;
+
+  setSecurity: (payload: {
+    pinNumber: string;
+    pinNumberConfirm: string;
+  }) => void;
+
+  resetSetup: () => void;
 };
 
-export const useSetupStore = create<SetupState>((set) => ({
+const initialState = {
+  provider: null as SetupProvider,
+  socialEmail: "",
+  profileImage: "",
+
+  submateEmail: "",
+  nickname: "",
+
+  phoneNumber: "",
+  verificationCode: "",
+  isPhoneVerified: false,
+
+  pinNumber: "",
+  pinNumberConfirm: "",
+};
+
+export const useSetupStore = create<SetupStore>((set) => ({
   ...initialState,
 
-  setProviderInfo: ({ provider, socialEmail = "", profileImage = "" }) =>
+  setProviderInfo: ({ provider, socialEmail, profileImage }) =>
     set({
       provider,
       socialEmail,
       profileImage,
     }),
 
-  setProfile: ({ userId, nickname }) =>
+  setProfile: ({ submateEmail, nickname }) =>
     set({
-      userId,
+      submateEmail,
       nickname,
     }),
 
-  setSecurity: ({ password, passwordConfirm }) =>
+  setPhone: ({ phoneNumber, verificationCode }) =>
     set({
-      password,
-      passwordConfirm,
-    }),
-
-  setPhone: ({ phone, verificationCode }) =>
-    set({
-      phone,
+      phoneNumber,
       verificationCode,
     }),
 
-  setPhoneVerified: (value) =>
+  setPhoneVerified: (verified) =>
     set({
-      isPhoneVerified: value,
+      isPhoneVerified: verified,
     }),
 
-  resetSetup: () =>
+  setSecurity: ({ pinNumber, pinNumberConfirm }) =>
     set({
-      ...initialState,
+      pinNumber,
+      pinNumberConfirm,
     }),
+
+  resetSetup: () => set(initialState),
 }));

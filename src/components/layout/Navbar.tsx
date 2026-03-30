@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 
 const navItems = [
-  { label: "나의 파티", to: "/party", requireAuth: true },
+  { label: "나의 파티", to: "/myparty", requireAuth: true },
   { label: "이벤트", to: "/event", requireAuth: false },
   { label: "서비스 소개", to: "/about", requireAuth: false },
   { label: "고객센터", to: "/support", requireAuth: false },
@@ -38,7 +38,7 @@ export default function Navbar() {
 
   const handleNotificationClick = () => {
     scrollToTop();
-    navigate("/notifications");
+    navigate("/notification");
   };
 
   return (

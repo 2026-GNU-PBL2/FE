@@ -1,30 +1,31 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import SetupShell from "./SetupShell";
-import { validateNickname, validateUserId } from "./setupUtils";
+import { validateNickname, validateSubmateEmail } from "./setupUtils";
 import { useSetupStore } from "@/stores/setupStore";
+
+const SUBMATE_DOMAIN = "@submate.com";
 
 export default function SetupProfilePage() {
   const navigate = useNavigate();
-  const { userId, nickname, setProfile } = useSetupStore();
+  const { submateEmail, nickname, setProfile } = useSetupStore();
 
-  const [localUserId, setLocalUserId] = useState(userId);
+  const [localSubmateEmail, setLocalSubmateEmail] = useState(submateEmail);
   const [localNickname, setLocalNickname] = useState(nickname);
   const [submitted, setSubmitted] = useState(false);
 
-  const [isUserIdChecked, setIsUserIdChecked] = useState(false);
+  const [isSubmateEmailChecked, setIsSubmateEmailChecked] = useState(false);
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
 
-  let userIdError = "";
+  let submateEmailError = "";
   let nicknameError = "";
 
-  if (submitted || localUserId.length > 0) {
-    if (!localUserId.trim()) {
-      userIdError = "아이디를 입력해 주세요.";
-    } else if (!validateUserId(localUserId)) {
-      userIdError =
-        "아이디는 4~20자의 영문, 숫자, ., _, - 만 사용할 수 있습니다.";
+  if (submitted || localSubmateEmail.length > 0) {
+    if (!localSubmateEmail.trim()) {
+      submateEmailError = "서브메이트 이메일 아이디를 입력해 주세요.";
+    } else if (!validateSubmateEmail(localSubmateEmail)) {
+      submateEmailError = "4~20자의 영문, 숫자, ., _, - 만 사용할 수 있습니다.";
     }
   }
 
@@ -36,20 +37,28 @@ export default function SetupProfilePage() {
     }
   }
 
+  const previewEmail = useMemo(() => {
+    if (!localSubmateEmail.trim()) return `example${SUBMATE_DOMAIN}`;
+    return `${localSubmateEmail.trim()}${SUBMATE_DOMAIN}`;
+  }, [localSubmateEmail]);
+
   const isValid =
-    !userIdError && !nicknameError && isUserIdChecked && isNicknameChecked;
+    !submateEmailError &&
+    !nicknameError &&
+    isSubmateEmailChecked &&
+    isNicknameChecked;
 
-  const handleCheckUserId = () => {
-    if (userIdError || !localUserId.trim()) return;
+  const handleCheckSubmateEmail = () => {
+    if (submateEmailError || !localSubmateEmail.trim()) return;
 
-    // TODO: 아이디 중복확인 API 연결
-    setIsUserIdChecked(true);
+    // TODO: submateEmail 중복확인 API 연결
+    setIsSubmateEmailChecked(true);
   };
 
   const handleCheckNickname = () => {
     if (nicknameError || !localNickname.trim()) return;
 
-    // TODO: 닉네임 중복확인 API 연결
+    // TODO: nickname 중복확인 API 연결
     setIsNicknameChecked(true);
   };
 
@@ -59,7 +68,7 @@ export default function SetupProfilePage() {
     if (!isValid) return;
 
     setProfile({
-      userId: localUserId.trim(),
+      submateEmail: localSubmateEmail.trim(),
       nickname: localNickname.trim(),
     });
 
@@ -73,38 +82,50 @@ export default function SetupProfilePage() {
       badge="프로필 설정"
       title={
         <>
-          사용할 계정을
+          서비스에서 사용할
           <br />
-          <span className="text-brand-main">간단히 설정해 주세요</span>
+          <span className="text-brand-main">계정 정보를 설정해 주세요</span>
         </>
       }
-      description={<>아이디와 닉네임은 다른 사용자와 겹칠 수 없습니다.</>}
+      description={
+        <>서브메이트 이메일과 닉네임은 다른 사용자와 겹칠 수 없습니다.</>
+      }
       rightContent={
         <div className="space-y-6">
           <Field
-            label="아이디"
-            subLabel="로그인에 사용됩니다"
-            value={localUserId}
+            label="서브메이트 이메일"
+            subLabel="@submate.com 형식으로 생성됩니다"
+            value={localSubmateEmail}
             onChange={(value) => {
-              setLocalUserId(value);
-              setIsUserIdChecked(false);
+              setLocalSubmateEmail(value);
+              setIsSubmateEmailChecked(false);
             }}
-            placeholder="submate.user"
-            icon="solar:user-id-bold-duotone"
-            error={userIdError}
-            checked={isUserIdChecked}
-            onCheck={handleCheckUserId}
+            placeholder="hajin"
+            icon="solar:letter-bold-duotone"
+            error={submateEmailError}
+            checked={isSubmateEmailChecked}
+            onCheck={handleCheckSubmateEmail}
+            suffix={SUBMATE_DOMAIN}
           />
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+            <p className="text-xs font-semibold text-slate-500">
+              생성될 서브메이트 이메일
+            </p>
+            <p className="mt-2 break-all text-sm font-bold text-slate-900">
+              {previewEmail}
+            </p>
+          </div>
 
           <Field
             label="닉네임"
-            subLabel="서비스에 표시됩니다"
+            subLabel="서비스 내 파티와 프로필에 표시됩니다"
             value={localNickname}
             onChange={(value) => {
               setLocalNickname(value);
               setIsNicknameChecked(false);
             }}
-            placeholder="서브메이트"
+            placeholder="하진"
             icon="solar:smile-circle-bold-duotone"
             error={nicknameError}
             checked={isNicknameChecked}
@@ -134,6 +155,7 @@ function Field({
   error,
   checked,
   onCheck,
+  suffix,
 }: {
   label: string;
   subLabel: string;
@@ -144,6 +166,7 @@ function Field({
   error: string;
   checked: boolean;
   onCheck: () => void;
+  suffix?: string;
 }) {
   return (
     <div className="space-y-2">
@@ -164,12 +187,20 @@ function Field({
           <Icon icon={icon} width="20" height="20" />
         </div>
 
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="h-12 w-full border-none bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
-        />
+        <div className="flex h-12 w-full items-center gap-2">
+          <input
+            value={value}
+            onChange={(e) => onChange(e.target.value.trim())}
+            placeholder={placeholder}
+            className="h-full w-full border-none bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
+          />
+
+          {suffix ? (
+            <span className="shrink-0 text-sm font-semibold text-slate-500">
+              {suffix}
+            </span>
+          ) : null}
+        </div>
 
         <button
           type="button"

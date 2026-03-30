@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import SetupShell from "./SetupShell";
 import { useSetupStore } from "@/stores/setupStore";
+import { formatPhoneNumber, toPhoneNumberDigits } from "./setupUtils";
 
 const PHONE_REGEX = /^010-\d{4}-\d{4}$/;
 const CODE_REGEX = /^\d{6}$/;
@@ -10,10 +11,12 @@ const RESEND_SECONDS = 180;
 
 export default function SetupPhonePage() {
   const navigate = useNavigate();
-  const { phone, verificationCode, setPhone, setPhoneVerified } =
+  const { phoneNumber, verificationCode, setPhone, setPhoneVerified } =
     useSetupStore();
 
-  const [localPhone, setLocalPhone] = useState(phone);
+  const [localPhone, setLocalPhone] = useState(
+    phoneNumber ? formatPhoneNumber(phoneNumber) : "",
+  );
   const [localCode, setLocalCode] = useState(verificationCode);
   const [submitted, setSubmitted] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
@@ -64,21 +67,7 @@ export default function SetupPhonePage() {
   }, [secondsLeft]);
 
   const handlePhoneChange = (value: string) => {
-    const digits = value.replace(/\D/g, "").slice(0, 11);
-
-    if (digits.length < 4) {
-      setLocalPhone(digits);
-      return;
-    }
-
-    if (digits.length < 8) {
-      setLocalPhone(`${digits.slice(0, 3)}-${digits.slice(3)}`);
-      return;
-    }
-
-    setLocalPhone(
-      `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`,
-    );
+    setLocalPhone(formatPhoneNumber(value));
   };
 
   const handleSendCode = () => {
@@ -110,7 +99,7 @@ export default function SetupPhonePage() {
     if (phoneError || !isVerified) return;
 
     setPhone({
-      phone: localPhone.trim(),
+      phoneNumber: toPhoneNumberDigits(localPhone.trim()),
       verificationCode: localCode.trim(),
     });
 
@@ -129,7 +118,7 @@ export default function SetupPhonePage() {
           <span className="text-brand-main">휴대폰 인증</span>을 진행해 주세요
         </>
       }
-      description={<>인증이 완료되면 마지막 단계로 넘어갑니다.</>}
+      description={<>인증이 완료되면 마지막 보안 설정 단계로 넘어갑니다.</>}
       rightContent={
         <div className="space-y-6">
           <div className="space-y-2">
@@ -245,7 +234,7 @@ export default function SetupPhonePage() {
 
           <div className="rounded-2xl bg-slate-50 px-4 py-4">
             <p className="text-sm leading-6 text-slate-600">
-              인증된 번호는 본인 확인과 주요 안내 알림에 사용됩니다.
+              인증된 번호는 본인 확인과 결제, 정산 관련 주요 안내에 사용됩니다.
             </p>
           </div>
 

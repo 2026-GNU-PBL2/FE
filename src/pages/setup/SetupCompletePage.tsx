@@ -1,7 +1,17 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
+import { AxiosError } from "axios";
+import { toast } from "react-toastify";
 import SetupShell from "./SetupShell";
 import { useSetupStore } from "@/stores/setupStore";
+import { api } from "@/api/axios";
+import {
+  useAuthStore,
+  type AuthUser,
+  type UserRole,
+  type UserStatus,
+} from "@/stores/authStore";
 
 const providerLabelMap = {
   google: "Google",
@@ -9,43 +19,154 @@ const providerLabelMap = {
   naver: "Naver",
 };
 
+type SignupResponse = {
+  id: number;
+  nickname: string | null;
+  submateEmail: string | null;
+  phoneNumber: string | null;
+  role: UserRole;
+  status: UserStatus;
+};
+
+type ApiErrorResponse = {
+  message?: string;
+};
+
+function normalizeSignedUpUser(data: SignupResponse): AuthUser {
+  return {
+    id: data.id,
+    nickname: data.nickname,
+    submateEmail: data.submateEmail,
+    phoneNumber: data.phoneNumber,
+    role: data.role,
+    status: data.status,
+  };
+}
+
 export default function SetupCompletePage() {
   const navigate = useNavigate();
-  const { provider, userId, nickname, phone, resetSetup } = useSetupStore();
+
+  const {
+    provider,
+    submateEmail,
+    nickname,
+    phoneNumber,
+    pinNumber,
+    resetSetup,
+  } = useSetupStore();
+
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const currentUser = useAuthStore((state) => state.user);
+  const socialProvider = useAuthStore((state) => state.socialProvider);
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const providerLabel = provider ? providerLabelMap[provider] : "Social";
 
-  const handleStart = () => {
-    resetSetup();
-    navigate("/");
+  const handleStart = async () => {
+    if (!accessToken) {
+      toast.error("로그인 정보가 없습니다. 다시 로그인해 주세요.");
+      clearAuth();
+      navigate("/log-in", { replace: true });
+      return;
+    }
+
+    if (!phoneNumber || !submateEmail || !nickname || !pinNumber) {
+      toast.error("가입에 필요한 정보가 부족합니다. 다시 진행해 주세요.");
+      return;
+    }
+
+    if (!currentUser || !socialProvider) {
+      toast.error("로그인 사용자 정보가 없습니다. 다시 로그인해 주세요.");
+      clearAuth();
+      navigate("/log-in", { replace: true });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const response = await api.post<SignupResponse>(
+        "/api/v1/user",
+        {
+          phoneNumber,
+          submateEmail,
+          nickname,
+          pinNumber,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      const signedUpUser = normalizeSignedUpUser(response.data);
+
+      setAuth({
+        accessToken,
+        user: signedUpUser,
+        socialProvider,
+      });
+
+      toast.success("회원가입이 완료되었습니다.");
+      resetSetup();
+      navigate("/", { replace: true });
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      const status = axiosError.response?.status;
+      const message =
+        axiosError.response?.data?.message ||
+        (status === 400
+          ? "입력한 회원가입 정보가 올바르지 않습니다."
+          : status === 401
+            ? "인증이 만료되었거나 로그인 정보가 올바르지 않습니다. 다시 로그인해 주세요."
+            : status === 403
+              ? "회원가입을 진행할 권한이 없습니다."
+              : status === 409
+                ? "이미 사용 중인 정보가 있습니다. 입력값을 다시 확인해 주세요."
+                : "회원가입 처리에 실패했습니다. 다시 시도해 주세요.");
+
+      toast.error(message);
+
+      if (status === 401) {
+        clearAuth();
+        navigate("/log-in", { replace: true });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <SetupShell
       step={5}
       totalSteps={5}
-      badge="가입 완료"
+      badge="가입 확인"
       title={
         <>
-          가입이 완료됐어요
+          입력한 정보를 확인하고
           <br />
-          <span className="text-brand-main">이제 바로 시작할 수 있어요</span>
+          <span className="text-brand-main">가입을 완료해 주세요</span>
         </>
       }
       description={
         <>
-          계정 설정이 모두 끝났습니다.
+          아래 정보로 서브메이트 계정을 생성합니다.
           <br />
-          Submate에서 파티를 찾거나 직접 만들 수 있습니다.
+          완료하면 바로 서비스 이용이 가능합니다.
         </>
       }
       leftBottom={
         <button
           type="button"
           onClick={handleStart}
-          className="inline-flex w-full items-center justify-center rounded-2xl bg-brand-main px-5 py-4 text-base font-semibold text-white transition hover:opacity-95 active:scale-95 sm:w-auto sm:px-6"
+          disabled={isSubmitting}
+          className="inline-flex w-full items-center justify-center rounded-2xl bg-brand-main px-5 py-4 text-base font-semibold text-white transition hover:opacity-95 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-6"
         >
-          시작하기
+          {isSubmitting ? "가입 처리 중..." : "가입 완료하기"}
         </button>
       }
       rightContent={
@@ -62,13 +183,13 @@ export default function SetupCompletePage() {
 
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-brand-main">
-                  계정 설정 완료
+                  가입 준비 완료
                 </p>
                 <p className="mt-1 text-lg font-bold text-slate-900">
-                  Submate를 이용할 준비가 끝났습니다
+                  마지막으로 정보 확인 후 계정을 생성합니다
                 </p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  입력한 정보를 바탕으로 계정이 설정되었습니다.
+                  공동구독 파티 참여와 정산을 위한 기본 계정 정보가 설정됩니다.
                 </p>
               </div>
             </div>
@@ -81,7 +202,7 @@ export default function SetupCompletePage() {
                   가입 정보
                 </p>
                 <p className="mt-1 text-base font-bold text-slate-900">
-                  기본 설정 확인
+                  최종 확인
                 </p>
               </div>
 
@@ -99,17 +220,23 @@ export default function SetupCompletePage() {
                 label="연결된 소셜"
                 value={`${providerLabel} 로그인`}
               />
-              <SummaryItem label="아이디" value={userId || "-"} />
+              <SummaryItem
+                label="서브메이트 이메일"
+                value={submateEmail || "-"}
+              />
               <SummaryItem label="닉네임" value={nickname || "-"} />
-              <SummaryItem label="휴대폰 번호" value={phone || "-"} />
+              <SummaryItem label="휴대폰 번호" value={phoneNumber || "-"} />
+              <SummaryItem
+                label="간편 비밀번호"
+                value={pinNumber ? "●●●●" : "-"}
+              />
             </div>
           </div>
 
           <div className="rounded-2xl bg-slate-50 px-4 py-4">
             <p className="text-sm leading-6 text-slate-600">
-              이제 원하는 파티에 참여하거나 직접 파티를 만들어
-              <br />
-              구독 정산을 시작할 수 있습니다.
+              가입이 완료되면 Submate에서 파티 참여, 결제, 정산 관리 기능을 바로
+              사용할 수 있습니다.
             </p>
           </div>
         </div>
