@@ -32,6 +32,7 @@ function getProviderMeta(provider: DisplayProvider | null) {
   if (provider === "google") {
     return {
       icon: "logos:google-icon",
+      imageSrc: "/images/login/google.png",
       badgeClassName: "bg-white ring-1 ring-slate-200",
       iconWrapperClassName: "bg-white",
     };
@@ -40,6 +41,7 @@ function getProviderMeta(provider: DisplayProvider | null) {
   if (provider === "kakao") {
     return {
       icon: "simple-icons:kakaotalk",
+      imageSrc: "/images/login/kakao.png",
       badgeClassName: "bg-[#FEE500] ring-1 ring-black/5",
       iconWrapperClassName: "bg-[#FEE500] text-[#1F1F1F]",
     };
@@ -48,6 +50,7 @@ function getProviderMeta(provider: DisplayProvider | null) {
   if (provider === "naver") {
     return {
       icon: "simple-icons:naver",
+      imageSrc: "/images/login/naver.png",
       badgeClassName: "bg-[#03C75A] ring-1 ring-black/5",
       iconWrapperClassName: "bg-[#03C75A] text-white",
     };
@@ -55,6 +58,7 @@ function getProviderMeta(provider: DisplayProvider | null) {
 
   return {
     icon: "solar:user-bold-duotone",
+    imageSrc: "",
     badgeClassName: "bg-brand-main/10 ring-1 ring-brand-main/10",
     iconWrapperClassName: "bg-brand-main/10 text-brand-main",
   };
@@ -66,8 +70,7 @@ export default function SetupIntroPage() {
   const user = useAuthStore((state) => state.user);
   const socialProvider = useAuthStore((state) => state.socialProvider);
 
-  const { provider, socialEmail, profileImage, setProviderInfo } =
-    useSetupStore();
+  const { provider, socialEmail, setProviderInfo } = useSetupStore();
 
   const displayProvider = resolveDisplayProvider(socialProvider ?? provider);
   const providerLabel = getProviderLabel(displayProvider);
@@ -81,11 +84,11 @@ export default function SetupIntroPage() {
     setProviderInfo({
       provider: resolvedProvider,
       socialEmail:
-        socialEmail || user?.submateEmail || "연결된 이메일 정보 없음",
-      profileImage: profileImage || "",
+        socialEmail ||
+        user?.submateEmail ||
+        "소셜 계정으로 간편하게 로그인 중입니다",
     });
   }, [
-    profileImage,
     provider,
     setProviderInfo,
     socialEmail,
@@ -127,10 +130,10 @@ export default function SetupIntroPage() {
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-center gap-4">
                 <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-slate-50">
-                  {profileImage ? (
+                  {providerMeta.imageSrc ? (
                     <img
-                      src={profileImage}
-                      alt="social profile"
+                      src={providerMeta.imageSrc}
+                      alt={`${providerLabel} logo`}
                       className="h-full w-full object-cover"
                     />
                   ) : (
@@ -153,7 +156,7 @@ export default function SetupIntroPage() {
                     {providerLabel} 계정으로 로그인됨
                   </p>
                   <p className="mt-1 break-all text-sm text-slate-600">
-                    "소셜 계정으로 간편하게 로그인 중입니다"
+                    소셜 계정으로 간편하게 로그인 중입니다
                   </p>
                 </div>
               </div>

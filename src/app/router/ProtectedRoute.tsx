@@ -1,3 +1,5 @@
+// src/app/router/ProtectedRoute.tsx
+
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 
