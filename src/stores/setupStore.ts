@@ -5,7 +5,6 @@ export type SetupProvider = "google" | "kakao" | "naver" | null;
 type SetupStore = {
   provider: SetupProvider;
   socialEmail: string;
-  profileImage: string;
 
   submateEmail: string;
   nickname: string;
@@ -20,7 +19,6 @@ type SetupStore = {
   setProviderInfo: (payload: {
     provider: Exclude<SetupProvider, null>;
     socialEmail: string;
-    profileImage: string;
   }) => void;
 
   setProfile: (payload: { submateEmail: string; nickname: string }) => void;
@@ -43,7 +41,6 @@ type SetupStore = {
 const initialState = {
   provider: null as SetupProvider,
   socialEmail: "",
-  profileImage: "",
 
   submateEmail: "",
   nickname: "",
@@ -59,11 +56,10 @@ const initialState = {
 export const useSetupStore = create<SetupStore>((set) => ({
   ...initialState,
 
-  setProviderInfo: ({ provider, socialEmail, profileImage }) =>
+  setProviderInfo: ({ provider, socialEmail }) =>
     set({
       provider,
       socialEmail,
-      profileImage,
     }),
 
   setProfile: ({ submateEmail, nickname }) =>

@@ -11,7 +11,7 @@ const navItems = [
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -99,15 +99,7 @@ export default function Navbar() {
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
                 aria-label="마이페이지"
               >
-                {user?.profileImage ? (
-                  <img
-                    src={user.profileImage}
-                    alt={user.nickname ?? "사용자"}
-                    className="h-8 w-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <Icon icon="mdi:account-outline" className="h-5 w-5" />
-                )}
+                <Icon icon="mdi:account-outline" className="h-5 w-5" />
               </button>
             </>
           ) : (

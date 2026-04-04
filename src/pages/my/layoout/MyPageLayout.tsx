@@ -29,11 +29,6 @@ const sidebarSections: SidebarMenuSection[] = [
         to: "/mypage/profile",
       },
       {
-        label: "암호 관리",
-        icon: "solar:lock-password-bold",
-        to: "/mypage/password",
-      },
-      {
         label: "설정",
         icon: "solar:settings-bold",
         to: "/mypage/settings",
@@ -41,7 +36,7 @@ const sidebarSections: SidebarMenuSection[] = [
     ],
   },
   {
-    title: "결제",
+    title: "결제 / 정산",
     items: [
       {
         label: "결제 수단 관리",
@@ -61,12 +56,17 @@ const sidebarSections: SidebarMenuSection[] = [
     ],
   },
   {
-    title: "이용",
+    title: "이용 내역",
     items: [
       {
         label: "파티 히스토리",
         icon: "solar:clock-circle-bold",
         to: "/mypage/party-history",
+      },
+      {
+        label: "메일함",
+        icon: "solar:inbox-bold",
+        to: "/mypage/mailbox",
       },
     ],
   },
@@ -75,7 +75,7 @@ const sidebarSections: SidebarMenuSection[] = [
 const allMenuItems = sidebarSections.flatMap((section) => section.items);
 
 function getCurrentMenuMeta(pathname: string) {
-  const currentItem = allMenuItems.find((item) => item.to === pathname);
+  const currentItem = allMenuItems.find((item) => pathname.startsWith(item.to));
 
   if (!currentItem) {
     return {
@@ -117,7 +117,7 @@ export default function MyPageLayout() {
 
   return (
     <div className="min-h-full bg-slate-50">
-      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="space-y-4 sm:space-y-5">
           <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_16px_50px_rgba(15,23,42,0.05)] sm:rounded-[28px]">
             <div className="relative overflow-hidden px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
@@ -155,7 +155,7 @@ export default function MyPageLayout() {
           </section>
 
           <div className="grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)] xl:gap-5">
-            <aside className="hidden xl:block xl:sticky xl:top-24 xl:self-start">
+            <aside className="hidden xl:sticky xl:top-24 xl:block xl:self-start">
               <div className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_16px_50px_rgba(15,23,42,0.05)]">
                 <div className="flex items-center justify-between px-2 pb-3">
                   <div>
@@ -292,7 +292,7 @@ function DesktopMenuLink({ item }: { item: SidebarMenuItem }) {
 
 function MobileMenuTabs() {
   return (
-    <div className="-mx-4 overflow-x-auto no-scrollbar px-4 sm:-mx-6 sm:px-6">
+    <div className="-mx-4 overflow-x-auto px-4 no-scrollbar sm:-mx-6 sm:px-6">
       <div className="flex min-w-max gap-2">
         {allMenuItems.map((item) => (
           <NavLink
@@ -300,7 +300,7 @@ function MobileMenuTabs() {
             to={item.to}
             className={({ isActive }) =>
               [
-                "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold whitespace-nowrap transition-all",
+                "inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full border px-4 text-sm font-semibold transition-all",
                 isActive
                   ? "border-slate-900 bg-slate-900 text-white"
                   : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100",
