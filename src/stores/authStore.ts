@@ -1,3 +1,5 @@
+// src/stores/authStore.ts
+
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -56,6 +58,12 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "submate-auth-storage",
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        accessToken: state.accessToken,
+        user: state.user,
+        socialProvider: state.socialProvider,
+        isAuthenticated: state.isAuthenticated,
+      }),
     },
   ),
 );

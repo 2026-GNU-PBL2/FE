@@ -3,8 +3,9 @@ import RouterRoot from "./RouterRoot";
 import HomePage from "@/pages/home/HomePage";
 import NotFoundPage from "@/pages/not-found/NotFoundPage";
 import MainLayout from "@/layouts/MainLayout";
-import PartyListPage from "@/pages/party/PartyListPage";
-import PartyCreatePage from "@/pages/party/PartyCreatePage";
+import PartyListPage from "@/pages/party/list/PartyListPage";
+import PartyCreatePage from "@/pages/party/common/PartyCreatePage";
+import PartyRoleSelectPage from "@/pages/party/common/PartyRoleSelectPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import SocialLoginCallbackPage from "@/pages/auth/SocialLoginCallbackPage";
 import MyPage from "@/pages/my/layoout/MyPage";
@@ -26,7 +27,7 @@ import MoneyManagePage from "@/pages/my/payment/MoneyManagePage";
 import PaymentHistoryPage from "@/pages/my/payment/PaymentHistoryPage";
 import PartyHistoryPage from "@/pages/my/usage/PartyHistoryPage";
 import SettingsPage from "@/pages/my/account/SettingsPage";
-import Myparty from "@/pages/party/MyParty";
+import Myparty from "@/pages/party/my/MyParty";
 
 import AdminRoute from "./AdminRoute";
 import AdminPublicRoute from "./AdminPublicRoute";
@@ -41,6 +42,15 @@ import AdminUserDetailPage from "@/pages/admin/user/AdminUserDetailPage";
 import AdminPartyListPage from "@/pages/admin/party/AdminPartyListPage";
 import AdminPartyDetailPage from "@/pages/admin/party/AdminPartyDetailPage";
 import MailboxPage from "@/pages/my/usage/MailboxPage";
+import PartyMemberAgreementPage from "@/pages/party/member/PartyMemberAgreementPage";
+import PartyMemberAutoPayAgreementPage from "@/pages/party/member/PartyMemberAutoPayAgreementPage";
+import PartyMemberCardRegisterPage from "@/pages/party/member/PartyMemberCardRegisterPage";
+import PartyMemberCardRegisterSuccessPage from "@/pages/party/member/PartyMemberCardRegisterSuccessPage";
+import PartyMemberCardRegisterFailPage from "@/pages/party/member/PartyMemberCardRegisterFailPage";
+import PartyHostAgreementPage from "@/pages/party/host/PartyHostAgreementPage";
+import PartyHostVerificationCallbackPage from "@/pages/party/host/PartyHostVerificationCallbackPage";
+import PartyHostAccountRegisterPage from "@/pages/party/host/PartyHostAccountRegisterPage";
+import PartyMemberPaymentPreviewPage from "@/pages/party/member/PartyMemberPaymentPreviewPage";
 
 const router = createBrowserRouter([
   {
@@ -48,14 +58,8 @@ const router = createBrowserRouter([
     children: [
       {
         element: <AdminPublicRoute />,
-        children: [
-          {
-            path: "/admin",
-            element: <AdminLoginPage />,
-          },
-        ],
+        children: [{ path: "/admin", element: <AdminLoginPage /> }],
       },
-
       {
         element: <AdminRoute />,
         children: [
@@ -82,7 +86,6 @@ const router = createBrowserRouter([
           },
         ],
       },
-
       {
         element: <MainLayout />,
         children: [
@@ -93,10 +96,52 @@ const router = createBrowserRouter([
           { path: "/parties", element: <PartyListPage /> },
           { path: "/parties/:type", element: <PartyListPage /> },
           { path: "/myparty", element: <Myparty /> },
-          { path: "/party/create/:ottSlug", element: <PartyCreatePage /> },
+          { path: "/party/create/:productId", element: <PartyCreatePage /> },
+
+          {
+            path: "/party/create/:productId/role",
+            element: <PartyRoleSelectPage />,
+          },
+
+          {
+            path: "/party/create/:productId/member/agreement",
+            element: <PartyMemberAgreementPage />,
+          },
+          {
+            path: "/party/create/:productId/member/auto-pay-agreement",
+            element: <PartyMemberAutoPayAgreementPage />,
+          },
+          {
+            path: "/party/create/:productId/member/card-register",
+            element: <PartyMemberCardRegisterPage />,
+          },
+          {
+            path: "/party/create/:productId/member/card-register/success",
+            element: <PartyMemberCardRegisterSuccessPage />,
+          },
+          {
+            path: "/party/create/:productId/member/card-register/fail",
+            element: <PartyMemberCardRegisterFailPage />,
+          },
+          {
+            path: "/party/create/:productId/member/payment-preview",
+            element: <PartyMemberPaymentPreviewPage />,
+          },
+
+          {
+            path: "/party/create/:productId/host/agreement",
+            element: <PartyHostAgreementPage />,
+          },
+          {
+            path: "/party/create/:productId/host/verification/callback",
+            element: <PartyHostVerificationCallbackPage />,
+          },
+          {
+            path: "/party/create/:productId/host/account-register",
+            element: <PartyHostAccountRegisterPage />,
+          },
         ],
       },
-
       {
         element: <ProtectedRoute />,
         children: [
@@ -128,52 +173,25 @@ const router = createBrowserRouter([
           },
         ],
       },
-
       {
         element: <PublicRoute />,
-        children: [
-          {
-            path: "/log-in",
-            element: <LoginPage />,
-          },
-        ],
+        children: [{ path: "/log-in", element: <LoginPage /> }],
       },
-
       {
         path: "/oauth/:provider/callback",
         element: <SocialLoginCallbackPage />,
       },
-
       {
         element: <SetupRoute />,
         children: [
-          {
-            path: "/setup/intro",
-            element: <SetupIntroPage />,
-          },
-          {
-            path: "/setup/profile",
-            element: <SetupProfilePage />,
-          },
-          {
-            path: "/setup/security",
-            element: <SetupSecurityPage />,
-          },
-          {
-            path: "/setup/phone",
-            element: <SetupPhonePage />,
-          },
-          {
-            path: "/setup/complete",
-            element: <SetupCompletePage />,
-          },
+          { path: "/setup/intro", element: <SetupIntroPage /> },
+          { path: "/setup/profile", element: <SetupProfilePage /> },
+          { path: "/setup/security", element: <SetupSecurityPage /> },
+          { path: "/setup/phone", element: <SetupPhonePage /> },
+          { path: "/setup/complete", element: <SetupCompletePage /> },
         ],
       },
-
-      {
-        path: "*",
-        element: <NotFoundPage />,
-      },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ]);

@@ -28,6 +28,7 @@ export default function PartyListPage() {
   const [searchParams] = useSearchParams();
 
   const recruitRole: RecruitRole = type === "hosts" ? "HOST" : "MEMBER";
+  const isMember = recruitRole === "MEMBER";
 
   const pageBadge =
     recruitRole === "HOST" ? "파티장 모집 전체 목록" : "파티원 모집 전체 목록";
@@ -81,10 +82,22 @@ export default function PartyListPage() {
   return (
     <div className="min-h-full bg-brand-bg">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-        <div className="rounded-4xl border border-sky-100 bg-white px-5 py-5 shadow-[0_20px_60px_rgba(30,58,138,0.06)] sm:px-7">
+        <div
+          className={[
+            "rounded-4xl bg-white px-5 py-5 shadow-[0_20px_60px_rgba(30,58,138,0.06)] sm:px-7",
+            isMember ? "border border-[#C9F7EA]" : "border border-sky-100",
+          ].join(" ")}
+        >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-brand-main">
+              <div
+                className={[
+                  "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold",
+                  isMember
+                    ? "border-[#C9F7EA] bg-[#ECFEF8] text-[#0F766E]"
+                    : "border-sky-100 bg-sky-50 text-brand-main",
+                ].join(" ")}
+              >
                 <Icon icon="solar:list-bold" className="h-4 w-4" />
                 {pageBadge}
               </div>
@@ -114,8 +127,12 @@ export default function PartyListPage() {
                   className={[
                     "inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-all",
                     isSelected
-                      ? "bg-brand-main text-white"
-                      : "border border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-slate-50",
+                      ? isMember
+                        ? "bg-[#14B8A6] text-white"
+                        : "bg-brand-main text-white"
+                      : isMember
+                        ? "border border-[#C9F7EA] bg-white text-[#0F766E] hover:bg-[#F7FFFD]"
+                        : "border border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-slate-50",
                   ].join(" ")}
                 >
                   {ott}
@@ -132,16 +149,31 @@ export default function PartyListPage() {
             return (
               <article
                 key={party.id}
-                className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition-all duration-200 hover:border-sky-200 hover:shadow-[0_16px_40px_rgba(30,58,138,0.08)]"
+                className={[
+                  "overflow-hidden rounded-3xl border bg-white transition-all duration-200",
+                  isMember
+                    ? "border-[#C9F7EA] hover:border-[#14B8A6] hover:shadow-[0_16px_40px_rgba(20,184,166,0.1)]"
+                    : "border-slate-200 hover:border-sky-200 hover:shadow-[0_16px_40px_rgba(30,58,138,0.08)]",
+                ].join(" ")}
               >
-                <div className="h-1 bg-linear-to-r from-brand-main via-brand-sub to-brand-accent" />
+                <div
+                  className={[
+                    "h-1",
+                    isMember
+                      ? "bg-linear-to-r from-[#14B8A6] via-[#2DD4BF] to-[#99F6E4]"
+                      : "bg-linear-to-r from-brand-main via-brand-sub to-brand-accent",
+                  ].join(" ")}
+                />
 
                 <div className="p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span
-                          className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold ring-1 ${ottMeta.chipClassName ?? "bg-slate-50 text-slate-700 ring-slate-100"}`}
+                          className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold ring-1 ${
+                            ottMeta.chipClassName ??
+                            "bg-slate-50 text-slate-700 ring-slate-100"
+                          }`}
                         >
                           {shouldUseNestedCircle(ottMeta.slug) ? (
                             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/80">
@@ -165,7 +197,14 @@ export default function PartyListPage() {
                           {party.ott}
                         </span>
 
-                        <span className="inline-flex rounded-full bg-teal-50 px-3 py-1 text-[11px] font-semibold text-teal-700 ring-1 ring-teal-100">
+                        <span
+                          className={[
+                            "inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ring-1",
+                            isMember
+                              ? "bg-[#ECFEF8] text-[#0F766E] ring-[#C9F7EA]"
+                              : "bg-blue-50 text-brand-main ring-blue-100",
+                          ].join(" ")}
+                        >
                           {party.status}
                         </span>
                       </div>
@@ -181,7 +220,12 @@ export default function PartyListPage() {
 
                     <button
                       type="button"
-                      className="inline-flex h-10 shrink-0 items-center justify-center rounded-2xl bg-brand-main px-4 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(30,58,138,0.18)] transition-all hover:bg-blue-700"
+                      className={[
+                        "inline-flex h-10 shrink-0 items-center justify-center rounded-2xl px-4 text-sm font-semibold text-white transition-all",
+                        isMember
+                          ? "bg-[#14B8A6] shadow-[0_8px_20px_rgba(20,184,166,0.18)] hover:bg-[#0D9488]"
+                          : "bg-brand-main shadow-[0_8px_20px_rgba(30,58,138,0.18)] hover:bg-blue-700",
+                      ].join(" ")}
                     >
                       {actionLabel}
                     </button>
@@ -223,15 +267,24 @@ export default function PartyListPage() {
 
         {filteredParties.length === 0 && (
           <div className="rounded-3xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
-            <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-slate-50">
+            <div
+              className={[
+                "mx-auto inline-flex h-14 w-14 items-center justify-center rounded-3xl",
+                isMember
+                  ? "bg-[#ECFEF8] text-[#0F766E]"
+                  : "bg-slate-50 text-brand-main",
+              ].join(" ")}
+            >
               <Icon
                 icon="solar:document-text-search-bold"
-                className="h-7 w-7 text-brand-main"
+                className="h-7 w-7"
               />
             </div>
+
             <h3 className="mt-4 text-base font-bold text-slate-900">
               현재 모집 중인 파티가 없습니다
             </h3>
+
             <p className="mt-2 text-sm text-slate-500">
               다른 OTT를 선택해서 다시 확인해보세요.
             </p>

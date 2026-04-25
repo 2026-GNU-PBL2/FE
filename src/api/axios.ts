@@ -30,5 +30,19 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error),
+  (error) => {
+    const status = error.response?.status;
+
+    if (status === 401 || status === 403) {
+      useAuthStore.getState().clearAuth();
+
+      const currentPath = window.location.pathname;
+
+      if (currentPath !== "/log-in") {
+        window.location.href = "/log-in";
+      }
+    }
+
+    return Promise.reject(error);
+  },
 );
