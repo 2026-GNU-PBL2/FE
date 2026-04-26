@@ -58,20 +58,6 @@ function normalizeNumber(value: string) {
   return value.replace(/[^0-9]/g, "");
 }
 
-function formatAccountNumber(value: string) {
-  const numbersOnly = normalizeNumber(value);
-
-  if (numbersOnly.length <= 3) return numbersOnly;
-  if (numbersOnly.length <= 6) {
-    return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3)}`;
-  }
-  if (numbersOnly.length <= 12) {
-    return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3, 6)}-${numbersOnly.slice(6)}`;
-  }
-
-  return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3, 6)}-${numbersOnly.slice(6, 12)}-${numbersOnly.slice(12)}`;
-}
-
 function formatBirthDate(value: string) {
   const numbersOnly = normalizeNumber(value).slice(0, 8);
 
@@ -103,8 +89,8 @@ const bankOptions = [
   { label: "우체국", code: "071" },
 ];
 
-function getCompletePath(productId: string) {
-  return `/party/create/${productId}/host/complete`;
+function getCreatePreviewPath(productId: string) {
+  return `/party/create/${productId}/host/create-preview`;
 }
 
 function getAgreementPath(productId: string) {
@@ -238,7 +224,7 @@ export default function PartyHostAccountRegisterPage() {
       }
 
       toast.success(payload?.message || "정산 계좌 등록이 완료되었습니다.");
-      navigate(getCompletePath(productId));
+      navigate(getCreatePreviewPath(productId));
     } catch (error) {
       console.error(error);
       toast.error("정산 계좌 등록 중 문제가 발생했습니다.");
