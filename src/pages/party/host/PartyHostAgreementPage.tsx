@@ -147,9 +147,7 @@ function AgreementModal({
   onClose: () => void;
   onAgree: (key: AgreementKey) => void;
 }) {
-  if (!open || !item) {
-    return null;
-  }
+  if (!open || !item) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 p-0 sm:items-center sm:p-6">
@@ -273,7 +271,7 @@ function AgreementCard({
 }
 
 export default function PartyHostAgreementPage() {
-  const { productId = "" } = useParams();
+  const { productId = "" } = useParams<{ productId: string }>();
 
   const [agreements, setAgreements] = useState<AgreementState>(
     initialAgreementState,
@@ -319,18 +317,16 @@ export default function PartyHostAgreementPage() {
   };
 
   const handleGoNext = async () => {
-    if (isSubmitting) {
-      return;
-    }
+    if (isSubmitting) return;
 
     if (!allRequiredChecked) {
       toast.error("필수 약관에 모두 동의해 주세요.");
       return;
     }
 
-    const numericProductId = Number(productId);
+    const trimmedProductId = productId.trim();
 
-    if (!Number.isFinite(numericProductId) || numericProductId <= 0) {
+    if (!trimmedProductId) {
       toast.error("유효한 상품 ID가 아닙니다.");
       return;
     }
@@ -342,7 +338,7 @@ export default function PartyHostAgreementPage() {
         "/api/v1/bank/authorize-url",
         {
           params: {
-            productId: numericProductId,
+            productId: trimmedProductId,
           },
         },
       );

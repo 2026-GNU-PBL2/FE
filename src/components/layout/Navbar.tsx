@@ -11,7 +11,9 @@ const navItems = [
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { accessToken, authStatus, isAuthenticated } = useAuthStore();
+  const isLoggedIn =
+    Boolean(accessToken) && isAuthenticated && authStatus === "authenticated";
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -23,7 +25,7 @@ export default function Navbar() {
   const handleProtectedRoute = (to: string, requireAuth?: boolean) => {
     scrollToTop();
 
-    if (requireAuth && !isAuthenticated) {
+    if (requireAuth && !isLoggedIn) {
       navigate("/log-in");
       return;
     }
@@ -81,7 +83,7 @@ export default function Navbar() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          {isAuthenticated ? (
+          {isLoggedIn ? (
             <>
               <button
                 type="button"

@@ -9,7 +9,7 @@ export default function PartyHostCreateCompletePage() {
   };
 
   const handleGoMyParties = () => {
-    navigate("/parties");
+    navigate("/myparty");
   };
 
   return (

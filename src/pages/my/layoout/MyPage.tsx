@@ -3,9 +3,11 @@ import { useAuthStore } from "@/stores/authStore";
 import MyPageLayout from "./MyPageLayout";
 
 export default function MyPage() {
-  const { user, isAuthenticated } = useAuthStore();
+  const { accessToken, authStatus, user, isAuthenticated } = useAuthStore();
+  const isLoggedIn =
+    Boolean(accessToken) && isAuthenticated && authStatus === "authenticated";
 
-  if (!isAuthenticated || !user) {
+  if (!isLoggedIn || !user) {
     return <Navigate to="/log-in" replace />;
   }
 

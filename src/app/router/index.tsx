@@ -53,6 +53,7 @@ import PartyHostAccountRegisterPage from "@/pages/party/host/PartyHostAccountReg
 import PartyMemberPaymentPreviewPage from "@/pages/party/member/PartyMemberPaymentPreviewPage";
 import PartyHostCreatePreviewPage from "@/pages/party/host/PartyHostCreatePreviewPage";
 import PartyHostCreateCompletePage from "@/pages/party/host/PartyHostCreateCompletePage";
+import MyPartyDetailPage from "@/pages/party/my/MyPartyDetailPage";
 
 const router = createBrowserRouter([
   {
@@ -98,6 +99,8 @@ const router = createBrowserRouter([
           { path: "/parties", element: <PartyListPage /> },
           { path: "/parties/:type", element: <PartyListPage /> },
           { path: "/myparty", element: <Myparty /> },
+          { path: "/myparty/:partyId", element: <MyPartyDetailPage /> },
+
           { path: "/party/create/:productId", element: <PartyCreatePage /> },
 
           {

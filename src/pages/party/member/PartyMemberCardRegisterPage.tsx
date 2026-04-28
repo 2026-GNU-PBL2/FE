@@ -83,6 +83,9 @@ export default function PartyMemberCardRegisterPage() {
         }
 
         setCustomerKey(resolved.customerKey);
+
+        console.log("🔥 [BACKEND CUSTOMER KEY]");
+        console.log("customerKey from API:", resolved.customerKey);
       } catch (error) {
         console.error(error);
         toast.error("카드 등록 정보를 불러오지 못했습니다.");
@@ -123,10 +126,8 @@ export default function PartyMemberCardRegisterPage() {
         getSuccessPath(productId),
         window.location.origin,
       );
-      successUrl.searchParams.set("partyId", productId);
 
       const failUrl = new URL(getFailPath(productId), window.location.origin);
-      failUrl.searchParams.set("partyId", productId);
 
       await payment.requestBillingAuth({
         method: "CARD",
