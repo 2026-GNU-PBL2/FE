@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react";
+import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -6,7 +7,6 @@ import { api } from "@/api/axios";
 
 type BillingAuthorizeRequest = {
   authKey: string;
-  partyId: string | number;
 };
 
 type BillingAuthorizeResponse = {
@@ -19,6 +19,7 @@ type ApiEnvelope<T> = {
   data?: T;
   result?: T;
   payload?: T;
+  message?: string;
 };
 
 function unwrapResponse<T>(
@@ -37,6 +38,29 @@ function unwrapResponse<T>(
   return value as T;
 }
 
+function getErrorMessage(error: unknown) {
+  if (axios.isAxiosError(error)) {
+    const responseData = error.response?.data as
+      | {
+          message?: string;
+          error?: string;
+        }
+      | undefined;
+
+    return (
+      responseData?.message ||
+      responseData?.error ||
+      "카드 등록 승인 처리에 실패했습니다."
+    );
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "카드 등록 승인 처리에 실패했습니다.";
+}
+
 export default function PartyMemberCardRegisterSuccessPage() {
   const [searchParams] = useSearchParams();
   const calledRef = useRef(false);
@@ -51,21 +75,23 @@ export default function PartyMemberCardRegisterSuccessPage() {
   const customerKey = searchParams.get("customerKey") ?? "";
 
   useEffect(() => {
-    if (calledRef.current) {
-      return;
-    }
+    if (calledRef.current) return;
 
     calledRef.current = true;
 
+    console.log("🔥 [SUCCESS CALLBACK]");
+    console.log("authKey:", authKey);
+    console.log("partyId:", partyId);
+    console.log("customerKey:", customerKey);
+
     async function authorizeBilling() {
       try {
-        if (!authKey || !partyId) {
-          throw new Error("승인에 필요한 authKey 또는 partyId가 없습니다.");
+        if (!authKey) {
+          throw new Error("승인에 필요한 authKey가 없습니다.");
         }
 
         const payload: BillingAuthorizeRequest = {
           authKey,
-          partyId,
         };
 
         const response = await api.post(
@@ -79,28 +105,25 @@ export default function PartyMemberCardRegisterSuccessPage() {
 
         setAuthorized(true);
         setRedirectUrl(resolved?.redirectUrl ?? "");
-        toast.success("카드 등록이 완료되었습니다.");
+        toast.success(resolved?.message || "카드 등록이 완료되었습니다.");
       } catch (error) {
         console.error(error);
 
-        const message =
-          error instanceof Error
-            ? error.message
-            : "카드 등록 승인 처리에 실패했습니다.";
+        const message = getErrorMessage(error);
 
         setAuthorized(false);
         setErrorMessage(message);
-        toast.error("카드 등록 승인 처리에 실패했습니다.");
+        toast.error(message);
       } finally {
         setLoading(false);
       }
     }
 
     authorizeBilling();
-  }, [authKey, partyId]);
+  }, [authKey]);
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+    <div className="min-h-screen bg-[#F8FAFC] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
       <div className="mx-auto flex min-h-[calc(100vh-64px)] max-w-120 items-center justify-center">
         <div className="w-full rounded-[32px] border border-slate-200 bg-white px-5 py-6 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.22)] sm:px-8 sm:py-8">
           <div
@@ -109,7 +132,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
               loading
                 ? "bg-[#EEF4FF] text-[#1E3A8A]"
                 : authorized
-                  ? "bg-[#EAFBF5] text-emerald-600"
+                  ? "bg-[#EAFBF5] text-[#2DD4BF]"
                   : "bg-rose-50 text-rose-500",
             ].join(" ")}
           >
@@ -140,7 +163,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
 
             <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
               {loading &&
-                "토스 인증 결과를 확인한 뒤 서버 승인 처리를 진행하고 있습니다."}
+                "토스 인증 결과를 확인한 뒤 서버에서 빌링키 발급을 진행하고 있습니다."}
               {!loading &&
                 authorized &&
                 "이제 자동결제에 사용할 카드가 정상적으로 연결되었습니다."}
@@ -155,7 +178,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
               <p className="text-xs font-semibold tracking-[0.12em] text-slate-400">
                 PARTY ID
               </p>
-              <p className="mt-2 text-sm font-semibold text-slate-900">
+              <p className="mt-2 break-all text-sm font-semibold text-slate-900">
                 {partyId || "-"}
               </p>
             </div>
@@ -164,7 +187,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
               <p className="text-xs font-semibold tracking-[0.12em] text-slate-400">
                 CUSTOMER KEY
               </p>
-              <p className="mt-2 wrap-break-word text-sm font-semibold text-slate-900">
+              <p className="mt-2 break-all text-sm font-semibold text-slate-900">
                 {customerKey || "-"}
               </p>
             </div>
@@ -173,7 +196,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
               <p className="text-xs font-semibold tracking-[0.12em] text-slate-400">
                 AUTH KEY
               </p>
-              <p className="mt-2 wrap-break-word text-sm font-semibold text-slate-900">
+              <p className="mt-2 break-all text-sm font-semibold text-slate-900">
                 {authKey || "-"}
               </p>
             </div>

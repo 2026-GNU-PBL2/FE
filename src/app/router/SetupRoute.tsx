@@ -6,9 +6,14 @@ import { useAuthStore } from "@/stores/authStore";
 export default function SetupRoute() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const authStatus = useAuthStore((state) => state.authStatus);
   const user = useAuthStore((state) => state.user);
 
   const isLoggedIn = Boolean(accessToken) && isAuthenticated;
+
+  if (authStatus === "idle" || authStatus === "checking") {
+    return null;
+  }
 
   if (!isLoggedIn) {
     return <Navigate to="/log-in" replace />;

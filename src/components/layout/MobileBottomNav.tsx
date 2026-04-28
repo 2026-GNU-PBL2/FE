@@ -16,10 +16,12 @@ const navItems = [
 
 export default function MobileBottomNav() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { accessToken, authStatus, isAuthenticated } = useAuthStore();
+  const isLoggedIn =
+    Boolean(accessToken) && isAuthenticated && authStatus === "authenticated";
 
   const handleRoute = (e: React.MouseEvent, requireAuth?: boolean) => {
-    if (requireAuth && !isAuthenticated) {
+    if (requireAuth && !isLoggedIn) {
       e.preventDefault();
       navigate("/log-in");
     }

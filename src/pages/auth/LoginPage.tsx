@@ -44,6 +44,8 @@ function Spinner({ className = "" }: { className?: string }) {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const authStatus = useAuthStore((state) => state.authStatus);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const [loadingProvider, setLoadingProvider] = useState<LoginProvider | null>(
@@ -54,12 +56,14 @@ export default function LoginPage() {
 
   const year = new Date().getFullYear();
   const isLoading = loadingProvider !== null;
+  const isLoggedIn =
+    Boolean(accessToken) && isAuthenticated && authStatus === "authenticated";
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isLoggedIn) {
       navigate("/mypage", { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isLoggedIn, navigate]);
 
   useEffect(() => {
     if (errorMsg) {
