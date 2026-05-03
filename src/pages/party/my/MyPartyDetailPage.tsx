@@ -1,11 +1,17 @@
 import { Icon } from "@iconify/react";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
 
-type ProvisionType = "INVITE_LINK" | "SHARED_ACCOUNT" | string;
+type ProvisionType =
+  | "INVITE_CODE"
+  | "INVITE_LINK"
+  | "ACCOUNT_SHARE"
+  | "SHARED_ACCOUNT"
+  | string;
 type ProvisionStatus = "WAITING" | "ACTIVE" | "RESET_REQUIRED" | string;
+type PartyRole = "HOST" | "MEMBER" | string;
 type MemberStatus =
   | "WAITING"
   | "ACTIVE"
@@ -45,11 +51,56 @@ type PartyProvisionResponse = {
   members: ProvisionMember[];
 };
 
+type PartyRecruitStatusResponse = {
+  partyId: number;
+  currentMemberCount: number;
+  capacity: number;
+  recruitStatus: string;
+  operationStatus: string;
+  recruitCompleted: boolean;
+  provisionAvailable: boolean;
+};
+
+type MyPartyDetailLocationState = {
+  productId?: string;
+  productName?: string;
+  role?: PartyRole;
+  operationType?: ProvisionType | null;
+  provisionType?: ProvisionType | null;
+};
+
+type PartyHistoryItem = {
+  partyId: number;
+  productId: string;
+  productName: string;
+  role: PartyRole;
+};
+
+type PartyJoinRequestItem = {
+  partyId?: number | null;
+  productId: string;
+  productName: string;
+};
+
+type ProductResponse = {
+  id: string;
+  productName?: string | null;
+  name?: string | null;
+  operationType?: ProvisionType | null;
+};
+
 type ApiEnvelope<T> = {
   data?: T;
   result?: T;
   payload?: T;
 };
+
+const INVITE_CODE_PLACEHOLDER_VALUE = "https://submate.example/invite-code";
+
+function getVisibleInviteValue(value?: string | null) {
+  if (!value || value === INVITE_CODE_PLACEHOLDER_VALUE) return null;
+  return value;
+}
 
 function unwrapResponse<T>(
   value: T | ApiEnvelope<T> | undefined | null,
@@ -83,9 +134,13 @@ function getMemberStatusLabel(status: MemberStatus) {
 }
 
 function getProvisionTypeLabel(type: ProvisionType) {
-  if (type === "INVITE_LINK") return "초대 링크";
-  if (type === "SHARED_ACCOUNT") return "공유 계정";
+  if (type === "INVITE_CODE" || type === "INVITE_LINK") return "초대 링크";
+  if (type === "ACCOUNT_SHARE" || type === "SHARED_ACCOUNT") return "공유 계정";
   return type;
+}
+
+function isInviteProvisionType(type?: string | null) {
+  return type === "INVITE_CODE" || type === "INVITE_LINK";
 }
 
 function getStatusStyle(status: string) {
@@ -122,13 +177,43 @@ function formatDateTime(value: string | null) {
 
 export default function MyPartyDetailPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { partyId } = useParams<{ partyId: string }>();
+  const locationState = location.state as MyPartyDetailLocationState | null;
 
   const [provision, setProvision] = useState<PartyProvisionResponse | null>(
     null,
   );
   const [isLoading, setIsLoading] = useState(true);
   const [isWaitingRecruit, setIsWaitingRecruit] = useState(false);
+  const [recruitStatus, setRecruitStatus] =
+    useState<PartyRecruitStatusResponse | null>(null);
+  const [isProvisionRegistered, setIsProvisionRegistered] = useState(false);
+  const [partyMeta, setPartyMeta] = useState<MyPartyDetailLocationState | null>(
+    locationState,
+  );
+  const isHost = partyMeta?.role === "HOST";
+  const isMember = partyMeta?.role === "MEMBER";
+  const partyOperationType =
+    partyMeta?.operationType ?? partyMeta?.provisionType;
+  const isInviteProduct = isInviteProvisionType(partyOperationType);
+  const isRecruitFull = recruitStatus?.recruitStatus === "FULL";
+  const canSetupProvision =
+    Boolean(partyId && partyMeta?.productId) && isHost && isRecruitFull;
+
+  const waitingTitle = isMember
+    ? "이용 안내를 준비 중입니다"
+    : isRecruitFull
+      ? "파티 모집이 완료되었습니다"
+      : "아직 파티원을 모집 중입니다";
+
+  const waitingDescription = isMember
+    ? "파티장이 공유 계정 또는 초대 정보를 등록하면 안내사항을 확인할 수 있습니다."
+    : isRecruitFull
+      ? isProvisionRegistered
+        ? "계정 정보 등록이 완료되었습니다. 파티원이 이용하기 전에 성인인증 완료 여부를 확인해주세요."
+        : "파티원이 이용을 시작할 수 있도록 계정 정보 또는 초대 정보를 등록해주세요."
+      : "정해진 인원이 모두 모이면 이용 정보가 열립니다. 파티 구성이 완료될 때까지 조금만 기다려주세요.";
 
   const progressPercent = useMemo(() => {
     if (!provision || provision.totalMemberCount <= 0) return 0;
@@ -140,6 +225,35 @@ export default function MyPartyDetailPage() {
       ),
     );
   }, [provision]);
+  const detailStatusLabel = provision
+    ? getProvisionStatusLabel(provision.provisionStatus)
+    : isMember
+      ? "매칭 완료"
+      : "확인 대기";
+  const detailStatusStyle = provision
+    ? getStatusStyle(provision.provisionStatus)
+    : getStatusStyle("WAITING");
+  const provisionTypeText = provision
+    ? getProvisionTypeLabel(provision.provisionType)
+    : partyOperationType
+      ? getProvisionTypeLabel(partyOperationType)
+      : "-";
+  const memberDescription = isInviteProduct
+    ? "초대 코드 안내사항을 확인한 뒤 이용 확인을 완료해주세요."
+    : partyOperationType
+      ? "공유계정 안내사항을 확인한 뒤 이용 확인을 완료해주세요."
+      : "이용 안내사항을 확인한 뒤 이용 확인을 완료해주세요.";
+  const memberCountText = provision
+    ? `${provision.activeMemberCount}/${provision.totalMemberCount}명`
+    : "-";
+  const provisionStartedAtText = provision
+    ? formatDateTime(provision.provisionStartedAt)
+    : "-";
+  const visibleInviteValue = getVisibleInviteValue(provision?.inviteValue);
+  const visibleProvisionGuide =
+    provision && isInviteProvisionType(provision.provisionType)
+      ? null
+      : provision?.provisionGuide;
 
   useEffect(() => {
     const fetchProvision = async () => {
@@ -149,9 +263,59 @@ export default function MyPartyDetailPage() {
         return;
       }
 
+      if (!partyMeta?.role) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         setIsLoading(true);
         setIsWaitingRecruit(false);
+        setProvision(null);
+        setRecruitStatus(null);
+        setIsProvisionRegistered(false);
+
+        if (!isHost) {
+          return;
+        }
+
+        const recruitStatusResponse = await api.get(
+          `/api/v1/parties/${partyId}/provision/recruit-status`,
+        );
+        const recruitStatusData = unwrapResponse<PartyRecruitStatusResponse>(
+          recruitStatusResponse.data,
+        );
+        setRecruitStatus(recruitStatusData);
+
+        if (recruitStatusData?.recruitStatus === "FULL" && isHost) {
+          try {
+            const provisionResponse = await api.get(
+              `/api/v1/parties/${partyId}/provision`,
+            );
+            const provisionData = unwrapResponse<PartyProvisionResponse>(
+              provisionResponse.data,
+            );
+
+            setIsProvisionRegistered(Boolean(provisionData));
+            setProvision(provisionData);
+          } catch (provisionError) {
+            const status = (
+              provisionError as { response?: { status?: number } }
+            ).response?.status;
+
+            if (status !== 404) {
+              console.error(provisionError);
+            }
+          }
+
+          setIsWaitingRecruit(true);
+          return;
+        }
+
+        if (!recruitStatusData?.provisionAvailable && isHost) {
+          setIsWaitingRecruit(true);
+          return;
+        }
 
         const response = await api.get(`/api/v1/parties/${partyId}/provision`);
         const data = unwrapResponse<PartyProvisionResponse>(response.data);
@@ -171,17 +335,166 @@ export default function MyPartyDetailPage() {
     };
 
     fetchProvision();
-  }, [partyId]);
+  }, [isHost, partyId, partyMeta?.role]);
+
+  useEffect(() => {
+    if (!partyId || partyMeta?.productId) return;
+
+    const fetchPartyMeta = async () => {
+      try {
+        const joinResponse = await api.get("/api/v1/party-join/me");
+        const joinData =
+          unwrapResponse<PartyJoinRequestItem[] | PartyJoinRequestItem>(
+            joinResponse.data,
+          ) ?? [];
+        const joinRequests = Array.isArray(joinData) ? joinData : [joinData];
+        const currentJoinRequest = joinRequests.find(
+          (request) => String(request.partyId) === partyId,
+        );
+
+        if (currentJoinRequest) {
+          setPartyMeta({
+            productId: currentJoinRequest.productId,
+            productName: currentJoinRequest.productName,
+            role: "MEMBER",
+          });
+          return;
+        }
+      } catch (joinError) {
+        console.error(joinError);
+      }
+
+      try {
+        const response = await api.get("/api/v1/me/party-history");
+        const data = unwrapResponse<PartyHistoryItem[]>(response.data) ?? [];
+        const currentParty = data.find(
+          (party) => String(party.partyId) === partyId,
+        );
+
+        if (!currentParty) return;
+
+        setPartyMeta({
+          productId: currentParty.productId,
+          productName: currentParty.productName,
+          role: currentParty.role,
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchPartyMeta();
+  }, [partyId, partyMeta?.productId]);
+
+  useEffect(() => {
+    if (!partyMeta?.productId || partyMeta.operationType) return;
+
+    const fetchProductOperationType = async () => {
+      try {
+        const response = await api.get<
+          ProductResponse | ApiEnvelope<ProductResponse>
+        >(`/api/v1/products/${partyMeta.productId}`);
+        const productData = unwrapResponse<ProductResponse>(response.data);
+
+        if (!productData?.operationType) return;
+
+        setPartyMeta((current) => {
+          if (!current || current.productId !== partyMeta.productId) {
+            return current;
+          }
+
+          return {
+            ...current,
+            productName:
+              current.productName ??
+              productData.productName ??
+              productData.name ??
+              undefined,
+            operationType: productData.operationType,
+          };
+        });
+      } catch (error) {
+        const status = (error as { response?: { status?: number } }).response
+          ?.status;
+
+        if (status !== 403 && status !== 404) {
+          console.error(error);
+        }
+      }
+    };
+
+    fetchProductOperationType();
+  }, [partyMeta?.operationType, partyMeta?.productId]);
 
   const handleCopyInviteValue = async () => {
-    if (!provision?.inviteValue) return;
+    if (!visibleInviteValue) return;
 
     try {
-      await navigator.clipboard.writeText(provision.inviteValue);
+      await navigator.clipboard.writeText(visibleInviteValue);
       toast.success("이용 정보가 복사되었습니다.");
     } catch {
       toast.error("복사에 실패했습니다.");
     }
+  };
+
+  const handleGoProvisionSetup = async () => {
+    if (!partyId || !partyMeta?.productId) return;
+
+    if (isProvisionRegistered) {
+      if (isInviteProvisionType(provision?.provisionType)) {
+        navigate(`/myparty/${partyId}/provision/dashboard`);
+        return;
+      }
+
+      navigate(
+        `/myparty/${partyId}/provision/adult-check/${partyMeta.productId}`,
+        {
+          state: {
+            productName: partyMeta.productName,
+          },
+        },
+      );
+      return;
+    }
+
+    try {
+      const response = await api.get<ProductResponse | ApiEnvelope<ProductResponse>>(
+        `/api/v1/products/${partyMeta.productId}`,
+      );
+      const productData = unwrapResponse<ProductResponse>(response.data);
+
+      if (productData?.operationType === "INVITE_CODE") {
+        navigate(
+          `/myparty/${partyId}/provision/invite-setup/${partyMeta.productId}`,
+          {
+            state: {
+              productId: partyMeta.productId,
+            },
+          },
+        );
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    navigate(`/myparty/${partyId}/provision/setup/${partyMeta.productId}`, {
+      state: {
+        productId: partyMeta.productId,
+      },
+    });
+  };
+
+  const handleGoMemberGuide = () => {
+    if (!partyId) return;
+
+    navigate(`/myparty/${partyId}/provision/confirm`, {
+      state: {
+        operationType: partyOperationType,
+        productId: partyMeta?.productId,
+        productName: partyMeta?.productName,
+      },
+    });
   };
 
   if (isLoading) {
@@ -202,7 +515,7 @@ export default function MyPartyDetailPage() {
     );
   }
 
-  if (isWaitingRecruit || !provision) {
+  if (isMember) {
     return (
       <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
         <div className="mx-auto w-full max-w-3xl">
@@ -212,20 +525,107 @@ export default function MyPartyDetailPage() {
             </div>
 
             <h1 className="mt-6 text-2xl font-extrabold text-slate-950">
-              아직 파티원을 모집 중입니다
+              파티 참여가 완료되었습니다
             </h1>
 
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
-              정해진 인원이 모두 모이면 이용 정보가 열립니다. 파티 구성이 완료될
-              때까지 조금만 기다려주세요.
+              {memberDescription}
             </p>
 
-            <button
-              onClick={() => navigate("/myparty")}
-              className="mt-8 rounded-2xl bg-blue-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-950"
-            >
-              나의 파티 목록으로 이동
-            </button>
+            <div className="mx-auto mt-7 grid max-w-lg gap-3 text-left sm:grid-cols-2">
+              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200">
+                <p className="text-xs font-bold text-slate-400">상품</p>
+                <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
+                  {partyMeta?.productName ?? "상품 정보 확인 중"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200">
+                <p className="text-xs font-bold text-slate-400">이용 방식</p>
+                <p className="mt-1 text-sm font-extrabold text-slate-900">
+                  {provisionTypeText}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <button
+                onClick={handleGoMemberGuide}
+                className="rounded-2xl bg-blue-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-950"
+              >
+                안내사항 확인하기
+              </button>
+
+              <button
+                onClick={() => navigate("/myparty")}
+                className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              >
+                나의 파티 목록으로 이동
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isMember && (isWaitingRecruit || !provision)) {
+    return (
+      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
+        <div className="mx-auto w-full max-w-3xl">
+          <section className="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm sm:px-10">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-sky-50 text-sky-500">
+              <Icon icon="solar:users-group-rounded-bold" className="h-9 w-9" />
+            </div>
+
+            <h1 className="mt-6 text-2xl font-extrabold text-slate-950">
+              {waitingTitle}
+            </h1>
+
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
+              {waitingDescription}
+            </p>
+
+            {isRecruitFull && (
+              <div className="mx-auto mt-7 grid max-w-lg gap-3 text-left sm:grid-cols-2">
+                <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200">
+                  <p className="text-xs font-bold text-slate-400">상품</p>
+                  <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
+                    {partyMeta?.productName ?? "상품 정보 확인 중"}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200">
+                  <p className="text-xs font-bold text-slate-400">모집 현황</p>
+                  <p className="mt-1 text-sm font-extrabold text-slate-900">
+                    {recruitStatus?.currentMemberCount ?? "-"} /{" "}
+                    {recruitStatus?.capacity ?? "-"}명
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              {canSetupProvision && (
+                <button
+                  onClick={handleGoProvisionSetup}
+                  className="rounded-2xl bg-blue-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-950"
+                >
+                  {isProvisionRegistered
+                    ? isInviteProvisionType(provision?.provisionType)
+                      ? "대시보드 보기"
+                      : "성인인증 확인하기"
+                    : "이용 정보 등록"}
+                </button>
+              )}
+
+              <button
+                onClick={() => navigate("/myparty")}
+                className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              >
+                나의 파티 목록으로 이동
+              </button>
+            </div>
           </section>
         </div>
       </div>
@@ -251,19 +651,21 @@ export default function MyPartyDetailPage() {
                   Submate Provision
                 </p>
 
-                <h1 className="mt-2 text-2xl font-extrabold">파티 이용 현황</h1>
+                <h1 className="mt-2 text-2xl font-extrabold">
+                  {isHost ? "파티 이용 현황" : "파티 이용 안내"}
+                </h1>
 
                 <p className="mt-3 text-sm leading-6 text-blue-100">
-                  파티 이용 정보와 멤버별 이용 확인 상태를 확인할 수 있습니다.
+                  {isHost
+                    ? "파티 이용 정보와 멤버별 이용 확인 상태를 확인할 수 있습니다."
+                    : "공유계정 안내사항을 확인한 뒤 이용 확인을 완료해주세요."}
                 </p>
               </div>
 
               <span
-                className={`w-fit rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${getStatusStyle(
-                  provision.provisionStatus,
-                )}`}
+                className={`w-fit rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${detailStatusStyle}`}
               >
-                {getProvisionStatusLabel(provision.provisionStatus)}
+                {detailStatusLabel}
               </span>
             </div>
           </div>
@@ -272,17 +674,17 @@ export default function MyPartyDetailPage() {
             <div className="grid gap-3 sm:grid-cols-3">
               <InfoCard
                 label="이용 방식"
-                value={getProvisionTypeLabel(provision.provisionType)}
+                value={provisionTypeText}
                 icon="solar:link-circle-bold"
               />
               <InfoCard
                 label="참여 인원"
-                value={`${provision.activeMemberCount}/${provision.totalMemberCount}명`}
+                value={memberCountText}
                 icon="solar:users-group-two-rounded-bold"
               />
               <InfoCard
                 label="시작일"
-                value={formatDateTime(provision.provisionStartedAt)}
+                value={provisionStartedAtText}
                 icon="solar:calendar-bold"
               />
             </div>
@@ -311,75 +713,92 @@ export default function MyPartyDetailPage() {
               </div>
             </div>
 
-            {(provision.inviteValue || provision.sharedAccountEmail) && (
-              <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-sm font-extrabold text-slate-900">
-                      이용 정보
-                    </p>
-
-                    {provision.sharedAccountEmail && (
-                      <p className="mt-3 truncate text-sm font-semibold text-slate-600">
-                        계정 이메일: {provision.sharedAccountEmail}
+            {isHost &&
+              provision &&
+              (visibleInviteValue || provision.sharedAccountEmail) && (
+                <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-sm font-extrabold text-slate-900">
+                        이용 정보
                       </p>
-                    )}
 
-                    {provision.inviteValue && (
-                      <p className="mt-2 break-all rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600">
-                        {provision.inviteValue}
-                      </p>
+                      {provision.sharedAccountEmail && (
+                        <p className="mt-3 truncate text-sm font-semibold text-slate-600">
+                          계정 이메일: {provision.sharedAccountEmail}
+                        </p>
+                      )}
+
+                      {visibleInviteValue && (
+                        <p className="mt-2 break-all rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600">
+                          {visibleInviteValue}
+                        </p>
+                      )}
+                    </div>
+
+                    {visibleInviteValue && (
+                      <button
+                        onClick={handleCopyInviteValue}
+                        className="shrink-0 rounded-2xl bg-sky-50 px-4 py-2 text-sm font-bold text-sky-700 transition hover:bg-sky-100"
+                      >
+                        복사
+                      </button>
                     )}
                   </div>
-
-                  {provision.inviteValue && (
-                    <button
-                      onClick={handleCopyInviteValue}
-                      className="shrink-0 rounded-2xl bg-sky-50 px-4 py-2 text-sm font-bold text-sky-700 transition hover:bg-sky-100"
-                    >
-                      복사
-                    </button>
-                  )}
                 </div>
-              </div>
-            )}
+              )}
 
-            {provision.provisionGuide && (
+            {visibleProvisionGuide && (
               <div className="mt-6 rounded-3xl bg-teal-50 px-5 py-4 text-sm font-semibold leading-6 text-teal-800 ring-1 ring-teal-100">
-                {provision.provisionGuide}
+                {visibleProvisionGuide}
               </div>
+            )}
+
+            {!isHost && (
+              <button
+                onClick={handleGoMemberGuide}
+                className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-blue-900 text-base font-bold text-white transition hover:bg-blue-950"
+              >
+                안내사항 확인하기
+                <Icon icon="solar:alt-arrow-right-linear" className="h-5 w-5" />
+              </button>
             )}
           </div>
         </section>
 
-        <section className="mt-8">
-          <div>
-            <p className="text-sm font-bold text-slate-400">Members</p>
-            <h2 className="mt-1 text-xl font-extrabold text-slate-950">
-              파티원 이용 확인
-            </h2>
-          </div>
+        {isHost && provision && (
+          <section className="mt-8">
+            <div>
+              <p className="text-sm font-bold text-slate-400">Members</p>
+              <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+                파티원 이용 확인
+              </h2>
+            </div>
 
-          <div className="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-            {provision.members.length > 0 ? (
-              <div className="divide-y divide-slate-100">
-                {provision.members.map((member) => (
-                  <MemberItem key={member.provisionMemberId} member={member} />
-                ))}
-              </div>
-            ) : (
-              <div className="px-6 py-10 text-center">
-                <Icon
-                  icon="solar:user-rounded-bold"
-                  className="mx-auto h-10 w-10 text-slate-300"
-                />
-                <p className="mt-3 text-sm font-semibold text-slate-500">
-                  표시할 파티원 정보가 없습니다.
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
+            <div className="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+              {provision.members.length > 0 ? (
+                <div className="divide-y divide-slate-100">
+                  {provision.members.map((member) => (
+                    <MemberItem
+                      key={member.provisionMemberId}
+                      member={member}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="px-6 py-10 text-center">
+                  <Icon
+                    icon="solar:user-rounded-bold"
+                    className="mx-auto h-10 w-10 text-slate-300"
+                  />
+                  <p className="mt-3 text-sm font-semibold text-slate-500">
+                    표시할 파티원 정보가 없습니다.
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

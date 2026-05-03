@@ -3,7 +3,7 @@ import RouterRoot from "./RouterRoot";
 import HomePage from "@/pages/home/HomePage";
 import NotFoundPage from "@/pages/not-found/NotFoundPage";
 import MainLayout from "@/layouts/MainLayout";
-import PartyListPage from "@/pages/party/list/PartyListPage";
+import PartyListPage from "@/pages/party/vacancy/PartyListPage";
 import PartyCreatePage from "@/pages/party/common/PartyCreatePage";
 import PartyRoleSelectPage from "@/pages/party/common/PartyRoleSelectPage";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -47,6 +47,8 @@ import PartyMemberAutoPayAgreementPage from "@/pages/party/member/PartyMemberAut
 import PartyMemberCardRegisterPage from "@/pages/party/member/PartyMemberCardRegisterPage";
 import PartyMemberCardRegisterSuccessPage from "@/pages/party/member/PartyMemberCardRegisterSuccessPage";
 import PartyMemberCardRegisterFailPage from "@/pages/party/member/PartyMemberCardRegisterFailPage";
+import PartyMemberCreatePreviewPage from "@/pages/party/member/PartyMemberCreatePreviewPage";
+import PartyMemberCreateCompletePage from "@/pages/party/member/PartyMemberCreateCompletePage";
 import PartyHostAgreementPage from "@/pages/party/host/PartyHostAgreementPage";
 import PartyHostVerificationCallbackPage from "@/pages/party/host/PartyHostVerificationCallbackPage";
 import PartyHostAccountRegisterPage from "@/pages/party/host/PartyHostAccountRegisterPage";
@@ -54,6 +56,13 @@ import PartyMemberPaymentPreviewPage from "@/pages/party/member/PartyMemberPayme
 import PartyHostCreatePreviewPage from "@/pages/party/host/PartyHostCreatePreviewPage";
 import PartyHostCreateCompletePage from "@/pages/party/host/PartyHostCreateCompletePage";
 import MyPartyDetailPage from "@/pages/party/my/MyPartyDetailPage";
+import PartyHostProvisionSetupPage from "@/pages/party/my/provision/host/PartyHostProvisionSetupPage";
+import PartyHostInviteSetupPage from "@/pages/party/my/provision/host/PartyHostInviteSetupPage";
+import PartyHostAdultCheckPage from "@/pages/party/my/provision/host/PartyHostAdultCheckPage";
+import PartyProvisionDashboardPage from "@/pages/party/my/provision/host/PartyProvisionDashboardPage";
+import PartyInviteCodeGuidePage from "@/pages/party/my/provision/host/PartyInviteCodeGuidePage";
+import PartyMemberProvisionConfirmPage from "@/pages/party/my/provision/member/PartyMemberProvisionConfirmPage";
+import PartyMemberProvisionDashboardPage from "@/pages/party/my/provision/member/PartyMemberProvisionDashboardPage";
 
 const router = createBrowserRouter([
   {
@@ -100,6 +109,34 @@ const router = createBrowserRouter([
           { path: "/parties/:type", element: <PartyListPage /> },
           { path: "/myparty", element: <Myparty /> },
           { path: "/myparty/:partyId", element: <MyPartyDetailPage /> },
+          {
+            path: "/myparty/:partyId/provision/setup/:productId",
+            element: <PartyHostProvisionSetupPage />,
+          },
+          {
+            path: "/myparty/:partyId/provision/invite-setup/:productId",
+            element: <PartyHostInviteSetupPage />,
+          },
+          {
+            path: "/myparty/:partyId/provision/adult-check/:productId",
+            element: <PartyHostAdultCheckPage />,
+          },
+          {
+            path: "/myparty/:partyId/provision/dashboard",
+            element: <PartyProvisionDashboardPage />,
+          },
+          {
+            path: "/myparty/:partyId/provision/invite-guide",
+            element: <PartyInviteCodeGuidePage />,
+          },
+          {
+            path: "/myparty/:partyId/provision/confirm",
+            element: <PartyMemberProvisionConfirmPage />,
+          },
+          {
+            path: "/myparty/:partyId/provision/member-dashboard",
+            element: <PartyMemberProvisionDashboardPage />,
+          },
 
           { path: "/party/create/:productId", element: <PartyCreatePage /> },
 
@@ -131,6 +168,14 @@ const router = createBrowserRouter([
           {
             path: "/party/create/:productId/member/payment-preview",
             element: <PartyMemberPaymentPreviewPage />,
+          },
+          {
+            path: "/party/create/:productId/member/create-preview",
+            element: <PartyMemberCreatePreviewPage />,
+          },
+          {
+            path: "/party/create/:productId/member/complete",
+            element: <PartyMemberCreateCompletePage />,
           },
 
           {

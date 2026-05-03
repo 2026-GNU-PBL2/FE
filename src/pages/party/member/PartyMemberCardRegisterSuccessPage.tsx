@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react";
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
 
@@ -22,6 +22,13 @@ type ApiEnvelope<T> = {
   message?: string;
 };
 
+type AuthorizationStatus = "loading" | "authorized" | "duplicate" | "failed";
+
+const authorizationRequests = new Map<
+  string,
+  Promise<BillingAuthorizeResponse | null>
+>();
+
 function unwrapResponse<T>(
   value: T | ApiEnvelope<T> | undefined | null,
 ): T | null {
@@ -29,7 +36,6 @@ function unwrapResponse<T>(
 
   if (typeof value === "object" && value !== null) {
     const maybeEnvelope = value as ApiEnvelope<T>;
-
     if (maybeEnvelope.data) return maybeEnvelope.data;
     if (maybeEnvelope.result) return maybeEnvelope.result;
     if (maybeEnvelope.payload) return maybeEnvelope.payload;
@@ -41,10 +47,7 @@ function unwrapResponse<T>(
 function getErrorMessage(error: unknown) {
   if (axios.isAxiosError(error)) {
     const responseData = error.response?.data as
-      | {
-          message?: string;
-          error?: string;
-        }
+      | { message?: string; error?: string; code?: string }
       | undefined;
 
     return (
@@ -54,35 +57,86 @@ function getErrorMessage(error: unknown) {
     );
   }
 
-  if (error instanceof Error) {
-    return error.message;
-  }
-
+  if (error instanceof Error) return error.message;
   return "카드 등록 승인 처리에 실패했습니다.";
 }
 
-export default function PartyMemberCardRegisterSuccessPage() {
-  const [searchParams] = useSearchParams();
-  const calledRef = useRef(false);
+function isDuplicateCardError(error: unknown) {
+  return axios.isAxiosError(error) && error.response?.status === 400;
+}
 
-  const [loading, setLoading] = useState(true);
-  const [authorized, setAuthorized] = useState(false);
+function mask(value: string) {
+  if (!value) return "-";
+  if (value.length <= 10) return "********";
+  return `${value.slice(0, 6)}...${value.slice(-4)}`;
+}
+
+function requestBillingAuthorization(authKey: string) {
+  const dedupeKey = `billing-auth:${authKey}`;
+
+  if (sessionStorage.getItem(dedupeKey) === "done") {
+    return Promise.resolve(null);
+  }
+
+  const existingRequest = authorizationRequests.get(authKey);
+
+  if (existingRequest) {
+    return existingRequest;
+  }
+
+  const request = api
+    .post("/api/v1/payments/billing/authorize", {
+      authKey,
+    } satisfies BillingAuthorizeRequest)
+    .then((response) => {
+      const resolved = unwrapResponse<BillingAuthorizeResponse>(response.data);
+      sessionStorage.setItem(dedupeKey, "done");
+      return resolved;
+    })
+    .catch((error) => {
+      sessionStorage.removeItem(dedupeKey);
+      throw error;
+    })
+    .finally(() => {
+      authorizationRequests.delete(authKey);
+    });
+
+  authorizationRequests.set(authKey, request);
+  return request;
+}
+
+function getMemberCreatePreviewPath(productId: string) {
+  return `/party/create/${productId}/member/create-preview`;
+}
+
+export default function PartyMemberCardRegisterSuccessPage() {
+  const { productId = "" } = useParams();
+  const [searchParams] = useSearchParams();
+
+  const [status, setStatus] = useState<AuthorizationStatus>("loading");
   const [errorMessage, setErrorMessage] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
 
-  const authKey = searchParams.get("authKey") ?? "";
-  const partyId = searchParams.get("partyId") ?? "";
-  const customerKey = searchParams.get("customerKey") ?? "";
+  const loading = status === "loading";
+  const authorized = status === "authorized";
+  const duplicated = status === "duplicate";
+  const memberCreatePreviewPath = productId
+    ? getMemberCreatePreviewPath(productId)
+    : "/party";
+
+  const rawAuthKey = useMemo(
+    () => searchParams.get("authKey") ?? "",
+    [searchParams],
+  );
+  const authKey = useMemo(() => rawAuthKey.replace(/ /g, "+"), [rawAuthKey]); // '+' 오염 보정
+
+  const customerKey = useMemo(
+    () => (searchParams.get("customerKey") ?? "").replace(/ /g, "+"),
+    [searchParams],
+  );
 
   useEffect(() => {
-    if (calledRef.current) return;
-
-    calledRef.current = true;
-
-    console.log("🔥 [SUCCESS CALLBACK]");
-    console.log("authKey:", authKey);
-    console.log("partyId:", partyId);
-    console.log("customerKey:", customerKey);
+    let cancelled = false;
 
     async function authorizeBilling() {
       try {
@@ -90,36 +144,36 @@ export default function PartyMemberCardRegisterSuccessPage() {
           throw new Error("승인에 필요한 authKey가 없습니다.");
         }
 
-        const payload: BillingAuthorizeRequest = {
-          authKey,
-        };
+        const resolved = await requestBillingAuthorization(authKey);
 
-        const response = await api.post(
-          "/api/v1/payments/billing/authorize",
-          payload,
-        );
-
-        const resolved = unwrapResponse<BillingAuthorizeResponse>(
-          response.data,
-        );
-
-        setAuthorized(true);
-        setRedirectUrl(resolved?.redirectUrl ?? "");
-        toast.success(resolved?.message || "카드 등록이 완료되었습니다.");
+        if (!cancelled) {
+          setStatus("authorized");
+          setRedirectUrl(resolved?.redirectUrl ?? "");
+          toast.success(resolved?.message || "카드 등록이 완료되었습니다.");
+        }
       } catch (error) {
-        console.error(error);
+        const duplicateCard = isDuplicateCardError(error);
+        const message = duplicateCard
+          ? "이미 등록된 카드입니다."
+          : getErrorMessage(error);
 
-        const message = getErrorMessage(error);
-
-        setAuthorized(false);
-        setErrorMessage(message);
-        toast.error(message);
-      } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setStatus(duplicateCard ? "duplicate" : "failed");
+          setErrorMessage(message);
+          if (duplicateCard) {
+            toast.info(message);
+          } else {
+            toast.error(message);
+          }
+        }
       }
     }
 
-    authorizeBilling();
+    void authorizeBilling();
+
+    return () => {
+      cancelled = true;
+    };
   }, [authKey]);
 
   return (
@@ -133,7 +187,9 @@ export default function PartyMemberCardRegisterSuccessPage() {
                 ? "bg-[#EEF4FF] text-[#1E3A8A]"
                 : authorized
                   ? "bg-[#EAFBF5] text-[#2DD4BF]"
-                  : "bg-rose-50 text-rose-500",
+                  : duplicated
+                    ? "bg-amber-50 text-amber-500"
+                    : "bg-rose-50 text-rose-500",
             ].join(" ")}
           >
             <Icon
@@ -142,7 +198,9 @@ export default function PartyMemberCardRegisterSuccessPage() {
                   ? "solar:refresh-bold"
                   : authorized
                     ? "solar:check-circle-bold"
-                    : "solar:close-circle-bold"
+                    : duplicated
+                      ? "solar:card-bold"
+                      : "solar:close-circle-bold"
               }
               className={["h-9 w-9", loading ? "animate-spin" : ""].join(" ")}
             />
@@ -158,7 +216,9 @@ export default function PartyMemberCardRegisterSuccessPage() {
                 ? "카드 등록을 완료하고 있습니다"
                 : authorized
                   ? "카드 등록이 완료되었습니다"
-                  : "카드 등록 완료에 실패했습니다"}
+                  : duplicated
+                    ? "이미 등록된 카드입니다"
+                    : "카드 등록 완료에 실패했습니다"}
             </h1>
 
             <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
@@ -168,21 +228,16 @@ export default function PartyMemberCardRegisterSuccessPage() {
                 authorized &&
                 "이제 자동결제에 사용할 카드가 정상적으로 연결되었습니다."}
               {!loading &&
+                duplicated &&
+                "같은 카드가 이미 자동결제 수단으로 등록되어 있습니다."}
+              {!loading &&
                 !authorized &&
+                !duplicated &&
                 (errorMessage || "승인 처리 중 문제가 발생했습니다.")}
             </p>
           </div>
 
           <div className="mt-8 space-y-3 rounded-[28px] bg-slate-50 px-5 py-5">
-            <div className="rounded-2xl bg-white px-4 py-4">
-              <p className="text-xs font-semibold tracking-[0.12em] text-slate-400">
-                PARTY ID
-              </p>
-              <p className="mt-2 break-all text-sm font-semibold text-slate-900">
-                {partyId || "-"}
-              </p>
-            </div>
-
             <div className="rounded-2xl bg-white px-4 py-4">
               <p className="text-xs font-semibold tracking-[0.12em] text-slate-400">
                 CUSTOMER KEY
@@ -197,34 +252,43 @@ export default function PartyMemberCardRegisterSuccessPage() {
                 AUTH KEY
               </p>
               <p className="mt-2 break-all text-sm font-semibold text-slate-900">
-                {authKey || "-"}
+                {mask(authKey)}
               </p>
             </div>
           </div>
 
           <div className="mt-8 space-y-3">
             {authorized && redirectUrl ? (
-              <a
-                href={redirectUrl}
-                className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-[#1E3A8A] text-base font-semibold tracking-tight text-white shadow-[0_18px_36px_-20px_rgba(30,58,138,0.45)] transition-all duration-300 hover:bg-[#1A347B] hover:shadow-[0_22px_42px_-22px_rgba(30,58,138,0.52)]"
+              <Link
+                to={memberCreatePreviewPath}
+                className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-[#1E3A8A] text-base font-semibold tracking-tight text-white"
               >
                 다음 단계로 이동
-              </a>
+              </Link>
             ) : null}
 
             {authorized && !redirectUrl ? (
               <Link
-                to="/party"
-                className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-[#1E3A8A] text-base font-semibold tracking-tight text-white shadow-[0_18px_36px_-20px_rgba(30,58,138,0.45)] transition-all duration-300 hover:bg-[#1A347B] hover:shadow-[0_22px_42px_-22px_rgba(30,58,138,0.52)]"
+                to={memberCreatePreviewPath}
+                className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-[#1E3A8A] text-base font-semibold tracking-tight text-white"
               >
-                파티 목록으로 이동
+                다음 단계로 이동
               </Link>
             ) : null}
 
-            {!loading && !authorized ? (
+            {duplicated ? (
+              <Link
+                to={memberCreatePreviewPath}
+                className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-[#1E3A8A] text-base font-semibold tracking-tight text-white"
+              >
+                다음 단계로 이동
+              </Link>
+            ) : null}
+
+            {!loading && !authorized && !duplicated ? (
               <Link
                 to="/party"
-                className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm font-semibold tracking-tight text-slate-700 transition-all duration-300 hover:border-slate-300 hover:bg-slate-50"
+                className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm font-semibold tracking-tight text-slate-700"
               >
                 목록으로 돌아가기
               </Link>

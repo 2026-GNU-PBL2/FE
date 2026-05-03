@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAdminAuthStore } from "@/stores/adminAuthStore";

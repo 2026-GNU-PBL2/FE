@@ -4,7 +4,9 @@ export type OttSlug =
   | "apple-tv"
   | "netflix"
   | "tving"
-  | "disney-plus";
+  | "disney-plus"
+  | "wavve"
+  | "laftel";
 
 export type OttType =
   | "유튜브"
@@ -12,7 +14,9 @@ export type OttType =
   | "애플티비"
   | "넷플릭스"
   | "티빙"
-  | "디즈니플러스";
+  | "디즈니플러스"
+  | "웨이브"
+  | "라프텔";
 
 export interface OttService {
   id: number;
