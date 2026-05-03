@@ -1,31 +1,184 @@
 import { Icon } from "@iconify/react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { api } from "@/api/axios";
 import { waitingParties } from "@/mocks/ott";
-import type { RecruitRole } from "@/types/ott";
+import type { OttSlug, RecruitRole, WaitingParty } from "@/types/ott";
 import { getOttMeta } from "@/mocks/ott";
 
-type OttType =
-  | "전체"
-  | "유튜브"
-  | "왓챠"
-  | "애플티비"
-  | "넷플릭스"
-  | "티빙"
-  | "디즈니플러스";
+type PartyCategory =
+  | "ALL"
+  | "NETFLIX"
+  | "TVING"
+  | "WATCHA"
+  | "DISNEY_PLUS"
+  | "APPLE_TV"
+  | "WAVVE"
+  | "LAFTEL";
 
-const ottFilterList: OttType[] = [
-  "전체",
-  "유튜브",
-  "왓챠",
-  "애플티비",
-  "넷플릭스",
-  "티빙",
-  "디즈니플러스",
+type PartyVacancyItem = {
+  partyId: number;
+  productId: string;
+  productName: string;
+  thumbnailUrl: string;
+  totalCapacity: number;
+  currentMemberCount: number;
+  remainingSeatCount: number;
+  monthlyPaymentAmount: number;
+  nextPaymentDate: string | null;
+  joinButtonLabel: string;
+  hostNickname?: string;
+};
+
+type ApiEnvelope<T> = {
+  data?: T;
+  result?: T;
+  payload?: T;
+};
+
+const categoryFilterList: PartyCategory[] = [
+  "ALL",
+  "NETFLIX",
+  "TVING",
+  "WATCHA",
+  "DISNEY_PLUS",
+  "APPLE_TV",
+  "WAVVE",
+  "LAFTEL",
 ];
+
+const categoryLabels: Record<PartyCategory, string> = {
+  ALL: "전체",
+  NETFLIX: "넷플릭스",
+  TVING: "티빙",
+  WATCHA: "왓챠",
+  DISNEY_PLUS: "디즈니플러스",
+  APPLE_TV: "애플티비",
+  WAVVE: "웨이브",
+  LAFTEL: "라프텔",
+};
+
+function unwrapResponse<T>(
+  value: T | ApiEnvelope<T> | undefined | null,
+): T | null {
+  if (!value) return null;
+
+  if (typeof value === "object" && value !== null) {
+    const maybeEnvelope = value as ApiEnvelope<T>;
+    if (maybeEnvelope.data) return maybeEnvelope.data;
+    if (maybeEnvelope.result) return maybeEnvelope.result;
+    if (maybeEnvelope.payload) return maybeEnvelope.payload;
+  }
+
+  return value as T;
+}
+
+function resolveCategoryByName(value: string): PartyCategory | null {
+  const normalized = value.trim().toLowerCase();
+
+  if (normalized.includes("netflix") || normalized.includes("넷플릭스")) {
+    return "NETFLIX";
+  }
+
+  if (normalized.includes("tving") || normalized.includes("티빙")) {
+    return "TVING";
+  }
+
+  if (normalized.includes("watcha") || normalized.includes("왓챠")) {
+    return "WATCHA";
+  }
+
+  if (
+    normalized.includes("disney") ||
+    normalized.includes("디즈니") ||
+    normalized.includes("디즈니플러스")
+  ) {
+    return "DISNEY_PLUS";
+  }
+
+  if (
+    normalized.includes("apple") ||
+    normalized.includes("애플") ||
+    normalized.includes("애플티비")
+  ) {
+    return "APPLE_TV";
+  }
+
+  if (normalized.includes("wavve") || normalized.includes("웨이브")) {
+    return "WAVVE";
+  }
+
+  if (normalized.includes("laftel") || normalized.includes("라프텔")) {
+    return "LAFTEL";
+  }
+
+  return null;
+}
+
+function resolveOttByProductName(productName: string): WaitingParty["ott"] {
+  const category = resolveCategoryByName(productName);
+
+  if (category === "NETFLIX") return "넷플릭스";
+  if (category === "TVING") return "티빙";
+  if (category === "WATCHA") return "왓챠";
+  if (category === "DISNEY_PLUS") return "디즈니플러스";
+  if (category === "APPLE_TV") return "애플티비";
+  if (category === "WAVVE") return "웨이브";
+  if (category === "LAFTEL") return "라프텔";
+
+  return "유튜브";
+}
+
+function formatPaymentAmount(value: number) {
+  return `월 ${value.toLocaleString("ko-KR")}원`;
+}
+
+function formatSettlementDate(value: string | null) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return `${String(date.getMonth() + 1).padStart(2, "0")}.${String(
+    date.getDate(),
+  ).padStart(2, "0")} 정산`;
+}
+
+function getVacancyStatus(role: RecruitRole, remainingSeatCount: number) {
+  const seatCount = Math.max(remainingSeatCount, 0) || 1;
+  return role === "HOST" ? `파티장 ${seatCount}자리` : `파티원 ${seatCount}자리`;
+}
+
+function mapVacancyToWaitingParty(
+  item: PartyVacancyItem,
+  role: RecruitRole,
+): WaitingParty {
+  return {
+    id: item.partyId,
+    ott: resolveOttByProductName(item.productName),
+    title:
+      role === "HOST"
+        ? `${item.productName} 파티장 모집`
+        : `${item.productName} 파티원 모집`,
+    host: role === "HOST" ? "운영 예정 파티" : item.hostNickname || "파티장",
+    currentMembers: item.currentMemberCount,
+    maxMembers: item.totalCapacity,
+    price: formatPaymentAmount(item.monthlyPaymentAmount),
+    settlementDate: formatSettlementDate(item.nextPaymentDate),
+    status: getVacancyStatus(role, item.remainingSeatCount),
+    recruitRole: role,
+  };
+}
+
+function getPartyCategory(party: WaitingParty): PartyCategory | null {
+  return resolveCategoryByName(`${party.ott} ${party.title}`);
+}
 
 export default function PartyListPage() {
   const { type } = useParams<{ type: "hosts" | "members" }>();
   const [searchParams] = useSearchParams();
+  const [apiParties, setApiParties] = useState<WaitingParty[]>([]);
 
   const recruitRole: RecruitRole = type === "hosts" ? "HOST" : "MEMBER";
   const isMember = recruitRole === "MEMBER";
@@ -40,28 +193,61 @@ export default function PartyListPage() {
 
   const actionLabel = recruitRole === "HOST" ? "파티장 참여" : "파티원 참여";
 
-  const ottParam = searchParams.get("ott") as OttType | null;
-  const selectedOtt: OttType =
-    ottParam && ottFilterList.includes(ottParam) ? ottParam : "전체";
+  const categoryParam = searchParams.get("category") as PartyCategory | null;
+  const selectedCategory: PartyCategory =
+    categoryParam && categoryFilterList.includes(categoryParam)
+      ? categoryParam
+      : "ALL";
 
-  const roleFilteredParties = waitingParties.filter(
-    (party) => party.recruitRole === recruitRole,
-  );
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchVacancyParties = async () => {
+      try {
+        const endpoint =
+          recruitRole === "HOST"
+            ? "/api/v1/party-vacancy/hosts"
+            : "/api/v1/party-vacancy/members";
+
+        const response = await api.get<PartyVacancyItem[]>(endpoint);
+        const data = unwrapResponse<PartyVacancyItem[]>(response.data);
+
+        if (!isMounted) return;
+
+        const nextParties = Array.isArray(data)
+          ? data.map((item) => mapVacancyToWaitingParty(item, recruitRole))
+          : [];
+
+        setApiParties(nextParties);
+      } catch (error) {
+        if (!isMounted) return;
+
+        console.error("결원 파티 목록 조회 실패", error);
+        setApiParties([]);
+      }
+    };
+
+    void fetchVacancyParties();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [recruitRole]);
+
+  const baseParties = useMemo(() => {
+    if (apiParties.length > 0) return apiParties;
+
+    return waitingParties.filter((party) => party.recruitRole === recruitRole);
+  }, [apiParties, recruitRole]);
 
   const filteredParties =
-    selectedOtt === "전체"
-      ? roleFilteredParties
-      : roleFilteredParties.filter((party) => party.ott === selectedOtt);
+    selectedCategory === "ALL"
+      ? baseParties
+      : baseParties.filter(
+          (party) => getPartyCategory(party) === selectedCategory,
+        );
 
-  const shouldUseNestedCircle = (
-    slug:
-      | "youtube"
-      | "watcha"
-      | "apple-tv"
-      | "netflix"
-      | "tving"
-      | "disney-plus",
-  ) => {
+  const shouldUseNestedCircle = (slug: OttSlug) => {
     return (
       slug === "netflix" ||
       slug === "tving" ||
@@ -70,13 +256,13 @@ export default function PartyListPage() {
     );
   };
 
-  const getFilterPath = (ott: OttType) => {
+  const getFilterPath = (category: PartyCategory) => {
     const basePath =
       recruitRole === "HOST" ? "/parties/hosts" : "/parties/members";
 
-    return ott === "전체"
+    return category === "ALL"
       ? basePath
-      : `${basePath}?ott=${encodeURIComponent(ott)}`;
+      : `${basePath}?category=${encodeURIComponent(category)}`;
   };
 
   return (
@@ -103,13 +289,13 @@ export default function PartyListPage() {
               </div>
 
               <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
-                {selectedOtt === "전체"
+                {selectedCategory === "ALL"
                   ? recruitRole === "HOST"
                     ? "파티장을 찾고 있는 파티"
                     : "지금 참여 가능한 파티"
                   : recruitRole === "HOST"
-                    ? `${selectedOtt} 파티장 모집`
-                    : `${selectedOtt} 참여 가능 파티`}
+                    ? `${categoryLabels[selectedCategory]} 파티장 모집`
+                    : `${categoryLabels[selectedCategory]} 참여 가능 파티`}
               </h1>
 
               <p className="mt-2 text-sm text-slate-500">{pageDescription}</p>
@@ -117,13 +303,13 @@ export default function PartyListPage() {
           </div>
 
           <div className="mt-5 flex flex-wrap gap-2">
-            {ottFilterList.map((ott) => {
-              const isSelected = selectedOtt === ott;
+            {categoryFilterList.map((category) => {
+              const isSelected = selectedCategory === category;
 
               return (
                 <Link
-                  key={ott}
-                  to={getFilterPath(ott)}
+                  key={category}
+                  to={getFilterPath(category)}
                   className={[
                     "inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-all",
                     isSelected
@@ -135,7 +321,7 @@ export default function PartyListPage() {
                         : "border border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-slate-50",
                   ].join(" ")}
                 >
-                  {ott}
+                  {categoryLabels[category]}
                 </Link>
               );
             })}

@@ -69,6 +69,26 @@ export const ottServices: OttService[] = [
     imageClassName: "h-5 w-8 object-contain",
     chipClassName: "bg-blue-50 text-blue-700 ring-blue-100",
   },
+  {
+    id: 7,
+    slug: "wavve",
+    name: "웨이브",
+    subtitle: "국내 방송 · 영화",
+    price: "월 이용권",
+    image: "/images/logo-symbol.png",
+    imageClassName: "h-6 w-6 object-contain",
+    chipClassName: "bg-sky-50 text-sky-700 ring-sky-100",
+  },
+  {
+    id: 8,
+    slug: "laftel",
+    name: "라프텔",
+    subtitle: "애니메이션 스트리밍",
+    price: "월 이용권",
+    image: "/images/logo-symbol.png",
+    imageClassName: "h-6 w-6 object-contain",
+    chipClassName: "bg-violet-50 text-violet-700 ring-violet-100",
+  },
 ];
 
 export const waitingParties: WaitingParty[] = [

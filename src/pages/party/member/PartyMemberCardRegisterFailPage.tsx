@@ -8,7 +8,6 @@ export default function PartyMemberCardRegisterFailPage() {
   const code = searchParams.get("code") ?? "";
   const message =
     searchParams.get("message") ?? "카드 등록이 취소되었거나 실패했습니다.";
-  const partyId = searchParams.get("partyId") ?? "";
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
@@ -39,15 +38,6 @@ export default function PartyMemberCardRegisterFailPage() {
               </p>
               <p className="mt-2 text-sm font-semibold text-slate-900">
                 {code || "-"}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white px-4 py-4">
-              <p className="text-xs font-semibold tracking-[0.12em] text-slate-400">
-                PARTY ID
-              </p>
-              <p className="mt-2 text-sm font-semibold text-slate-900">
-                {partyId || "-"}
               </p>
             </div>
           </div>

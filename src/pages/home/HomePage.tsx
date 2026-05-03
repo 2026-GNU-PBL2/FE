@@ -12,6 +12,41 @@ import type { OttSlug, WaitingParty } from "@/types/ott";
 import type { ProductListItem } from "@/types/product";
 import { useAuthStore } from "@/stores/authStore";
 
+type PartyVacancyItem = {
+  partyId: number;
+  productId: string;
+  productName: string;
+  thumbnailUrl: string;
+  totalCapacity: number;
+  currentMemberCount: number;
+  remainingSeatCount: number;
+  monthlyPaymentAmount: number;
+  nextPaymentDate: string | null;
+  joinButtonLabel: string;
+  hostNickname?: string;
+};
+
+type ApiEnvelope<T> = {
+  data?: T;
+  result?: T;
+  payload?: T;
+};
+
+function unwrapResponse<T>(
+  value: T | ApiEnvelope<T> | undefined | null,
+): T | null {
+  if (!value) return null;
+
+  if (typeof value === "object" && value !== null) {
+    const maybeEnvelope = value as ApiEnvelope<T>;
+    if (maybeEnvelope.data) return maybeEnvelope.data;
+    if (maybeEnvelope.result) return maybeEnvelope.result;
+    if (maybeEnvelope.payload) return maybeEnvelope.payload;
+  }
+
+  return value as T;
+}
+
 function shouldUseNestedCircle(slug: OttSlug) {
   return (
     slug === "netflix" ||
@@ -64,11 +99,81 @@ function resolveOttSlugByServiceName(serviceName: string): OttSlug | null {
     return "disney-plus";
   }
 
+  if (normalized.includes("wavve") || normalized.includes("웨이브")) {
+    return "wavve";
+  }
+
+  if (normalized.includes("laftel") || normalized.includes("라프텔")) {
+    return "laftel";
+  }
+
   return null;
+}
+
+function resolveOttNameByServiceName(serviceName: string): WaitingParty["ott"] {
+  const slug = resolveOttSlugByServiceName(serviceName);
+
+  if (slug === "youtube") return "유튜브";
+  if (slug === "watcha") return "왓챠";
+  if (slug === "apple-tv") return "애플티비";
+  if (slug === "netflix") return "넷플릭스";
+  if (slug === "tving") return "티빙";
+  if (slug === "disney-plus") return "디즈니플러스";
+  if (slug === "wavve") return "웨이브";
+  if (slug === "laftel") return "라프텔";
+
+  return "유튜브";
 }
 
 function formatPrice(price: number) {
   return `월 ${price.toLocaleString("ko-KR")}원`;
+}
+
+function formatVacancyPaymentAmount(value: number) {
+  return `월 ${value.toLocaleString("ko-KR")}원`;
+}
+
+function formatSettlementDate(value: string | null) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return `${String(date.getMonth() + 1).padStart(2, "0")}.${String(
+    date.getDate(),
+  ).padStart(2, "0")} 정산`;
+}
+
+function getVacancyStatus(role: "HOST" | "MEMBER", remainingSeatCount: number) {
+  const seatCount = Math.max(remainingSeatCount, 0);
+
+  if (role === "HOST") {
+    return `파티장 ${seatCount || 1}자리`;
+  }
+
+  return `파티원 ${seatCount || 1}자리`;
+}
+
+function mapVacancyToWaitingParty(
+  item: PartyVacancyItem,
+  role: "HOST" | "MEMBER",
+): WaitingParty {
+  return {
+    id: item.partyId,
+    ott: resolveOttNameByServiceName(item.productName),
+    title:
+      role === "HOST"
+        ? `${item.productName} 파티장 모집`
+        : `${item.productName} 파티원 모집`,
+    host: role === "HOST" ? "운영 예정 파티" : item.hostNickname || "파티장",
+    currentMembers: item.currentMemberCount,
+    maxMembers: item.totalCapacity,
+    price: formatVacancyPaymentAmount(item.monthlyPaymentAmount),
+    settlementDate: formatSettlementDate(item.nextPaymentDate),
+    status: getVacancyStatus(role, item.remainingSeatCount),
+    recruitRole: role,
+  };
 }
 
 function getProductSubtitle(product: ProductListItem) {
@@ -390,6 +495,12 @@ console.log(useAuthStore.getState());
 
 export default function HomePage() {
   const [products, setProducts] = useState<ProductListItem[]>([]);
+  const [hostVacancyParties, setHostVacancyParties] = useState<WaitingParty[]>(
+    [],
+  );
+  const [memberVacancyParties, setMemberVacancyParties] = useState<
+    WaitingParty[]
+  >([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
@@ -435,6 +546,53 @@ export default function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchVacancyParties = async () => {
+      try {
+        const [hostResponse, memberResponse] = await Promise.all([
+          api.get<PartyVacancyItem[]>("/api/v1/party-vacancy/hosts"),
+          api.get<PartyVacancyItem[]>("/api/v1/party-vacancy/members"),
+        ]);
+
+        if (!isMounted) return;
+
+        const hostData = unwrapResponse<PartyVacancyItem[]>(hostResponse.data);
+        const memberData = unwrapResponse<PartyVacancyItem[]>(
+          memberResponse.data,
+        );
+
+        const nextHostParties = Array.isArray(hostData)
+          ? hostData
+              .slice(0, 2)
+              .map((item) => mapVacancyToWaitingParty(item, "HOST"))
+          : [];
+
+        const nextMemberParties = Array.isArray(memberData)
+          ? memberData
+              .slice(0, 2)
+              .map((item) => mapVacancyToWaitingParty(item, "MEMBER"))
+          : [];
+
+        setHostVacancyParties(nextHostParties);
+        setMemberVacancyParties(nextMemberParties);
+      } catch (error) {
+        if (!isMounted) return;
+
+        console.error("결원 파티 목록 조회 실패", error);
+        setHostVacancyParties([]);
+        setMemberVacancyParties([]);
+      }
+    };
+
+    void fetchVacancyParties();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const selectedProduct = useMemo(() => {
     return (
       products.find((product) => product.id === selectedProductId) ??
@@ -443,8 +601,12 @@ export default function HomePage() {
     );
   }, [products, selectedProductId]);
 
-  const hostParties = hostPreviewParties;
-  const memberParties = memberPreviewParties;
+  const hostParties =
+    hostVacancyParties.length > 0 ? hostVacancyParties : hostPreviewParties;
+  const memberParties =
+    memberVacancyParties.length > 0
+      ? memberVacancyParties
+      : memberPreviewParties;
 
   return (
     <div className="min-h-full bg-brand-bg">

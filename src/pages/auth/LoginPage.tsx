@@ -116,21 +116,27 @@ export default function LoginPage() {
 
             <div className="px-7 pt-10">
               <div className="flex flex-col items-center">
-                <div className="relative mb-4">
-                  <div className="absolute inset-0 -z-10 rounded-2xl bg-linear-to-br from-brand-sub/35 to-brand-accent/25 blur-md" />
-                  <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-brand-main/10">
-                    <img
-                      src="/images/logo-symbol.png"
-                      alt="Submate Logo"
-                      draggable={false}
-                      className="h-full w-full object-cover"
-                    />
+                <Link
+                  to="/"
+                  aria-label="Submate 홈으로 이동"
+                  className="group flex flex-col items-center rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-sub/25"
+                >
+                  <div className="relative mb-4">
+                    <div className="absolute inset-0 -z-10 rounded-2xl bg-linear-to-br from-brand-sub/35 to-brand-accent/25 blur-md transition group-hover:opacity-80" />
+                    <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-brand-main/10 transition group-hover:-translate-y-0.5 group-hover:shadow-md">
+                      <img
+                        src="/images/logo-symbol.png"
+                        alt="Submate Logo"
+                        draggable={false}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <h1 className="text-center text-2xl font-semibold tracking-tight text-slate-900">
-                  <span className="text-brand-main">Sub</span>mate
-                </h1>
+                  <h1 className="text-center text-2xl font-semibold tracking-tight text-slate-900 transition group-hover:text-brand-main">
+                    <span className="text-brand-main">Sub</span>mate
+                  </h1>
+                </Link>
 
                 <p className="mt-3 max-w-[28ch] text-center text-sm leading-relaxed text-slate-600">
                   공동구독 파티 참여부터

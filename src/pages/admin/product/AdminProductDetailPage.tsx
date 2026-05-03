@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon } from "@iconify/react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
+import { Link, useParams } from "react-router-dom";
 import { api } from "@/api/axios";
 
 type ProductOperationType = "INVITE_CODE" | "ACCOUNT_SHARE" | string;
@@ -115,7 +113,6 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
 }
 
 export default function AdminProductDetailPage() {
-  const navigate = useNavigate();
   const { id, productId } = useParams();
 
   const selectedProductId = id ?? productId ?? "";
