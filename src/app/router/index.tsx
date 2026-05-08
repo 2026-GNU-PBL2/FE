@@ -61,8 +61,10 @@ import PartyHostInviteSetupPage from "@/pages/party/my/provision/host/PartyHostI
 import PartyHostAdultCheckPage from "@/pages/party/my/provision/host/PartyHostAdultCheckPage";
 import PartyProvisionDashboardPage from "@/pages/party/my/provision/host/PartyProvisionDashboardPage";
 import PartyInviteCodeGuidePage from "@/pages/party/my/provision/host/PartyInviteCodeGuidePage";
+import PartyHostSettingsPage from "@/pages/party/my/provision/host/PartyHostSettingsPage";
 import PartyMemberProvisionConfirmPage from "@/pages/party/my/provision/member/PartyMemberProvisionConfirmPage";
 import PartyMemberProvisionDashboardPage from "@/pages/party/my/provision/member/PartyMemberProvisionDashboardPage";
+import PartyMemberSettingsPage from "@/pages/party/my/provision/member/PartyMemberSettingsPage";
 
 const router = createBrowserRouter([
   {
@@ -126,6 +128,10 @@ const router = createBrowserRouter([
             element: <PartyProvisionDashboardPage />,
           },
           {
+            path: "/myparty/:partyId/provision/settings",
+            element: <PartyHostSettingsPage />,
+          },
+          {
             path: "/myparty/:partyId/provision/invite-guide",
             element: <PartyInviteCodeGuidePage />,
           },
@@ -136,6 +142,10 @@ const router = createBrowserRouter([
           {
             path: "/myparty/:partyId/provision/member-dashboard",
             element: <PartyMemberProvisionDashboardPage />,
+          },
+          {
+            path: "/myparty/:partyId/provision/member-settings",
+            element: <PartyMemberSettingsPage />,
           },
 
           { path: "/party/create/:productId", element: <PartyCreatePage /> },
@@ -198,6 +208,7 @@ const router = createBrowserRouter([
             path: "/party/create/:productId/host/complete",
             element: <PartyHostCreateCompletePage />,
           },
+          { path: "/notification", element: <NotificationPage /> },
         ],
       },
       {
@@ -206,7 +217,7 @@ const router = createBrowserRouter([
           {
             element: <MainLayout />,
             children: [
-              { path: "/notification", element: <NotificationPage /> },
+              // { path: "/notification", element: <NotificationPage /> },
               {
                 path: "/mypage",
                 element: <MyPage />,

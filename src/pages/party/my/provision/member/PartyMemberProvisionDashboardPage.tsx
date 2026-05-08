@@ -99,6 +99,10 @@ function isInviteProvisionType(type?: ProvisionType | null) {
   return type === "INVITE_CODE" || type === "INVITE_LINK";
 }
 
+function isInviteCodeProvisionType(type?: ProvisionType | null) {
+  return type === "INVITE_CODE";
+}
+
 function getProvisionStatusLabel(status?: ProvisionStatus | null) {
   if (status === "WAITING") return "이용 확인 대기";
   if (status === "IN_PROGRESS") return "확인 진행 중";
@@ -157,22 +161,6 @@ function getStatusTone(status?: string | null) {
     icon: "solar:info-circle-bold",
     className: "bg-slate-100 text-slate-600 ring-slate-200",
   };
-}
-
-function formatDateTime(value?: string | null) {
-  if (!value) return "-";
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) return "-";
-
-  return new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
 }
 
 export default function PartyMemberProvisionDashboardPage() {
@@ -330,6 +318,7 @@ export default function PartyMemberProvisionDashboardPage() {
       !isInviteProvisionType(view.provisionType) &&
       view.memberStatus !== "WAITING",
   );
+  const isInviteCodeProvision = isInviteCodeProvisionType(view.provisionType);
   const metrics = [
     {
       label: "방식",
@@ -340,21 +329,6 @@ export default function PartyMemberProvisionDashboardPage() {
       value: getProvisionStatusLabel(view.provisionStatus),
     },
   ].filter((item) => item.value !== "-");
-  const statusDates = [
-    {
-      label: "등록",
-      value: formatDateTime(view.provisionStartedAt),
-    },
-    {
-      label: "완료",
-      value: formatDateTime(view.provisionCompletedAt),
-    },
-    {
-      label: "재설정",
-      value: formatDateTime(view.lastResetAt),
-    },
-  ].filter((item) => item.value !== "-");
-
   return (
     <div className="min-h-screen bg-[#F8FAFC] px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-[760px]">
@@ -367,55 +341,87 @@ export default function PartyMemberProvisionDashboardPage() {
             <Icon icon="solar:alt-arrow-left-linear" className="h-5 w-5" />
           </button>
 
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${getStatusStyle(
-              view.memberStatus,
-            )}`}
-          >
-            <Icon icon={memberTone.icon} className="h-4 w-4" />
-            {getMemberStatusLabel(view.memberStatus)}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ${getStatusStyle(
+                view.memberStatus,
+              )}`}
+            >
+              <Icon icon={memberTone.icon} className="h-4 w-4" />
+              {getMemberStatusLabel(view.memberStatus)}
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/myparty/${partyId}/provision/member-settings`)
+              }
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50"
+              aria-label="파티원 설정으로 이동"
+            >
+              <Icon icon="solar:settings-bold" className="h-5 w-5" />
+            </button>
+          </div>
         </header>
 
-        <section className="mt-5 rounded-[32px] border border-slate-200 bg-white px-5 py-6 shadow-[0_24px_70px_-44px_rgba(15,23,42,0.32)] sm:px-7 sm:py-7">
-          <div className="flex items-start justify-between gap-5">
+        <section className="mt-5 rounded-[24px] border border-slate-200 bg-white px-5 py-5 shadow-[0_16px_48px_-40px_rgba(15,23,42,0.28)] sm:px-6">
+          <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-sm font-bold text-[#14B8A6]">
-                파티원 이용 현황
-              </p>
-              <h1 className="mt-2 text-[28px] font-extrabold tracking-tight text-slate-950 sm:text-[34px]">
+              <p className="text-xs font-medium text-[#14B8A6]">MEMBER PARTY</p>
+              <h1 className="mt-1 truncate text-xl font-bold text-slate-950">
                 {view.productName}
               </h1>
-              <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
-                공유계정 안내 확인과 이용 활성화 상태를 확인할 수 있습니다.
+              <p className="mt-1.5 text-sm font-normal leading-6 text-slate-500">
+                현재 이용 중인 파티입니다.
               </p>
             </div>
-
-            <div
-              className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-[24px] ring-1 ${memberTone.className}`}
-            >
-              <Icon icon={memberTone.icon} className="h-8 w-8" />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EAFBF5] text-[#0F766E] ring-1 ring-[#BDEFE4]">
+              <Icon icon="solar:user-check-bold" className="h-5 w-5" />
             </div>
           </div>
+        </section>
 
-          {metrics.length > 0 && (
-            <div className="mt-6 grid grid-cols-2 gap-2">
-              {metrics.map((metric) => (
-                <MetricTile
-                  key={metric.label}
-                  label={metric.label}
-                  value={metric.value}
-                />
-              ))}
+        <section className="mt-5 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_56px_-46px_rgba(15,23,42,0.3)]">
+          <div className="px-5 py-5 sm:px-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-[#14B8A6]">
+                  파티원 이용 현황
+                </p>
+                <h2 className="mt-1 text-xl font-bold text-slate-950">
+                  이용 정보 확인
+                </h2>
+                <p className="mt-1.5 text-sm font-normal leading-6 text-slate-500">
+                  공유계정 안내 확인과 이용 활성화 상태를 확인할 수 있습니다.
+                </p>
+              </div>
+
+              <div
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ring-1 ${memberTone.className}`}
+              >
+                <Icon icon={memberTone.icon} className="h-5 w-5" />
+              </div>
             </div>
-          )}
+
+            {metrics.length > 0 && (
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                {metrics.map((metric) => (
+                  <MetricTile
+                    key={metric.label}
+                    label={metric.label}
+                    value={metric.value}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
         </section>
 
         <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-bold text-slate-400">ACCESS</p>
-              <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+              <p className="text-xs font-medium text-slate-400">ACCESS</p>
+              <h2 className="mt-1 text-lg font-bold text-slate-950">
                 이용 정보
               </h2>
             </div>
@@ -444,7 +450,7 @@ export default function PartyMemberProvisionDashboardPage() {
                       type="button"
                       onClick={handleRevealPassword}
                       disabled={isPasswordLoading}
-                      className="flex h-9 shrink-0 items-center justify-center rounded-xl bg-blue-900 px-3 text-xs font-bold text-white transition hover:bg-blue-950 disabled:cursor-not-allowed disabled:bg-slate-300"
+                      className="flex h-9 shrink-0 items-center justify-center rounded-xl bg-[#14B8A6] px-3 text-xs font-bold text-white transition hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-300"
                     >
                       {isPasswordLoading ? "조회 중" : "보기"}
                     </button>
@@ -459,10 +465,40 @@ export default function PartyMemberProvisionDashboardPage() {
                 value={view.inviteValue}
               />
             )}
+            {isInviteCodeProvision && (
+              <div className="rounded-2xl bg-[#F8FAFC] px-4 py-4 ring-1 ring-slate-100">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#1E3A8A] ring-1 ring-slate-200">
+                    <Icon icon="solar:letter-bold" className="h-5 w-5" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-slate-400">
+                      초대 코드 안내
+                    </p>
+                    <p className="mt-1.5 text-sm font-normal leading-6 text-slate-600">
+                      파티장이 마이페이지 메일함으로 초대 코드를 발송하면, 받은
+                      링크를 통해 OTT 계정을 활성화해주세요.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/mypage/mailbox")}
+                      className="mt-3 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-white px-3 text-xs font-bold text-[#1E3A8A] ring-1 ring-slate-200 transition hover:bg-slate-50"
+                    >
+                      메일함 확인
+                      <Icon
+                        icon="solar:alt-arrow-right-linear"
+                        className="h-4 w-4"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             {view.provisionGuide && (
               <div className="rounded-2xl bg-[#F8FAFC] px-4 py-4 ring-1 ring-slate-100">
-                <p className="text-xs font-bold text-slate-400">이용 안내</p>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                <p className="text-xs font-medium text-slate-400">이용 안내</p>
+                <p className="mt-2 text-sm font-normal leading-6 text-slate-600">
                   {view.provisionGuide}
                 </p>
               </div>
@@ -470,9 +506,10 @@ export default function PartyMemberProvisionDashboardPage() {
             {!view.sharedAccountEmail &&
               !view.maskedSharedAccountPassword &&
               !view.inviteValue &&
+              !isInviteCodeProvision &&
               !view.provisionGuide && (
                 <div className="rounded-2xl bg-[#F8FAFC] px-4 py-5 text-center ring-1 ring-slate-100">
-                  <p className="text-sm font-semibold text-slate-500">
+                  <p className="text-sm font-normal text-slate-500">
                     표시할 이용 정보가 없습니다.
                   </p>
                 </div>
@@ -480,42 +517,18 @@ export default function PartyMemberProvisionDashboardPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold text-slate-400">STATUS</p>
-              <h2 className="mt-1 text-lg font-extrabold text-slate-950">
-                내 확인 상태
-              </h2>
+        {view.provisionMessage && (
+          <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F8FAFC] text-[#1E3A8A] ring-1 ring-slate-100">
+                <Icon icon="solar:info-circle-bold" className="h-5 w-5" />
+              </div>
+              <p className="text-sm font-normal leading-6 text-slate-600">
+                {view.provisionMessage}
+              </p>
             </div>
-            <span
-              className={`rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${getStatusStyle(
-                view.memberStatus,
-              )}`}
-            >
-              {getMemberStatusLabel(view.memberStatus)}
-            </span>
-          </div>
-
-          {view.provisionMessage && (
-            <p className="mt-4 rounded-2xl bg-[#F8FAFC] px-4 py-3 text-sm font-semibold leading-6 text-slate-600 ring-1 ring-slate-100">
-              {view.provisionMessage}
-            </p>
-          )}
-
-          {statusDates.length > 0 && (
-            <div className="mt-5 grid gap-2 text-xs font-semibold text-slate-500 sm:grid-cols-2">
-              {statusDates.map((item) => (
-                <p
-                  key={item.label}
-                  className="rounded-2xl bg-[#F8FAFC] px-3 py-2"
-                >
-                  {item.label} {item.value}
-                </p>
-              ))}
-            </div>
-          )}
-        </section>
+          </section>
+        )}
       </div>
     </div>
   );
@@ -524,10 +537,8 @@ export default function PartyMemberProvisionDashboardPage() {
 function MetricTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 rounded-2xl bg-[#F8FAFC] px-3 py-4 text-center ring-1 ring-slate-100">
-      <p className="text-[11px] font-bold text-slate-400">{label}</p>
-      <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
-        {value}
-      </p>
+      <p className="text-[11px] font-medium text-slate-400">{label}</p>
+      <p className="mt-1 truncate text-sm font-bold text-slate-900">{value}</p>
     </div>
   );
 }
@@ -549,8 +560,8 @@ function InfoRow({
         <Icon icon={icon} className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold text-slate-400">{label}</p>
-        <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
+        <p className="text-xs font-medium text-slate-400">{label}</p>
+        <p className="mt-1 truncate text-sm font-bold text-slate-900">
           {value}
         </p>
       </div>

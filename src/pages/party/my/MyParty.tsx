@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
@@ -35,6 +35,12 @@ type PartyJoinRequestItem = {
   expectedPaymentAmount: number;
   statusLabel: string;
   statusMessage: string;
+};
+
+type PartyJoinCancelResponse = {
+  joinRequestId: number;
+  canceledAt: string;
+  message: string;
 };
 
 type PartyMemberProvisionResponse = {
@@ -88,19 +94,30 @@ function getStatusStyle(status: PartyHistoryStatus) {
 }
 
 function getJoinStatusStyle(status: PartyJoinStatus) {
-  if (status === "WAITING") {
+  const normalizedStatus = normalizeJoinStatus(status);
+
+  if (normalizedStatus === "WAITING") {
     return "bg-amber-50 text-amber-700 ring-amber-100";
   }
 
-  if (status === "ACTIVE" || status === "MATCHED") {
+  if (normalizedStatus === "ACTIVE" || normalizedStatus === "MATCHED") {
     return "bg-[#2DD4BF]/10 text-[#0F766E] ring-[#2DD4BF]/20";
   }
 
-  if (status === "CANCELED") {
+  if (normalizedStatus === "CANCELED") {
     return "bg-slate-100 text-slate-500 ring-slate-200";
   }
 
   return "bg-[#38BDF8]/10 text-[#0369A1] ring-[#38BDF8]/20";
+}
+
+function normalizeJoinStatus(status: PartyJoinStatus) {
+  return String(status).trim().toUpperCase();
+}
+
+function canShowCancelJoinRequest(status: PartyJoinStatus) {
+  const normalizedStatus = normalizeJoinStatus(status);
+  return normalizedStatus === "WAITING";
 }
 
 function formatDate(value: string | null) {
@@ -147,6 +164,10 @@ export default function MyParty() {
   const [parties, setParties] = useState<PartyHistoryItem[]>([]);
   const [joinRequests, setJoinRequests] = useState<PartyJoinRequestItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [cancelTarget, setCancelTarget] = useState<PartyJoinRequestItem | null>(
+    null,
+  );
+  const [isCanceling, setIsCanceling] = useState(false);
 
   const usingParties = useMemo(() => {
     return parties.filter((party) => party.status === "USING");
@@ -187,25 +208,25 @@ export default function MyParty() {
     fetchPartyHistory();
   }, []);
 
-  useEffect(() => {
-    const fetchJoinRequests = async () => {
-      try {
-        const response = await api.get("/api/v1/party-join/me");
-        const data =
-          unwrapResponse<PartyJoinRequestItem[] | PartyJoinRequestItem>(
-            response.data,
-          ) ?? [];
-        const nextJoinRequests = Array.isArray(data) ? data : [data];
+  const fetchJoinRequests = useCallback(async () => {
+    try {
+      const response = await api.get("/api/v1/party-join/me");
+      const data =
+        unwrapResponse<PartyJoinRequestItem[] | PartyJoinRequestItem>(
+          response.data,
+        ) ?? [];
+      const nextJoinRequests = Array.isArray(data) ? data : [data];
 
-        setJoinRequests(nextJoinRequests);
-      } catch (error) {
-        console.error(error);
-        setJoinRequests([]);
-      }
-    };
-
-    fetchJoinRequests();
+      setJoinRequests(nextJoinRequests);
+    } catch (error) {
+      console.error(error);
+      setJoinRequests([]);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchJoinRequests();
+  }, [fetchJoinRequests]);
 
   const handleGoDetail = async (party: PartyHistoryItem) => {
     const detailState = {
@@ -307,6 +328,43 @@ export default function MyParty() {
         role: "MEMBER",
       },
     });
+  };
+
+  const handleCancelJoinRequest = async () => {
+    if (!cancelTarget) return;
+
+    try {
+      setIsCanceling(true);
+
+      const response = await api.post(
+        `/api/v1/party-join/${cancelTarget.joinRequestId}/cancel`,
+      );
+      const cancelResult = unwrapResponse<PartyJoinCancelResponse>(
+        response.data,
+      );
+
+      setJoinRequests((prevRequests) =>
+        prevRequests.map((request) =>
+          request.joinRequestId === cancelTarget.joinRequestId
+            ? {
+                ...request,
+                joinStatus: "CANCELED",
+                statusLabel: "취소됨",
+                statusMessage:
+                  cancelResult?.message || "자동 매칭 신청이 취소되었습니다.",
+              }
+            : request,
+        ),
+      );
+      toast.success(cancelResult?.message || "자동 매칭 신청을 취소했습니다.");
+      setCancelTarget(null);
+    } catch (error) {
+      console.error(error);
+      toast.error("자동 매칭 신청을 취소하지 못했습니다.");
+      await fetchJoinRequests();
+    } finally {
+      setIsCanceling(false);
+    }
   };
 
   return (
@@ -572,18 +630,50 @@ export default function MyParty() {
                       </div>
                     </div>
 
-                    {request.partyId && request.joinStatus === "MATCHED" && (
-                      <button
-                        onClick={() => handleGoJoinRequestParty(request)}
-                        className="flex h-13 w-full items-center justify-center gap-2 rounded-2xl bg-[#1E3A8A] px-4 text-sm font-bold text-white transition hover:bg-blue-950"
+                    {(request.partyId &&
+                      normalizeJoinStatus(request.joinStatus) === "MATCHED") ||
+                    canShowCancelJoinRequest(request.joinStatus) ? (
+                      <div
+                        className={`grid gap-2 ${
+                          request.partyId &&
+                          normalizeJoinStatus(request.joinStatus) ===
+                            "MATCHED" &&
+                          canShowCancelJoinRequest(request.joinStatus)
+                            ? "grid-cols-2"
+                            : "grid-cols-1"
+                        }`}
                       >
-                        파티 상세 보기
-                        <Icon
-                          icon="solar:alt-arrow-right-linear"
-                          className="h-5 w-5"
-                        />
-                      </button>
-                    )}
+                        {request.partyId &&
+                          normalizeJoinStatus(request.joinStatus) ===
+                            "MATCHED" && (
+                            <button
+                              type="button"
+                              onClick={() => handleGoJoinRequestParty(request)}
+                              className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#1E3A8A] px-3 text-sm font-bold text-white transition hover:bg-blue-950"
+                            >
+                              상세 보기
+                              <Icon
+                                icon="solar:alt-arrow-right-linear"
+                                className="h-5 w-5"
+                              />
+                            </button>
+                          )}
+
+                        {canShowCancelJoinRequest(request.joinStatus) && (
+                          <button
+                            type="button"
+                            onClick={() => setCancelTarget(request)}
+                            className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-white px-3 text-sm font-bold text-rose-600 ring-1 ring-rose-100 transition hover:bg-rose-50"
+                          >
+                            <Icon
+                              icon="solar:close-circle-bold"
+                              className="h-5 w-5"
+                            />
+                            매칭 취소
+                          </button>
+                        )}
+                      </div>
+                    ) : null}
                   </div>
                 </article>
               ))}
@@ -591,6 +681,98 @@ export default function MyParty() {
           </section>
         )}
       </div>
+
+      {cancelTarget && (
+        <CancelJoinRequestModal
+          productName={cancelTarget.productName}
+          isSubmitting={isCanceling}
+          onClose={() => {
+            if (!isCanceling) {
+              setCancelTarget(null);
+            }
+          }}
+          onConfirm={handleCancelJoinRequest}
+        />
+      )}
+    </div>
+  );
+}
+
+function CancelJoinRequestModal({
+  productName,
+  isSubmitting,
+  onClose,
+  onConfirm,
+}: {
+  productName: string;
+  isSubmitting: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:items-center sm:py-8"
+      onMouseDown={() => {
+        if (!isSubmitting) {
+          onClose();
+        }
+      }}
+      role="presentation"
+    >
+      <section
+        className="w-full max-w-[420px] rounded-[28px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] sm:px-6"
+        onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cancel-join-request-title"
+      >
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-100">
+            <Icon icon="solar:close-circle-bold" className="h-6 w-6" />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <h2
+              id="cancel-join-request-title"
+              className="text-lg font-semibold text-slate-950"
+            >
+              자동 매칭 신청을 취소할까요?
+            </h2>
+            <p className="mt-2 text-sm font-normal leading-6 text-slate-500">
+              {productName || "선택한 상품"} 자동 매칭 대기 신청이 취소되며,
+              취소 후에는 대기열로 복구할 수 없습니다.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center rounded-2xl bg-[#F8FAFC] text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+          >
+            닫기
+          </button>
+
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-rose-50 text-sm font-semibold text-rose-600 ring-1 ring-rose-100 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
+          >
+            <Icon
+              icon={
+                isSubmitting
+                  ? "solar:refresh-circle-bold"
+                  : "solar:close-circle-bold"
+              }
+              className={`h-4 w-4 ${isSubmitting ? "animate-spin" : ""}`}
+            />
+            {isSubmitting ? "취소 중..." : "신청 취소"}
+          </button>
+        </div>
+      </section>
     </div>
   );
 }
@@ -631,7 +813,7 @@ function PartyListItem({
         </div>
 
         <p className="mt-1 text-sm font-semibold text-slate-400">
-          {getRoleLabel(party.role)} · {formatDate(party.startAt)} 시작
+          {getRoleLabel(party.role)}
         </p>
       </div>
 

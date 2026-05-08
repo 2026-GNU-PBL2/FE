@@ -51,6 +51,11 @@ type PartyProvisionResponse = {
   members: ProvisionMember[];
 };
 
+type PartySettingsResponse = {
+  ottServiceName?: string | null;
+  partyCreatedAt?: string | null;
+};
+
 type ApiEnvelope<T> = {
   data?: T;
   result?: T;
@@ -119,7 +124,7 @@ function getStatusTone(status: string) {
   if (status === "ACTIVE") {
     return {
       icon: "solar:check-circle-bold",
-      className: "bg-[#EAFBF5] text-[#0F766E] ring-[#BDEFE4]",
+      className: "bg-[#EEF4FF] text-[#1E3A8A] ring-[#D9E6FF]",
     };
   }
 
@@ -159,12 +164,34 @@ function formatDateTime(value: string | null) {
   }).format(date);
 }
 
+function formatDate(value?: string | null) {
+  if (!value) return "-";
+
+  const dateOnlyMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (dateOnlyMatch) {
+    return `${dateOnlyMatch[1]}.${dateOnlyMatch[2]}.${dateOnlyMatch[3]}`;
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
 export default function PartyProvisionDashboardPage() {
   const navigate = useNavigate();
   const { partyId } = useParams<{ partyId: string }>();
   const [provision, setProvision] = useState<PartyProvisionResponse | null>(
     null,
   );
+  const [partySettings, setPartySettings] =
+    useState<PartySettingsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const progressPercent = useMemo(() => {
@@ -186,6 +213,37 @@ export default function PartyProvisionDashboardPage() {
     );
   }, [provision]);
 
+  const memberSchedule = useMemo(() => {
+    if (!provision?.members.length) {
+      return {
+        inviteSentAt: null,
+        mustCompleteBy: null,
+      };
+    }
+
+    const inviteSentAtValues = [
+      ...new Set(
+        provision.members
+          .map((member) => member.inviteSentAt)
+          .filter((value): value is string => Boolean(value)),
+      ),
+    ];
+    const mustCompleteByValues = [
+      ...new Set(
+        provision.members
+          .map((member) => member.mustCompleteBy)
+          .filter((value): value is string => Boolean(value)),
+      ),
+    ];
+
+    return {
+      inviteSentAt:
+        inviteSentAtValues.length === 1 ? inviteSentAtValues[0] : null,
+      mustCompleteBy:
+        mustCompleteByValues.length === 1 ? mustCompleteByValues[0] : null,
+    };
+  }, [provision]);
+
   useEffect(() => {
     const fetchProvision = async () => {
       if (!partyId) {
@@ -196,9 +254,27 @@ export default function PartyProvisionDashboardPage() {
       try {
         setIsLoading(true);
 
-        const response = await api.get(`/api/v1/parties/${partyId}/provision`);
-        const data = unwrapResponse<PartyProvisionResponse>(response.data);
-        console.log(data);
+        const [provisionResult, settingsResult] = await Promise.allSettled([
+          api.get(`/api/v1/parties/${partyId}/provision`),
+          api.get(`/api/v1/parties/${partyId}/settings`),
+        ]);
+
+        if (settingsResult.status === "fulfilled") {
+          const settingsData = unwrapResponse<PartySettingsResponse>(
+            settingsResult.value.data,
+          );
+          setPartySettings(settingsData);
+        } else {
+          setPartySettings(null);
+        }
+
+        if (provisionResult.status === "rejected") {
+          throw provisionResult.reason;
+        }
+
+        const data = unwrapResponse<PartyProvisionResponse>(
+          provisionResult.value.data,
+        );
 
         if (!data) {
           toast.error("파티 이용 현황을 확인할 수 없습니다.");
@@ -272,58 +348,95 @@ export default function PartyProvisionDashboardPage() {
             <Icon icon="solar:alt-arrow-left-linear" className="h-5 w-5" />
           </button>
 
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${provisionTone.className}`}
-          >
-            <Icon icon={provisionTone.icon} className="h-4 w-4" />
-            {getProvisionStatusLabel(provision.provisionStatus)}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ${provisionTone.className}`}
+            >
+              <Icon icon={provisionTone.icon} className="h-4 w-4" />
+              {getProvisionStatusLabel(provision.provisionStatus)}
+            </span>
+            <button
+              type="button"
+              onClick={() => navigate(`/myparty/${partyId}/provision/settings`)}
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50"
+              aria-label="파티 설정으로 이동"
+            >
+              <Icon icon="solar:settings-bold" className="h-5 w-5" />
+            </button>
+          </div>
         </header>
 
-        <section className="mt-5 rounded-[32px] border border-slate-200 bg-white px-5 py-6 shadow-[0_24px_70px_-44px_rgba(15,23,42,0.32)] sm:px-7 sm:py-7">
-          <div className="flex items-start justify-between gap-5">
+        <section className="mt-5 rounded-[24px] border border-slate-200 bg-white px-5 py-5 shadow-[0_16px_48px_-40px_rgba(15,23,42,0.28)] sm:px-6">
+          <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-sm font-bold text-[#14B8A6]">파티 이용 현황</p>
-              <h1 className="mt-2 text-[28px] font-extrabold tracking-tight text-slate-950 sm:text-[34px]">
-                {progressPercent}% 확인 완료
+              <p className="text-xs font-medium text-[#1E3A8A]">HOST PARTY</p>
+              <h1 className="mt-1 truncate text-xl font-bold text-slate-950">
+                {partySettings?.ottServiceName || "파티 정보"}
               </h1>
-              <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
-                파티원 이용 확인 상태가 실시간으로 반영됩니다.
+              <p className="mt-1.5 text-sm font-normal leading-6 text-slate-500">
+                {partySettings?.partyCreatedAt
+                  ? `${formatDate(partySettings.partyCreatedAt)} 생성`
+                  : "운영 중인 파티"}
               </p>
             </div>
-
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[24px] bg-[#EAFBF5] text-[#0F766E] ring-1 ring-[#BDEFE4]">
-              <Icon icon="solar:chart-2-bold" className="h-8 w-8" />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EEF4FF] text-[#1E3A8A] ring-1 ring-[#D9E6FF]">
+              <Icon icon="solar:crown-star-bold" className="h-5 w-5" />
             </div>
           </div>
+        </section>
 
-          <div className="mt-7">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-400">
-              <span>{provision.activeMemberCount}명 완료</span>
-              <span>{pendingMemberCount}명 대기</span>
+        <section className="mt-5 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_56px_-46px_rgba(15,23,42,0.3)]">
+          <div className="px-5 py-5 sm:px-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-[#1E3A8A]">
+                  파티 이용 현황
+                </p>
+                <h2 className="mt-1 text-xl font-bold text-slate-950">
+                  이용 확인 현황
+                </h2>
+                <p className="mt-1.5 text-sm font-normal leading-6 text-slate-500">
+                  파티원 이용 확인 상태가 실시간으로 반영됩니다.
+                </p>
+              </div>
+
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EEF4FF] text-[#1E3A8A] ring-1 ring-[#D9E6FF]">
+                <Icon icon="solar:chart-2-bold" className="h-5 w-5" />
+              </div>
             </div>
-            <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-100">
-              <div
-                className="h-full rounded-full bg-[#14B8A6]"
-                style={{ width: `${progressPercent}%` }}
+
+            <div className="mt-5">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-medium text-slate-400">
+                <span>{progressPercent}% 확인 완료</span>
+                <span>
+                  {provision.activeMemberCount}명 완료 / {pendingMemberCount}명
+                  대기
+                </span>
+              </div>
+              <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full rounded-full bg-[#60A5FA]"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 grid grid-cols-3 gap-2">
+              <MetricTile
+                label="방식"
+                value={getProvisionTypeLabel(provision.provisionType)}
+              />
+              <MetricTile
+                label="완료"
+                value={`${provision.activeMemberCount}/${provision.totalMemberCount}`}
+              />
+              <MetricTile
+                label="등록"
+                value={formatDateTime(provision.provisionStartedAt)}
               />
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-3 gap-2">
-            <MetricTile
-              label="방식"
-              value={getProvisionTypeLabel(provision.provisionType)}
-            />
-            <MetricTile
-              label="완료"
-              value={`${provision.activeMemberCount}/${provision.totalMemberCount}`}
-            />
-            <MetricTile
-              label="등록"
-              value={formatDateTime(provision.provisionStartedAt)}
-            />
-          </div>
         </section>
 
         {showInviteGuideButton && (
@@ -335,7 +448,8 @@ export default function PartyProvisionDashboardPage() {
                   파티원 초대 방법
                 </h2>
                 <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
-                  OTT 사이트의 추가 회원 초대 화면에 파티원 이메일을 입력해주세요.
+                  OTT 사이트의 추가 회원 초대 화면에 파티원 이메일을
+                  입력해주세요.
                 </p>
               </div>
 
@@ -356,15 +470,34 @@ export default function PartyProvisionDashboardPage() {
         <section className="mt-7">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="text-sm font-bold text-[#14B8A6]">Members</p>
+              <p className="text-sm font-bold text-[#1E3A8A]">Members</p>
               <h2 className="mt-1 text-xl font-extrabold text-slate-950">
                 파티원 확인 상태
               </h2>
             </div>
-            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-500 ring-1 ring-slate-200">
+            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-slate-500 ring-1 ring-slate-200">
               {provision.members.length}명
             </span>
           </div>
+
+          {(memberSchedule.inviteSentAt || memberSchedule.mustCompleteBy) && (
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {memberSchedule.inviteSentAt && (
+                <ScheduleTile
+                  icon="solar:letter-bold"
+                  label="공통 발송 시각"
+                  value={formatDateTime(memberSchedule.inviteSentAt)}
+                />
+              )}
+              {memberSchedule.mustCompleteBy && (
+                <ScheduleTile
+                  icon="solar:calendar-mark-bold"
+                  label="공통 확인 기한"
+                  value={formatDateTime(memberSchedule.mustCompleteBy)}
+                />
+              )}
+            </div>
+          )}
 
           <div className="mt-4 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)]">
             {provision.members.length > 0 ? (
@@ -387,6 +520,7 @@ export default function PartyProvisionDashboardPage() {
           </div>
         </section>
       </div>
+
     </div>
   );
 }
@@ -394,10 +528,32 @@ export default function PartyProvisionDashboardPage() {
 function MetricTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 rounded-2xl bg-[#F8FAFC] px-3 py-4 text-center ring-1 ring-slate-100">
-      <p className="text-[11px] font-bold text-slate-400">{label}</p>
-      <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
-        {value}
-      </p>
+      <p className="text-[11px] font-medium text-slate-400">{label}</p>
+      <p className="mt-1 truncate text-sm font-bold text-slate-900">{value}</p>
+    </div>
+  );
+}
+
+function ScheduleTile({
+  icon,
+  label,
+  value,
+}: {
+  icon: string;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-4 ring-1 ring-slate-200">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F8FAFC] text-[#1E3A8A] ring-1 ring-slate-100">
+        <Icon icon={icon} className="h-5 w-5" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-slate-400">{label}</p>
+        <p className="mt-1 truncate text-sm font-bold text-slate-900">
+          {value}
+        </p>
+      </div>
     </div>
   );
 }
@@ -417,16 +573,16 @@ function MemberItem({ member }: { member: ProvisionMember }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="truncate text-base font-extrabold text-slate-900">
+              <p className="truncate text-base font-bold text-slate-900">
                 {member.nickname}
               </p>
-              <p className="mt-1 text-xs font-semibold text-slate-400">
-                확인 완료 {formatDateTime(member.confirmedAt)}
+              <p className="mt-1 text-xs font-normal text-slate-400">
+                활성화 {formatDateTime(member.activatedAt)}
               </p>
             </div>
 
             <span
-              className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${getStatusStyle(
+              className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ${getStatusStyle(
                 member.memberStatus,
               )}`}
             >
@@ -435,22 +591,10 @@ function MemberItem({ member }: { member: ProvisionMember }) {
           </div>
 
           {member.provisionMessage && (
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+            <p className="mt-2 text-sm font-normal leading-6 text-slate-500">
               {member.provisionMessage}
             </p>
           )}
-
-          <div className="mt-4 grid gap-2 text-xs font-semibold text-slate-500 sm:grid-cols-3">
-            <p className="rounded-2xl bg-[#F8FAFC] px-3 py-2">
-              발송 {formatDateTime(member.inviteSentAt)}
-            </p>
-            <p className="rounded-2xl bg-[#F8FAFC] px-3 py-2">
-              기한 {formatDateTime(member.mustCompleteBy)}
-            </p>
-            <p className="rounded-2xl bg-[#F8FAFC] px-3 py-2">
-              활성화 {formatDateTime(member.activatedAt)}
-            </p>
-          </div>
         </div>
       </div>
     </article>

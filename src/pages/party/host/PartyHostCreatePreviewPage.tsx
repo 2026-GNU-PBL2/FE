@@ -141,6 +141,7 @@ export default function PartyHostCreatePreviewPage() {
         const previewPayload = unwrapResponse<CreatePreviewResponse>(
           previewResponse.data,
         );
+        console.log(previewPayload);
 
         if (!previewPayload) {
           toast.error("파티 생성 요약 정보를 불러오지 못했습니다.");

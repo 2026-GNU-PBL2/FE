@@ -1,5 +1,7 @@
 import { Icon } from "@iconify/react";
-import { Link, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { api } from "@/api/axios";
 import { useAuthStore } from "@/stores/authStore";
 
 const navItems = [
@@ -9,11 +11,64 @@ const navItems = [
   { label: "고객센터", to: "/support", requireAuth: false },
 ];
 
+type UnreadCountResponse = {
+  count: number;
+};
+
+type ApiEnvelope<T> = {
+  data?: T;
+  result?: T;
+  payload?: T;
+};
+
+function unwrapResponse<T>(
+  value: T | ApiEnvelope<T> | undefined | null,
+): T | null {
+  if (!value) return null;
+
+  if (typeof value === "object" && value !== null) {
+    const maybeEnvelope = value as ApiEnvelope<T>;
+
+    if (maybeEnvelope.data !== undefined) return maybeEnvelope.data;
+    if (maybeEnvelope.result !== undefined) return maybeEnvelope.result;
+    if (maybeEnvelope.payload !== undefined) return maybeEnvelope.payload;
+  }
+
+  return value as T;
+}
+
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { accessToken, authStatus, isAuthenticated } = useAuthStore();
+  const [unreadCount, setUnreadCount] = useState(0);
   const isLoggedIn =
     Boolean(accessToken) && isAuthenticated && authStatus === "authenticated";
+  const unreadBadgeLabel = unreadCount > 99 ? "99+" : String(unreadCount);
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!isLoggedIn) {
+      return;
+    }
+
+    try {
+      const response = await api.get("/api/v1/notifications/unread-count");
+      const data = unwrapResponse<UnreadCountResponse>(response.data);
+
+      setUnreadCount(typeof data?.count === "number" ? data.count : 0);
+    } catch (error) {
+      console.error(error);
+      setUnreadCount(0);
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void fetchUnreadCount();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [fetchUnreadCount, location.pathname]);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -92,7 +147,11 @@ export default function Navbar() {
                 aria-label="알림"
               >
                 <Icon icon="mdi:bell-outline" className="h-5 w-5" />
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-extrabold leading-none text-white ring-2 ring-white">
+                    {unreadBadgeLabel}
+                  </span>
+                )}
               </button>
 
               <button
