@@ -5,7 +5,7 @@ import { useAuthStore } from "@/stores/authStore";
 const navItems = [
   {
     label: "나의 파티",
-    to: "/party",
+    to: "/myparty",
     icon: "mdi:account-group-outline",
     requireAuth: true,
   },

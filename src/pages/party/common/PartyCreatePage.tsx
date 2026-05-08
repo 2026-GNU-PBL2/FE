@@ -107,10 +107,8 @@ function getSummaryText(product: ProductDetailResponse) {
 function getOperationTypeLabel(operationType: string | null | undefined) {
   const normalized = operationType?.trim().toUpperCase() ?? "";
 
-  if (normalized === "INVITE") return "초대형";
+  if (normalized === "INVITE_CODE") return "초대코드형";
   if (normalized === "ACCOUNT_SHARE") return "계정공유형";
-  if (normalized === "ACCOUNT_SHARED") return "계정공유형";
-  if (normalized === "SHARED_ACCOUNT") return "계정공유형";
 
   return operationType?.trim() || "-";
 }

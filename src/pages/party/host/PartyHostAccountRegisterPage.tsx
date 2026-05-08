@@ -166,7 +166,7 @@ export default function PartyHostAccountRegisterPage() {
 
         console.log("bank accounts response:", accounts);
 
-        const firstAccount = accounts?.[7];
+        const firstAccount = accounts?.[0];
 
         if (!firstAccount?.fintechUseNum) {
           toast.error("연결된 계좌 정보를 찾을 수 없습니다.");
