@@ -1,5 +1,7 @@
 import { Icon } from "@iconify/react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { api } from "@/api/axios";
 
 type PartyJoinPreviewResponse = {
   productId: string;
@@ -13,6 +15,32 @@ type PartyJoinPreviewResponse = {
   paymentNotice: string;
 };
 
+type BillingMethodResponse = {
+  hasBillingKey: boolean;
+};
+
+type ApiEnvelope<T> = {
+  data?: T;
+  result?: T;
+  payload?: T;
+};
+
+function unwrapResponse<T>(
+  value: T | ApiEnvelope<T> | undefined | null,
+): T | null {
+  if (!value) return null;
+
+  if (typeof value === "object" && value !== null) {
+    const maybeEnvelope = value as ApiEnvelope<T>;
+
+    if (maybeEnvelope.data) return maybeEnvelope.data;
+    if (maybeEnvelope.result) return maybeEnvelope.result;
+    if (maybeEnvelope.payload) return maybeEnvelope.payload;
+  }
+
+  return value as T;
+}
+
 function formatPrice(value: number) {
   return `${value.toLocaleString("ko-KR")}원`;
 }
@@ -23,8 +51,50 @@ export default function PartyMemberPaymentPreviewPage() {
   const { productId = "" } = useParams();
 
   const preview = location.state as PartyJoinPreviewResponse | null;
+  const [hasBillingMethod, setHasBillingMethod] = useState(false);
+  const [isBillingLoading, setIsBillingLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function fetchBillingMethod() {
+      try {
+        setIsBillingLoading(true);
+
+        const response = await api.get<
+          BillingMethodResponse | ApiEnvelope<BillingMethodResponse>
+        >("/api/v1/payments/billing/me");
+        const data = unwrapResponse<BillingMethodResponse>(response.data);
+
+        if (!mounted) return;
+
+        setHasBillingMethod(Boolean(data?.hasBillingKey));
+      } catch (error) {
+        console.error(error);
+
+        if (mounted) {
+          setHasBillingMethod(false);
+        }
+      } finally {
+        if (mounted) {
+          setIsBillingLoading(false);
+        }
+      }
+    }
+
+    void fetchBillingMethod();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleGoNext = () => {
+    if (hasBillingMethod) {
+      navigate(`/party/create/${productId}/member/create-preview`);
+      return;
+    }
+
     navigate(`/party/create/${productId}/member/agreement`);
   };
 
@@ -156,12 +226,45 @@ export default function PartyMemberPaymentPreviewPage() {
           </section>
         ) : null}
 
+        {!isBillingLoading && hasBillingMethod ? (
+          <section className="mt-4 rounded-[28px] bg-white px-5 py-5 ring-1 ring-inset ring-slate-200">
+            <div className="flex gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ECFEF8] text-[#0F766E]">
+                <Icon icon="solar:card-bold" className="h-5 w-5" />
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-slate-950">
+                  등록된 결제수단을 사용합니다
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  이미 등록된 카드가 있어 약관 동의와 카드 등록 단계를 건너뛰고
+                  파티 신청으로 이동합니다.
+                </p>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         <button
           type="button"
           onClick={handleGoNext}
-          className="mt-6 inline-flex h-14 w-full items-center justify-center rounded-2xl bg-[#14B8A6] px-5 text-[15px] font-semibold text-white shadow-[0_20px_46px_-24px_rgba(20,184,166,0.42)] transition hover:bg-[#0D9488]"
+          disabled={isBillingLoading}
+          className="mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#14B8A6] px-5 text-[15px] font-semibold text-white shadow-[0_20px_46px_-24px_rgba(20,184,166,0.42)] transition hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
         >
-          약관 동의로 이동
+          {isBillingLoading ? (
+            <>
+              <Icon
+                icon="solar:refresh-circle-bold"
+                className="h-5 w-5 animate-spin"
+              />
+              결제수단 확인 중
+            </>
+          ) : hasBillingMethod ? (
+            "파티 신청으로 이동"
+          ) : (
+            "약관 동의로 이동"
+          )}
         </button>
       </main>
     </div>

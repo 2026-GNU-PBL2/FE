@@ -39,7 +39,7 @@ const sidebarSections: SidebarMenuSection[] = [
     title: "결제 / 정산",
     items: [
       {
-        label: "결제 수단 관리",
+        label: "결제 관리",
         icon: "solar:card-bold",
         to: "/mypage/payment-method",
       },
@@ -47,11 +47,6 @@ const sidebarSections: SidebarMenuSection[] = [
         label: "머니 관리",
         icon: "solar:wallet-money-bold",
         to: "/mypage/money",
-      },
-      {
-        label: "결제 / 적립 내역",
-        icon: "solar:bill-list-bold",
-        to: "/mypage/payment-history",
       },
     ],
   },
@@ -107,9 +102,6 @@ export default function MyPageLayout() {
   const displayEmail = user.submateEmail?.trim() || "이메일 미등록";
   const currentMenu = getCurrentMenuMeta(location.pathname);
 
-  // TODO: 실제 API 연결 전 더미값
-  const moneyBalance = "12,400원";
-
   const handleLogout = () => {
     clearAuth();
     navigate("/", { replace: true });
@@ -147,9 +139,6 @@ export default function MyPageLayout() {
                   </div>
                 </div>
 
-                <div className="self-start sm:self-auto">
-                  <MoneyBadge value={moneyBalance} />
-                </div>
               </div>
             </div>
           </section>
@@ -233,9 +222,9 @@ export default function MyPageLayout() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-[18px] border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 shadow-[0_10px_30px_rgba(15,23,42,0.04)] transition hover:bg-slate-50"
+                  className="flex h-14 w-full items-center justify-center gap-2.5 rounded-[20px] border border-slate-200 bg-white px-4 text-base font-bold text-slate-800 shadow-[0_10px_30px_rgba(15,23,42,0.04)] transition hover:bg-slate-50"
                 >
-                  <Icon icon="solar:logout-2-bold" className="h-5 w-5" />
+                  <Icon icon="solar:logout-2-bold" className="h-6 w-6" />
                   로그아웃
                 </button>
               </div>
@@ -300,34 +289,17 @@ function MobileMenuTabs() {
             to={item.to}
             className={({ isActive }) =>
               [
-                "inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full border px-4 text-sm font-semibold transition-all",
+                "inline-flex h-[52px] items-center gap-2.5 whitespace-nowrap rounded-2xl border px-4 text-sm font-bold transition-all",
                 isActive
                   ? "border-slate-900 bg-slate-900 text-white"
                   : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100",
               ].join(" ")
             }
           >
-            <Icon icon={item.icon} className="h-4 w-4" />
+            <Icon icon={item.icon} className="h-5 w-5" />
             <span>{item.label}</span>
           </NavLink>
         ))}
-      </div>
-    </div>
-  );
-}
-
-function MoneyBadge({ value }: { value: string }) {
-  return (
-    <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-3 py-2 shadow-[0_8px_20px_rgba(15,23,42,0.04)] backdrop-blur-sm sm:px-4">
-      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,#dbeafe_0%,#ccfbf1_100%)] text-blue-800">
-        <Icon icon="solar:wallet-money-bold" className="h-4 w-4" />
-      </div>
-
-      <div>
-        <p className="text-[10px] font-semibold tracking-[0.16em] text-slate-400">
-          SUBMATE MONEY
-        </p>
-        <p className="text-sm font-bold text-slate-900 sm:text-base">{value}</p>
       </div>
     </div>
   );

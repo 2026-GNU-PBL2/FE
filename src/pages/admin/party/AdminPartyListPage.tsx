@@ -208,7 +208,7 @@ export default function AdminPartyListPage() {
             조회된 파티가 없습니다.
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="no-scrollbar overflow-x-auto">
             <div className="min-w-[1120px]">
               <div className="grid grid-cols-[1.7fr_1.1fr_1fr_1fr_1fr_1.1fr_1.1fr_0.8fr] gap-4 border-b border-slate-200 bg-slate-50 px-6 py-4 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                 <span>파티</span>

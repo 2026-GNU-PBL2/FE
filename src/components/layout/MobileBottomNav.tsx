@@ -35,13 +35,13 @@ export default function MobileBottomNav() {
             key={item.to}
             to={item.to}
             onClick={(e) => handleRoute(e, item.requireAuth)}
-            className="flex flex-col items-center justify-center gap-1 px-2 py-3"
+            className="flex flex-col items-center justify-center gap-1 px-2 py-3.5"
           >
             {({ isActive }) => (
               <>
                 <span
                   className={[
-                    "inline-flex h-10 w-10 items-center justify-center rounded-2xl transition",
+                    "inline-flex h-11 w-11 items-center justify-center rounded-2xl transition",
                     isActive
                       ? "bg-slate-100 text-slate-900 ring-1 ring-slate-200"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
@@ -52,7 +52,7 @@ export default function MobileBottomNav() {
 
                 <span
                   className={[
-                    "text-[11px] font-semibold",
+                    "text-xs font-semibold",
                     isActive ? "text-slate-900" : "text-slate-500",
                   ].join(" ")}
                 >

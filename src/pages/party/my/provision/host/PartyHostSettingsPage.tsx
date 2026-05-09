@@ -1,9 +1,12 @@
 import { Icon } from "@iconify/react";
-import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import {
+  getApiErrorMessage,
+  isExpectedClientError,
+} from "@/utils/api-error";
 
 type PartyLeaveReservationStatus =
   | "ACTIVE"
@@ -26,10 +29,6 @@ type PartyLeaveReserveResponse = PartyLeaveReservation & {
   partyId: number;
   vacancyType?: string | null;
   message?: string | null;
-};
-
-type ErrorResponse = {
-  message?: string;
 };
 
 type ProvisionMember = {
@@ -139,18 +138,6 @@ function formatWon(value?: number | null) {
   return `${new Intl.NumberFormat("ko-KR").format(value)}원`;
 }
 
-function getErrorMessage(error: unknown, fallbackMessage: string) {
-  if (axios.isAxiosError(error)) {
-    const responseData = error.response?.data as ErrorResponse | undefined;
-
-    if (responseData?.message) {
-      return responseData.message;
-    }
-  }
-
-  return fallbackMessage;
-}
-
 function formatDayOfMonth(value?: number | null) {
   if (value === null || value === undefined) return "-";
   return `매달 ${value}일`;
@@ -171,6 +158,8 @@ export default function PartyHostSettingsPage() {
   const [isFeeDetailModalOpen, setIsFeeDetailModalOpen] = useState(false);
   const [isFeeDetailLoading, setIsFeeDetailLoading] = useState(false);
   const [isLeaveConfirmOpen, setIsLeaveConfirmOpen] = useState(false);
+  const [isLeaveCancelConfirmOpen, setIsLeaveCancelConfirmOpen] =
+    useState(false);
 
   const memberMap = useMemo(() => {
     const map = new Map<number, ProvisionMember>();
@@ -182,10 +171,17 @@ export default function PartyHostSettingsPage() {
     return map;
   }, [members]);
 
-  const hostReservationCount = reservations.filter(
+  const activeReservations = useMemo(
+    () =>
+      reservations.filter(
+        (reservation) => reservation.status === "LEAVE_RESERVED",
+      ),
+    [reservations],
+  );
+  const hostReservation = activeReservations.find(
     (reservation) => reservation.role === "HOST",
-  ).length;
-  const hasHostReservation = hostReservationCount > 0;
+  );
+  const hasHostReservation = Boolean(hostReservation);
 
   const fetchSettings = useCallback(async () => {
     if (!partyId) {
@@ -304,8 +300,46 @@ export default function PartyHostSettingsPage() {
       setIsLeaveConfirmOpen(false);
       toast.success(data.message || "파티 탈퇴가 예약되었습니다.");
     } catch (error) {
-      console.error(error);
-      toast.error(getErrorMessage(error, "파티 해지 예약에 실패했습니다."));
+      if (!isExpectedClientError(error)) {
+        console.error(error);
+      }
+      toast.error(
+        getApiErrorMessage(error, "파티 해지 예약에 실패했습니다."),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancelHostLeave = async () => {
+    if (!partyId || isSubmitting || !hasHostReservation) return;
+
+    try {
+      setIsSubmitting(true);
+
+      await api.delete(`/api/v1/party-leave/${partyId}/reserve`);
+
+      setReservations((current) =>
+        current.map((reservation) =>
+          reservation.role === "HOST" &&
+          reservation.status === "LEAVE_RESERVED"
+            ? {
+                ...reservation,
+                status: "ACTIVE",
+                leaveReservedAt: null,
+              }
+            : reservation,
+        ),
+      );
+      setIsLeaveCancelConfirmOpen(false);
+      toast.success("파티 해지가 취소되었습니다.");
+    } catch (error) {
+      if (!isExpectedClientError(error)) {
+        console.error(error);
+      }
+      toast.error(
+        getApiErrorMessage(error, "파티 해지 취소에 실패했습니다."),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -375,9 +409,9 @@ export default function PartyHostSettingsPage() {
           </div>
 
           <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
-            {reservations.length > 0 ? (
+            {activeReservations.length > 0 ? (
               <div className="divide-y divide-slate-100 bg-white">
-                {reservations.map((reservation) => (
+                {activeReservations.map((reservation) => (
                   <LeaveReservationItem
                     key={`${reservation.partyMemberId}-${reservation.userId}`}
                     reservation={reservation}
@@ -399,26 +433,49 @@ export default function PartyHostSettingsPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[24px] border border-rose-100 bg-white px-4 py-4 shadow-[0_14px_46px_-42px_rgba(15,23,42,0.24)] sm:px-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-100">
-              <Icon icon="solar:logout-3-bold" className="h-5 w-5" />
+        <section
+          className={`mt-5 rounded-[24px] border bg-white px-4 py-4 shadow-[0_14px_46px_-42px_rgba(15,23,42,0.24)] sm:px-5 ${
+            hasHostReservation ? "border-teal-100" : "border-rose-100"
+          }`}
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1 ${
+                hasHostReservation
+                  ? "bg-teal-50 text-teal-700 ring-teal-100"
+                  : "bg-rose-50 text-rose-600 ring-rose-100"
+              }`}
+            >
+              <Icon
+                icon={
+                  hasHostReservation
+                    ? "solar:refresh-bold"
+                    : "solar:logout-3-bold"
+                }
+                className="h-5 w-5"
+              />
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="text-base font-semibold text-slate-950">
-                파티 해지하기
+                {hasHostReservation ? "파티 해지 취소" : "파티 해지하기"}
               </h2>
               <p className="mt-1 text-sm font-normal leading-6 text-slate-500">
-                다음 결제일에 탈퇴가 반영됩니다.
+                {hasHostReservation
+                  ? "등록한 해지를 취소하고 기존 이용 상태로 되돌립니다."
+                  : "다음 결제일에 탈퇴가 반영됩니다."}
               </p>
             </div>
             <button
               type="button"
-              onClick={() => setIsLeaveConfirmOpen(true)}
-              disabled={isSubmitting || hasHostReservation}
-              className={`flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-2xl px-3 text-xs font-semibold ring-1 transition disabled:cursor-not-allowed ${
+              onClick={() =>
                 hasHostReservation
-                  ? "bg-[#EEF4FF] text-[#1E3A8A] ring-[#D9E6FF]"
+                  ? setIsLeaveCancelConfirmOpen(true)
+                  : setIsLeaveConfirmOpen(true)
+              }
+              disabled={isSubmitting}
+              className={`flex h-10 w-full shrink-0 items-center justify-center gap-1.5 rounded-2xl px-3 text-xs font-semibold ring-1 transition disabled:cursor-not-allowed sm:w-auto ${
+                hasHostReservation
+                  ? "bg-teal-50 text-teal-700 ring-teal-100 hover:bg-teal-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
                   : "bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
               }`}
             >
@@ -427,15 +484,15 @@ export default function PartyHostSettingsPage() {
                   isSubmitting
                     ? "solar:refresh-circle-bold"
                     : hasHostReservation
-                      ? "solar:check-circle-bold"
+                      ? "solar:refresh-bold"
                       : "solar:logout-3-bold"
                 }
                 className={`h-4 w-4 ${isSubmitting ? "animate-spin" : ""}`}
               />
               {isSubmitting
-                ? "해지 중"
+                ? "처리 중"
                 : hasHostReservation
-                  ? "해지 예약됨"
+                  ? "해지 취소"
                   : "해지"}
             </button>
           </div>
@@ -453,8 +510,22 @@ export default function PartyHostSettingsPage() {
           isSubmitting={isSubmitting}
           title="파티 해지하기"
           description="즉시 탈퇴되지는 않으며, 다음 결제일에 새 이용 주기가 시작될 때 파티장 탈퇴가 반영됩니다."
+          confirmLabel="해지"
+          submittingLabel="해지 중"
           onClose={() => setIsLeaveConfirmOpen(false)}
           onConfirm={handleReserveHostLeave}
+        />
+      )}
+      {isLeaveCancelConfirmOpen && (
+        <LeaveReserveConfirmModal
+          isSubmitting={isSubmitting}
+          title="파티 해지를 취소할까요?"
+          description="등록한 해지 예약을 취소하고 기존 이용 상태로 되돌립니다."
+          confirmLabel="해지 취소"
+          submittingLabel="취소 중"
+          variant="success"
+          onClose={() => setIsLeaveCancelConfirmOpen(false)}
+          onConfirm={handleCancelHostLeave}
         />
       )}
     </div>
@@ -755,16 +826,31 @@ function FeeDetailCard({ label, value }: { label: string; value: string }) {
 function LeaveReserveConfirmModal({
   title,
   description,
+  confirmLabel,
+  submittingLabel,
+  variant = "danger",
   isSubmitting,
   onClose,
   onConfirm,
 }: {
   title: string;
   description: string;
+  confirmLabel: string;
+  submittingLabel: string;
+  variant?: "danger" | "success";
   isSubmitting: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }) {
+  const isSuccess = variant === "success";
+  const iconClassName = isSuccess
+    ? "bg-teal-50 text-teal-700 ring-teal-100"
+    : "bg-rose-50 text-rose-600 ring-rose-100";
+  const buttonClassName = isSuccess
+    ? "bg-teal-50 text-teal-700 ring-teal-100 hover:bg-teal-100"
+    : "bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-100";
+  const icon = isSuccess ? "solar:refresh-bold" : "solar:logout-3-bold";
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:items-center sm:py-8"
@@ -783,8 +869,10 @@ function LeaveReserveConfirmModal({
         aria-labelledby="leave-confirm-title"
       >
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-100">
-            <Icon icon="solar:logout-3-bold" className="h-6 w-6" />
+          <div
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ring-1 ${iconClassName}`}
+          >
+            <Icon icon={icon} className="h-6 w-6" />
           </div>
           <div className="min-w-0 flex-1">
             <h2
@@ -812,17 +900,17 @@ function LeaveReserveConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={isSubmitting}
-            className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-rose-50 text-sm font-semibold text-rose-600 ring-1 ring-rose-100 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
+            className={`flex h-11 items-center justify-center gap-2 rounded-2xl text-sm font-semibold ring-1 transition disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200 ${buttonClassName}`}
           >
             <Icon
               icon={
                 isSubmitting
                   ? "solar:refresh-circle-bold"
-                  : "solar:logout-3-bold"
+                  : icon
               }
               className={`h-4 w-4 ${isSubmitting ? "animate-spin" : ""}`}
             />
-            {isSubmitting ? "해지 중" : "해지"}
+            {isSubmitting ? submittingLabel : confirmLabel}
           </button>
         </div>
       </section>

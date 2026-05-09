@@ -28,6 +28,11 @@ const menuItems = [
     to: "/admin/parties",
     icon: "solar:layers-bold-duotone",
   },
+  {
+    label: "환급 관리",
+    to: "/admin/withdraw-requests",
+    icon: "solar:wallet-money-bold-duotone",
+  },
 ];
 
 function SidebarContent({ onClose }: { onClose: () => void }) {

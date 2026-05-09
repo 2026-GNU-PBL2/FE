@@ -367,38 +367,16 @@ export default function ProfileManagePage() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-rose-200 bg-linear-to-br from-rose-50 via-white to-orange-50 shadow-sm">
-          <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100">
-                  <Icon
-                    icon="solar:trash-bin-trash-bold"
-                    className="h-6 w-6 text-rose-600"
-                  />
-                </div>
-                <div>
-                  <p className="text-base font-semibold text-slate-900">
-                    회원탈퇴
-                  </p>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">
-                    탈퇴 후에는 계정을 복구하기 어려울 수 있으니 신중하게 진행해
-                    주세요.
-                  </p>
-                </div>
-              </div>
-            </div>
-
+        <div className="flex justify-end">
             <button
               type="button"
               onClick={handleOpenWithdrawModal}
               disabled={isWithdrawSubmitting}
-              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-[18px] border border-rose-200 bg-white px-5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-[18px] border border-rose-200 bg-white px-5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             >
               <Icon icon="solar:shield-warning-bold" className="h-5 w-5" />
               회원탈퇴하기
             </button>
-          </div>
         </div>
       </form>
 
@@ -461,67 +439,61 @@ function WithdrawConfirmModal({
   onConfirm: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 px-4 backdrop-blur-[2px]">
-      <div className="w-full max-w-md overflow-hidden rounded-[28px] bg-white shadow-2xl">
-        <div className="border-b border-slate-100 px-6 pb-5 pt-6">
-          <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-rose-100">
-              <Icon
-                icon="solar:danger-triangle-bold"
-                className="h-7 w-7 text-rose-600"
-              />
-            </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6 backdrop-blur-sm">
+      <section
+        className="w-full max-w-[420px] rounded-[28px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] sm:px-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="withdraw-confirm-title"
+      >
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-100">
+            <Icon icon="solar:logout-3-bold" className="h-6 w-6" />
+          </div>
 
-            <div className="min-w-0">
-              <p className="text-lg font-semibold text-slate-900">
-                회원탈퇴를 진행할까요?
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                탈퇴를 진행하면 계정 정보가 삭제될 수 있으며, 되돌리기 어려울 수
-                있습니다.
-                <br />
-                정말로 회원탈퇴를 진행하시겠습니까?
-              </p>
-            </div>
+          <div className="min-w-0 flex-1">
+            <h2
+              id="withdraw-confirm-title"
+              className="text-lg font-semibold text-slate-950"
+            >
+              회원탈퇴를 진행할까요?
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              탈퇴 후 계정 복구가 어렵습니다.
+            </p>
           </div>
         </div>
 
-        <div className="bg-slate-50 px-6 py-4">
-          <div className="rounded-2xl border border-rose-100 bg-white px-4 py-3">
-            <div className="flex items-start gap-3">
-              <Icon
-                icon="solar:info-circle-bold"
-                className="mt-0.5 h-5 w-5 shrink-0 text-rose-500"
-              />
-              <div className="text-sm leading-6 text-slate-600">
-                탈퇴 후에는 계정을 복구하기 어려우며, 서비스 이용 정보가 더 이상
-                유지되지 않을 수 있습니다.
-              </div>
-            </div>
-          </div>
+        <div className="mt-5 grid grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="flex h-16 items-center justify-center rounded-2xl bg-[#F8FAFC] text-base font-bold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+          >
+            취소
+          </button>
 
-          <div className="mt-5 flex flex-col gap-2 sm:flex-row-reverse">
-            <button
-              type="button"
-              onClick={onConfirm}
-              disabled={isSubmitting}
-              className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-rose-600 px-5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-300"
-            >
-              <Icon icon="solar:trash-bin-trash-bold" className="h-5 w-5" />
-              {isSubmitting ? "탈퇴 처리 중..." : "회원탈퇴 진행"}
-            </button>
-
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              취소
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isSubmitting}
+            className="flex h-16 items-center justify-center gap-2 rounded-2xl bg-rose-50 text-base font-bold text-rose-600 ring-1 ring-rose-100 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
+          >
+            <Icon
+              icon={
+                isSubmitting
+                  ? "solar:refresh-circle-bold"
+                  : "solar:logout-3-bold"
+              }
+              className={`h-5 w-5 ${isSubmitting ? "animate-spin" : ""}`}
+            />
+            <span className="whitespace-nowrap">
+              {isSubmitting ? "처리 중" : "탈퇴 진행"}
+            </span>
+          </button>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import SetupShell from "./SetupShell";
 import { useSetupStore } from "@/stores/setupStore";
 
@@ -15,7 +16,8 @@ const PIN_LENGTH = 4;
 
 export default function SetupSecurityPage() {
   const navigate = useNavigate();
-  const { setSecurity } = useSetupStore();
+  const { submateEmail, nickname, phoneNumber, isPhoneVerified, setSecurity } =
+    useSetupStore();
 
   const [mode, setMode] = useState<PinMode>("create");
   const [pin, setPin] = useState("");
@@ -38,6 +40,19 @@ export default function SetupSecurityPage() {
   const keypad = useMemo(() => {
     return createRandomKeypad();
   }, []);
+
+  useEffect(() => {
+    if (!submateEmail || !nickname) {
+      toast.error("계정 정보를 먼저 설정해 주세요.");
+      navigate("/setup/profile", { replace: true });
+      return;
+    }
+
+    if (!phoneNumber || !isPhoneVerified) {
+      toast.error("휴대폰 인증을 먼저 완료해 주세요.");
+      navigate("/setup/phone", { replace: true });
+    }
+  }, [isPhoneVerified, navigate, nickname, phoneNumber, submateEmail]);
 
   useEffect(() => {
     return () => {
