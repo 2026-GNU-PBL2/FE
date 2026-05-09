@@ -23,23 +23,27 @@ export default function AdminStatCard({
   tone = "blue",
 }: AdminStatCardProps) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
-            {value}
-          </p>
-          <p className="mt-2 text-sm text-slate-500">{description}</p>
-        </div>
-
+    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm shadow-slate-900/5 transition hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/5">
+      <div className="flex items-center gap-3">
         <div
           className={[
-            "flex h-12 w-12 items-center justify-center rounded-2xl ring-1 ring-inset",
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
             toneClassMap[tone],
           ].join(" ")}
         >
-          <Icon icon={icon} className="h-6 w-6" />
+          <Icon icon={icon} className="h-4.5 w-4.5" />
+        </div>
+
+        <div className="min-w-0">
+          <p className="truncate text-[11px] font-semibold text-slate-500">
+            {label}
+          </p>
+          <p className="mt-0.5 text-xl font-bold text-slate-900">
+            {value}
+          </p>
+          <p className="mt-0.5 truncate text-[11px] text-slate-400">
+            {description}
+          </p>
         </div>
       </div>
     </div>

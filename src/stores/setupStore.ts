@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 export type SetupProvider = "google" | "kakao" | "naver" | null;
 
@@ -53,37 +54,60 @@ const initialState = {
   pinNumberConfirm: "",
 };
 
-export const useSetupStore = create<SetupStore>((set) => ({
-  ...initialState,
+export const useSetupStore = create<SetupStore>()(
+  persist(
+    (set) => ({
+      ...initialState,
 
-  setProviderInfo: ({ provider, socialEmail }) =>
-    set({
-      provider,
-      socialEmail,
+      setProviderInfo: ({ provider, socialEmail }) =>
+        set({
+          provider,
+          socialEmail,
+        }),
+
+      setProfile: ({ submateEmail, nickname }) =>
+        set({
+          submateEmail,
+          nickname,
+          phoneNumber: "",
+          verificationCode: "",
+          isPhoneVerified: false,
+          pinNumber: "",
+          pinNumberConfirm: "",
+        }),
+
+      setPhone: ({ phoneNumber, verificationCode }) =>
+        set({
+          phoneNumber,
+          verificationCode,
+          pinNumber: "",
+          pinNumberConfirm: "",
+        }),
+
+      setPhoneVerified: (verified) =>
+        set({
+          isPhoneVerified: verified,
+        }),
+
+      setSecurity: ({ pinNumber, pinNumberConfirm }) =>
+        set({
+          pinNumber,
+          pinNumberConfirm,
+        }),
+
+      resetSetup: () => set(initialState),
     }),
-
-  setProfile: ({ submateEmail, nickname }) =>
-    set({
-      submateEmail,
-      nickname,
-    }),
-
-  setPhone: ({ phoneNumber, verificationCode }) =>
-    set({
-      phoneNumber,
-      verificationCode,
-    }),
-
-  setPhoneVerified: (verified) =>
-    set({
-      isPhoneVerified: verified,
-    }),
-
-  setSecurity: ({ pinNumber, pinNumberConfirm }) =>
-    set({
-      pinNumber,
-      pinNumberConfirm,
-    }),
-
-  resetSetup: () => set(initialState),
-}));
+    {
+      name: "submate-setup-storage",
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({
+        provider: state.provider,
+        socialEmail: state.socialEmail,
+        submateEmail: state.submateEmail,
+        nickname: state.nickname,
+        phoneNumber: state.phoneNumber,
+        isPhoneVerified: state.isPhoneVerified,
+      }),
+    },
+  ),
+);

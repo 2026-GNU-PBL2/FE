@@ -47,6 +47,15 @@ type PartyMemberProvisionResponse = {
   memberStatus?: string | null;
 };
 
+type PartyUsagePeriodResponse = {
+  partyId: number;
+  currentStartDate: string | null;
+  currentEndDate: string | null;
+  nextBillingDate: string | null;
+  endingSoon: boolean;
+  daysRemaining: number;
+};
+
 type ApiEnvelope<T> = {
   data?: T;
   result?: T;
@@ -134,6 +143,26 @@ function formatDate(value: string | null) {
   }).format(date);
 }
 
+function formatUsageDayCount(startDate?: string | null) {
+  if (!startDate) return "-";
+
+  const start = new Date(startDate);
+  if (Number.isNaN(start.getTime())) return "-";
+
+  const now = new Date();
+  const startDay = new Date(
+    start.getFullYear(),
+    start.getMonth(),
+    start.getDate(),
+  );
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.floor(
+    (today.getTime() - startDay.getTime()) / 86_400_000,
+  );
+
+  return `${Math.max(1, diffDays + 1)}일째 이용 중`;
+}
+
 function formatPrice(value?: number | null) {
   if (typeof value !== "number") return "-";
   return `${value.toLocaleString("ko-KR")}원`;
@@ -162,6 +191,9 @@ export default function MyParty() {
   const userId = useAuthStore((state) => state.user?.id);
 
   const [parties, setParties] = useState<PartyHistoryItem[]>([]);
+  const [usagePeriods, setUsagePeriods] = useState<
+    Record<number, PartyUsagePeriodResponse>
+  >({});
   const [joinRequests, setJoinRequests] = useState<PartyJoinRequestItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cancelTarget, setCancelTarget] = useState<PartyJoinRequestItem | null>(
@@ -197,6 +229,24 @@ export default function MyParty() {
         const data = unwrapResponse<PartyHistoryItem[]>(response.data) ?? [];
 
         setParties(data);
+
+        const activeParties = data.filter((party) => party.status === "USING");
+        const usagePeriodResults = await Promise.allSettled(
+          activeParties.map(async (party) => {
+            const usageResponse = await api.get(
+              `/api/v1/parties/${party.partyId}/usage-period`,
+            );
+            return unwrapResponse<PartyUsagePeriodResponse>(usageResponse.data);
+          }),
+        );
+
+        const nextUsagePeriods: Record<number, PartyUsagePeriodResponse> = {};
+        usagePeriodResults.forEach((result) => {
+          if (result.status === "fulfilled" && result.value) {
+            nextUsagePeriods[result.value.partyId] = result.value;
+          }
+        });
+        setUsagePeriods(nextUsagePeriods);
       } catch (error) {
         console.error(error);
         toast.error("내 파티 목록을 불러오지 못했습니다.");
@@ -448,6 +498,7 @@ export default function MyParty() {
                   <PartyListItem
                     key={party.partyId}
                     party={party}
+                    usagePeriod={usagePeriods[party.partyId]}
                     onClick={() => handleGoDetail(party)}
                   />
                 ))}
@@ -519,6 +570,7 @@ export default function MyParty() {
                   <PartyListItem
                     key={party.partyId}
                     party={party}
+                    usagePeriod={usagePeriods[party.partyId]}
                     onClick={() => handleGoDetail(party)}
                   />
                 ))}
@@ -779,9 +831,11 @@ function CancelJoinRequestModal({
 
 function PartyListItem({
   party,
+  usagePeriod,
   onClick,
 }: {
   party: PartyHistoryItem;
+  usagePeriod?: PartyUsagePeriodResponse;
   onClick: () => void;
 }) {
   return (
@@ -815,6 +869,12 @@ function PartyListItem({
         <p className="mt-1 text-sm font-semibold text-slate-400">
           {getRoleLabel(party.role)}
         </p>
+
+        {party.status === "USING" && usagePeriod && (
+          <p className="mt-1 text-xs font-bold text-[#0F766E]">
+            {formatUsageDayCount(usagePeriod.currentStartDate)}
+          </p>
+        )}
       </div>
 
       <Icon

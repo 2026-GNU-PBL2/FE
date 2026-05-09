@@ -41,6 +41,7 @@ import AdminUserListPage from "@/pages/admin/user/AdminUserListPage";
 import AdminUserDetailPage from "@/pages/admin/user/AdminUserDetailPage";
 import AdminPartyListPage from "@/pages/admin/party/AdminPartyListPage";
 import AdminPartyDetailPage from "@/pages/admin/party/AdminPartyDetailPage";
+import AdminWithdrawRequestListPage from "@/pages/admin/settlement/AdminWithdrawRequestListPage";
 import MailboxPage from "@/pages/my/usage/MailboxPage";
 import PartyMemberAgreementPage from "@/pages/party/member/PartyMemberAgreementPage";
 import PartyMemberAutoPayAgreementPage from "@/pages/party/member/PartyMemberAutoPayAgreementPage";
@@ -96,6 +97,10 @@ const router = createBrowserRouter([
               { path: "users/:userId", element: <AdminUserDetailPage /> },
               { path: "parties", element: <AdminPartyListPage /> },
               { path: "parties/:partyId", element: <AdminPartyDetailPage /> },
+              {
+                path: "withdraw-requests",
+                element: <AdminWithdrawRequestListPage />,
+              },
             ],
           },
         ],

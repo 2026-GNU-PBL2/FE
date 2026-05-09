@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { AxiosError } from "axios";
@@ -51,6 +51,7 @@ export default function SetupCompletePage() {
     submateEmail,
     nickname,
     phoneNumber,
+    isPhoneVerified,
     pinNumber,
     resetSetup,
   } = useSetupStore();
@@ -64,6 +65,32 @@ export default function SetupCompletePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const providerLabel = provider ? providerLabelMap[provider] : "Social";
+
+  useEffect(() => {
+    if (!submateEmail || !nickname) {
+      toast.error("계정 정보를 먼저 설정해 주세요.");
+      navigate("/setup/profile", { replace: true });
+      return;
+    }
+
+    if (!phoneNumber || !isPhoneVerified) {
+      toast.error("휴대폰 인증을 먼저 완료해 주세요.");
+      navigate("/setup/phone", { replace: true });
+      return;
+    }
+
+    if (!pinNumber) {
+      toast.error("간편 비밀번호를 먼저 설정해 주세요.");
+      navigate("/setup/security", { replace: true });
+    }
+  }, [
+    isPhoneVerified,
+    navigate,
+    nickname,
+    phoneNumber,
+    pinNumber,
+    submateEmail,
+  ]);
 
   const handleStart = async () => {
     if (!accessToken) {

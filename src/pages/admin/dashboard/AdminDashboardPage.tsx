@@ -21,7 +21,6 @@ export default function AdminDashboardPage() {
     const fetchDashboard = async () => {
       try {
         const res = await api.get("/api/v1/admin/dashboard");
-        console.log(res);
         setData(res.data);
       } catch (e) {
         console.error(e);
@@ -66,112 +65,127 @@ export default function AdminDashboardPage() {
     },
   ];
 
+  const keyMetrics = [
+    {
+      label: "운영 상품",
+      value: data.operatingProductCount,
+      description: "현재 운영 중인 상품",
+      icon: "solar:box-bold-duotone",
+      tone: "blue" as const,
+    },
+    {
+      label: "활성 회원",
+      value: data.activeMemberCount,
+      description: "서비스 이용 회원",
+      icon: "solar:users-group-rounded-bold-duotone",
+      tone: "mint" as const,
+    },
+    {
+      label: "모집 파티",
+      value: data.recruitingPartyCount,
+      description: "현재 모집 진행",
+      icon: "solar:layers-bold-duotone",
+      tone: "amber" as const,
+    },
+    {
+      label: "결제 실패",
+      value: data.failedPaymentCount,
+      description: "전체 실패 건수",
+      icon: "solar:card-bold-duotone",
+      tone: "rose" as const,
+    },
+    {
+      label: "실패 파티",
+      value: data.failedPaymentPartyCount,
+      description: "문제 발생 파티",
+      icon: "solar:danger-triangle-bold-duotone",
+      tone: "rose" as const,
+    },
+    {
+      label: "매칭 대기",
+      value: data.waitingMatchUserCount,
+      description: "자동 매칭 대기",
+      icon: "solar:user-clock-bold-duotone",
+      tone: "amber" as const,
+    },
+    {
+      label: "공지 필요",
+      value: data.recruitingPartyNoticeCount,
+      description: "운영 개입 필요",
+      icon: "solar:bell-bold-duotone",
+      tone: "blue" as const,
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* 통계 카드 */}
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
-        <AdminStatCard
-          label="운영 상품"
-          value={data.operatingProductCount}
-          description="현재 운영 중인 상품 수"
-          icon="solar:box-bold-duotone"
-          tone="blue"
-        />
-        <AdminStatCard
-          label="활성 회원"
-          value={data.activeMemberCount}
-          description="서비스 이용 중인 회원 수"
-          icon="solar:users-group-rounded-bold-duotone"
-          tone="mint"
-        />
-        <AdminStatCard
-          label="모집 파티"
-          value={data.recruitingPartyCount}
-          description="현재 모집 진행 중 파티"
-          icon="solar:layers-bold-duotone"
-          tone="amber"
-        />
-        <AdminStatCard
-          label="결제 실패"
-          value={data.failedPaymentCount}
-          description="결제 실패 전체 건수"
-          icon="solar:card-bold-duotone"
-          tone="rose"
-        />
-      </section>
-
-      {/* 추가 지표 카드 */}
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-        <AdminStatCard
-          label="결제 실패 파티"
-          value={data.failedPaymentPartyCount}
-          description="문제 발생 파티 수"
-          icon="solar:danger-triangle-bold-duotone"
-          tone="rose"
-        />
-        <AdminStatCard
-          label="매칭 대기 유저"
-          value={data.waitingMatchUserCount}
-          description="자동 매칭 대기 인원"
-          icon="solar:user-clock-bold-duotone"
-          tone="amber"
-        />
-        <AdminStatCard
-          label="모집 공지 필요"
-          value={data.recruitingPartyNoticeCount}
-          description="운영 개입 필요 파티"
-          icon="solar:bell-bold-duotone"
-          tone="blue"
-        />
-      </section>
-
-      {/* 알림 영역 */}
-      <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 sm:p-6">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-4">
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-900/5">
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-lg font-semibold text-slate-900">운영 알림</p>
-            <p className="mt-1 text-sm text-slate-500">
-              즉시 확인이 필요한 항목입니다.
+            <p className="text-base font-bold text-slate-900">운영 현황</p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              핵심 지표와 확인이 필요한 항목을 한 화면에서 봅니다.
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             <Link
               to="/admin/parties"
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+              className="inline-flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
               파티 관리
             </Link>
             <Link
               to="/admin/users"
-              className="rounded-2xl bg-[#1E3A8A] px-4 py-2.5 text-sm text-white hover:bg-[#1e40af]"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-[#1E3A8A] px-3 text-xs font-semibold text-white hover:bg-[#1e40af]"
             >
               회원 관리
             </Link>
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {keyMetrics.map((metric) => (
+            <AdminStatCard key={metric.label} {...metric} />
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5">
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+          <div>
+            <p className="text-base font-bold text-slate-900">운영 알림</p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              우선 처리할 이슈입니다.
+            </p>
+          </div>
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+            {alerts.length}건
+          </span>
+        </div>
+
+        <div className="divide-y divide-slate-100">
           {alerts.map((alert) => (
             <div
               key={alert.id}
-              className="flex flex-col gap-3 rounded-3xl border border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+              className="grid gap-3 px-4 py-3 sm:grid-cols-[1fr_auto] sm:items-center"
             >
-              <div className="flex items-start gap-3">
-                <div
+              <div className="flex min-w-0 items-center gap-3">
+                <span
                   className={[
-                    "flex h-10 w-10 items-center justify-center rounded-2xl",
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
                     alert.tone,
                   ].join(" ")}
                 >
-                  <Icon icon={alert.icon} className="h-5 w-5" />
-                </div>
-                <p className="text-sm text-slate-800">{alert.text}</p>
+                  <Icon icon={alert.icon} className="h-4 w-4" />
+                </span>
+                <p className="min-w-0 truncate text-sm font-medium text-slate-800">
+                  {alert.text}
+                </p>
               </div>
-
               <Link
                 to={alert.link}
-                className="h-10 rounded-2xl border border-slate-200 px-4 text-sm text-slate-700 hover:bg-slate-50 flex items-center justify-center"
+                className="inline-flex h-8 items-center justify-center rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50"
               >
                 {alert.linkText}
               </Link>

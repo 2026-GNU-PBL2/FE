@@ -512,7 +512,6 @@ export default function HomePage() {
         setIsLoadingProducts(true);
 
         const response = await api.get<ProductListItem[]>("/api/v1/products");
-        console.log(response);
 
         const nextProducts = Array.isArray(response.data) ? response.data : [];
 
@@ -562,6 +561,8 @@ export default function HomePage() {
         const memberData = unwrapResponse<PartyVacancyItem[]>(
           memberResponse.data,
         );
+        console.log(hostData);
+        console.log(memberData);
 
         const nextHostParties = Array.isArray(hostData)
           ? hostData

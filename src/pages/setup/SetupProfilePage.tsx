@@ -1,11 +1,39 @@
 import { useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import SetupShell from "./SetupShell";
 import { validateNickname, validateSubmateEmail } from "./setupUtils";
 import { useSetupStore } from "@/stores/setupStore";
+import { api } from "@/api/axios";
 
-const SUBMATE_DOMAIN = "@submate.com";
+const SUBMATE_DOMAIN = "@submate.cloud";
+
+type DuplicateCheckResponse = {
+  available: boolean;
+};
+
+type ApiEnvelope<T> = {
+  data?: T;
+  result?: T;
+  payload?: T;
+};
+
+function unwrapResponse<T>(
+  value: T | ApiEnvelope<T> | undefined | null,
+): T | null {
+  if (!value) return null;
+
+  if (typeof value === "object" && value !== null) {
+    const maybeEnvelope = value as ApiEnvelope<T>;
+
+    if (maybeEnvelope.data) return maybeEnvelope.data;
+    if (maybeEnvelope.result) return maybeEnvelope.result;
+    if (maybeEnvelope.payload) return maybeEnvelope.payload;
+  }
+
+  return value as T;
+}
 
 export default function SetupProfilePage() {
   const navigate = useNavigate();
@@ -18,29 +46,35 @@ export default function SetupProfilePage() {
   const [isSubmateEmailChecked, setIsSubmateEmailChecked] = useState(false);
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
 
+  const [isCheckingSubmateEmail, setIsCheckingSubmateEmail] = useState(false);
+  const [isCheckingNickname, setIsCheckingNickname] = useState(false);
+
   let submateEmailError = "";
   let nicknameError = "";
 
+  const trimmedSubmateEmail = localSubmateEmail.trim();
+  const trimmedNickname = localNickname.trim();
+
   if (submitted || localSubmateEmail.length > 0) {
-    if (!localSubmateEmail.trim()) {
+    if (!trimmedSubmateEmail) {
       submateEmailError = "서브메이트 이메일 아이디를 입력해 주세요.";
-    } else if (!validateSubmateEmail(localSubmateEmail)) {
+    } else if (!validateSubmateEmail(trimmedSubmateEmail)) {
       submateEmailError = "4~20자의 영문, 숫자, ., _, - 만 사용할 수 있습니다.";
     }
   }
 
   if (submitted || localNickname.length > 0) {
-    if (!localNickname.trim()) {
+    if (!trimmedNickname) {
       nicknameError = "닉네임을 입력해 주세요.";
-    } else if (!validateNickname(localNickname)) {
+    } else if (!validateNickname(trimmedNickname)) {
       nicknameError = "닉네임은 2자 이상 12자 이하로 입력해 주세요.";
     }
   }
 
   const previewEmail = useMemo(() => {
-    if (!localSubmateEmail.trim()) return `example${SUBMATE_DOMAIN}`;
-    return `${localSubmateEmail.trim()}${SUBMATE_DOMAIN}`;
-  }, [localSubmateEmail]);
+    if (!trimmedSubmateEmail) return `example${SUBMATE_DOMAIN}`;
+    return `${trimmedSubmateEmail}${SUBMATE_DOMAIN}`;
+  }, [trimmedSubmateEmail]);
 
   const isValid =
     !submateEmailError &&
@@ -48,28 +82,112 @@ export default function SetupProfilePage() {
     isSubmateEmailChecked &&
     isNicknameChecked;
 
-  const handleCheckSubmateEmail = () => {
-    if (submateEmailError || !localSubmateEmail.trim()) return;
+  const handleCheckSubmateEmail = async () => {
+    setSubmitted(true);
 
-    // TODO: submateEmail 중복확인 API 연결
-    setIsSubmateEmailChecked(true);
+    if (submateEmailError || !trimmedSubmateEmail || isCheckingSubmateEmail) {
+      return;
+    }
+
+    try {
+      setIsCheckingSubmateEmail(true);
+
+      const response = await api.get<
+        DuplicateCheckResponse | ApiEnvelope<DuplicateCheckResponse>
+      >("/api/v1/user/check/email", {
+        params: {
+          email: trimmedSubmateEmail,
+        },
+      });
+
+      const result = unwrapResponse<DuplicateCheckResponse>(response.data);
+
+      if (!result) {
+        toast.error("이메일 중복확인 응답을 확인할 수 없습니다.");
+        setIsSubmateEmailChecked(false);
+        return;
+      }
+
+      if (result.available) {
+        setIsSubmateEmailChecked(true);
+        toast.success("사용 가능한 서브메이트 이메일입니다.");
+      } else {
+        setIsSubmateEmailChecked(false);
+        toast.error("이미 사용 중인 서브메이트 이메일입니다.");
+      }
+    } catch (error) {
+      console.error(error);
+      setIsSubmateEmailChecked(false);
+      toast.error("이메일 중복확인 중 오류가 발생했습니다.");
+    } finally {
+      setIsCheckingSubmateEmail(false);
+    }
   };
 
-  const handleCheckNickname = () => {
-    if (nicknameError || !localNickname.trim()) return;
+  const handleCheckNickname = async () => {
+    setSubmitted(true);
 
-    // TODO: nickname 중복확인 API 연결
-    setIsNicknameChecked(true);
+    if (nicknameError || !trimmedNickname || isCheckingNickname) {
+      return;
+    }
+
+    try {
+      setIsCheckingNickname(true);
+
+      const response = await api.get<
+        DuplicateCheckResponse | ApiEnvelope<DuplicateCheckResponse>
+      >("/api/v1/user/check/nickname", {
+        params: {
+          nickname: trimmedNickname,
+        },
+      });
+
+      const result = unwrapResponse<DuplicateCheckResponse>(response.data);
+
+      if (!result) {
+        toast.error("닉네임 중복확인 응답을 확인할 수 없습니다.");
+        setIsNicknameChecked(false);
+        return;
+      }
+
+      if (result.available) {
+        setIsNicknameChecked(true);
+        toast.success("사용 가능한 닉네임입니다.");
+      } else {
+        setIsNicknameChecked(false);
+        toast.error("이미 사용 중인 닉네임입니다.");
+      }
+    } catch (error) {
+      console.error(error);
+      setIsNicknameChecked(false);
+      toast.error("닉네임 중복확인 중 오류가 발생했습니다.");
+    } finally {
+      setIsCheckingNickname(false);
+    }
   };
 
   const handleNext = () => {
     setSubmitted(true);
 
+    if (submateEmailError || nicknameError) {
+      return;
+    }
+
+    if (!isSubmateEmailChecked) {
+      toast.error("서브메이트 이메일 중복확인을 완료해 주세요.");
+      return;
+    }
+
+    if (!isNicknameChecked) {
+      toast.error("닉네임 중복확인을 완료해 주세요.");
+      return;
+    }
+
     if (!isValid) return;
 
     setProfile({
-      submateEmail: localSubmateEmail.trim(),
-      nickname: localNickname.trim(),
+      submateEmail: trimmedSubmateEmail,
+      nickname: trimmedNickname,
     });
 
     navigate("/setup/phone");
@@ -94,7 +212,7 @@ export default function SetupProfilePage() {
         <div className="space-y-6">
           <Field
             label="서브메이트 이메일"
-            subLabel="@submate.com 형식으로 생성됩니다"
+            subLabel={`${SUBMATE_DOMAIN} 형식으로 생성됩니다`}
             value={localSubmateEmail}
             onChange={(value) => {
               setLocalSubmateEmail(value);
@@ -104,6 +222,7 @@ export default function SetupProfilePage() {
             icon="solar:letter-bold-duotone"
             error={submateEmailError}
             checked={isSubmateEmailChecked}
+            isChecking={isCheckingSubmateEmail}
             onCheck={handleCheckSubmateEmail}
             suffix={SUBMATE_DOMAIN}
           />
@@ -129,13 +248,15 @@ export default function SetupProfilePage() {
             icon="solar:smile-circle-bold-duotone"
             error={nicknameError}
             checked={isNicknameChecked}
+            isChecking={isCheckingNickname}
             onCheck={handleCheckNickname}
           />
 
           <button
             type="button"
             onClick={handleNext}
-            className="inline-flex w-full items-center justify-center rounded-2xl bg-brand-main px-5 py-4 text-base font-semibold text-white transition hover:opacity-95 active:scale-95"
+            className="inline-flex w-full items-center justify-center rounded-2xl bg-brand-main px-5 py-4 text-base font-semibold text-white transition hover:opacity-95 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isCheckingSubmateEmail || isCheckingNickname}
           >
             다음으로
           </button>
@@ -154,6 +275,7 @@ function Field({
   icon,
   error,
   checked,
+  isChecking,
   onCheck,
   suffix,
 }: {
@@ -165,9 +287,12 @@ function Field({
   icon: string;
   error: string;
   checked: boolean;
+  isChecking: boolean;
   onCheck: () => void;
   suffix?: string;
 }) {
+  const isDisabled = !!error || !value.trim() || checked || isChecking;
+
   return (
     <div className="space-y-2">
       <div>
@@ -180,19 +305,32 @@ function Field({
           "flex items-center gap-3 rounded-2xl border bg-white px-4 py-3 transition",
           error
             ? "border-rose-300"
-            : "border-slate-200 focus-within:border-brand-main",
+            : checked
+              ? "border-teal-300"
+              : "border-slate-200 focus-within:border-brand-main",
         ].join(" ")}
       >
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-main/10 text-brand-main">
-          <Icon icon={icon} width="20" height="20" />
+        <div
+          className={[
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl",
+            checked
+              ? "bg-teal-50 text-teal-500"
+              : "bg-brand-main/10 text-brand-main",
+          ].join(" ")}
+        >
+          <Icon
+            icon={checked ? "solar:check-circle-bold" : icon}
+            width="20"
+            height="20"
+          />
         </div>
 
-        <div className="flex h-12 w-full items-center gap-2">
+        <div className="flex h-12 min-w-0 flex-1 items-center gap-2">
           <input
             value={value}
             onChange={(e) => onChange(e.target.value.trim())}
             placeholder={placeholder}
-            className="h-full w-full border-none bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
+            className="h-full min-w-0 flex-1 border-none bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
           />
 
           {suffix ? (
@@ -205,20 +343,24 @@ function Field({
         <button
           type="button"
           onClick={onCheck}
-          disabled={!!error || !value.trim() || checked}
+          disabled={isDisabled}
           className={[
-            "whitespace-nowrap rounded-xl px-3 py-2 text-xs font-semibold transition",
+            "shrink-0 whitespace-nowrap rounded-xl px-3 py-2 text-xs font-semibold transition",
             checked
-              ? "bg-emerald-100 text-emerald-600"
+              ? "bg-teal-100 text-teal-600"
               : "bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50",
           ].join(" ")}
         >
-          {checked ? "확인됨" : "중복확인"}
+          {isChecking ? "확인 중" : checked ? "확인됨" : "중복확인"}
         </button>
       </div>
 
       {error ? (
         <p className="text-sm font-medium text-rose-500">{error}</p>
+      ) : checked ? (
+        <p className="text-sm font-medium text-teal-600">
+          사용 가능한 {label}입니다.
+        </p>
       ) : null}
     </div>
   );
