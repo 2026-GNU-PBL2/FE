@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react";
-import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
 
@@ -27,6 +27,17 @@ type AuthorizeUrlResponse = {
   data?: {
     authorizeUrl?: string;
   };
+};
+
+type PrimaryBankAccountResponse = {
+  accountType: string | null;
+  isPrimary: boolean;
+};
+
+type ApiEnvelope<T> = {
+  data?: T;
+  result?: T;
+  payload?: T;
 };
 
 type ErrorResponse = {
@@ -113,6 +124,22 @@ const initialAgreementState: AgreementState = {
 
 function getAuthorizeUrl(responseData: AuthorizeUrlResponse) {
   return responseData.authorizeUrl ?? responseData.data?.authorizeUrl ?? "";
+}
+
+function unwrapResponse<T>(
+  value: T | ApiEnvelope<T> | undefined | null,
+): T | null {
+  if (!value) return null;
+
+  if (typeof value === "object" && value !== null) {
+    const maybeEnvelope = value as ApiEnvelope<T>;
+
+    if (maybeEnvelope.data) return maybeEnvelope.data;
+    if (maybeEnvelope.result) return maybeEnvelope.result;
+    if (maybeEnvelope.payload) return maybeEnvelope.payload;
+  }
+
+  return value as T;
 }
 
 function getErrorMessage(error: unknown) {
@@ -271,6 +298,7 @@ function AgreementCard({
 }
 
 export default function PartyHostAgreementPage() {
+  const navigate = useNavigate();
   const { productId = "" } = useParams<{ productId: string }>();
 
   const [agreements, setAgreements] = useState<AgreementState>(
@@ -278,6 +306,10 @@ export default function PartyHostAgreementPage() {
   );
   const [openedItem, setOpenedItem] = useState<AgreementItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasPrimarySettlementAccount, setHasPrimarySettlementAccount] =
+    useState(false);
+  const [isCheckingSettlementAccount, setIsCheckingSettlementAccount] =
+    useState(false);
 
   const requiredItems = useMemo(() => {
     return agreementItems.filter((item) => item.required);
@@ -290,6 +322,45 @@ export default function PartyHostAgreementPage() {
   const allRequiredChecked = useMemo(() => {
     return requiredItems.every((item) => agreements[item.key]);
   }, [agreements, requiredItems]);
+
+  const fetchHasPrimarySettlementAccount = async () => {
+    try {
+      const primaryAccountResponse = await api.get<
+        PrimaryBankAccountResponse | ApiEnvelope<PrimaryBankAccountResponse>
+      >("/api/v1/bank/accounts/primary");
+      const primaryAccount = unwrapResponse<PrimaryBankAccountResponse>(
+        primaryAccountResponse.data,
+      );
+
+      return (
+        primaryAccount?.accountType === "SETTLEMENT" &&
+        primaryAccount.isPrimary === true
+      );
+    } catch {
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    const checkSettlementAccount = async () => {
+      setIsCheckingSettlementAccount(true);
+
+      const hasAccount = await fetchHasPrimarySettlementAccount();
+
+      if (!mounted) return;
+
+      setHasPrimarySettlementAccount(hasAccount);
+      setIsCheckingSettlementAccount(false);
+    };
+
+    void checkSettlementAccount();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleOpenItem = (item: AgreementItem) => {
     setOpenedItem(item);
@@ -333,6 +404,14 @@ export default function PartyHostAgreementPage() {
 
     try {
       setIsSubmitting(true);
+
+      const hasAccount =
+        hasPrimarySettlementAccount || (await fetchHasPrimarySettlementAccount());
+
+      if (hasAccount) {
+        navigate(`/party/create/${trimmedProductId}/host/create-preview`);
+        return;
+      }
 
       const response = await api.get<AuthorizeUrlResponse>(
         "/api/v1/bank/authorize-url",
@@ -379,8 +458,8 @@ export default function PartyHostAgreementPage() {
               <p className="mt-3 text-[15px] leading-7 text-slate-500">
                 각 항목을 눌러 내용을 확인한 뒤 동의해 주세요.
                 <br className="hidden sm:block" />
-                모든 필수 항목에 동의하면 다음 단계에서 본인인증을 진행할 수
-                있습니다.
+                모든 필수 항목에 동의하면 파티 생성 전 필요한 정보를
+                확인합니다.
               </p>
             </div>
 
@@ -433,9 +512,11 @@ export default function PartyHostAgreementPage() {
                     안내
                   </p>
                   <p className="mt-2 text-[14px] leading-6 text-slate-500 sm:text-[15px]">
-                    계좌인증 버튼을 누르면 인증 URL을 받은 뒤 오픈뱅킹 인증
-                    페이지로 이동합니다. 인증과 계좌등록이 끝나면 다시 서비스로
-                    돌아와 다음 단계를 이어서 진행합니다.
+                    {isCheckingSettlementAccount
+                      ? "등록된 정산계좌가 있는지 확인하고 있습니다."
+                      : hasPrimarySettlementAccount
+                        ? "이미 등록된 대표 정산계좌가 있어 계좌 인증 단계를 건너뛰고 파티 생성 정보를 확인합니다."
+                        : "계좌 인증을 진행하면 오픈뱅킹 인증 페이지로 이동합니다. 인증과 계좌등록이 끝나면 다시 서비스로 돌아와 다음 단계를 이어서 진행합니다."}
                   </p>
                 </div>
               </div>
@@ -463,7 +544,11 @@ export default function PartyHostAgreementPage() {
                       : "cursor-not-allowed bg-slate-200 text-slate-400",
                   ].join(" ")}
                 >
-                  {isSubmitting ? "이동 중..." : "계좌인증 단계로 이동"}
+                  {isSubmitting
+                    ? "이동 중..."
+                    : hasPrimarySettlementAccount
+                      ? "파티 생성 정보 확인"
+                      : "계좌 인증 단계로 이동"}
                   <Icon icon="solar:arrow-right-linear" className="h-4 w-4" />
                 </button>
               </div>

@@ -4,6 +4,7 @@ import HomePage from "@/pages/home/HomePage";
 import NotFoundPage from "@/pages/not-found/NotFoundPage";
 import MainLayout from "@/layouts/MainLayout";
 import PartyListPage from "@/pages/party/vacancy/PartyListPage";
+import PartyVacancyDetailPage from "@/pages/party/vacancy/PartyVacancyDetailPage";
 import PartyCreatePage from "@/pages/party/common/PartyCreatePage";
 import PartyRoleSelectPage from "@/pages/party/common/PartyRoleSelectPage";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -24,6 +25,7 @@ import NotificationPage from "@/pages/notification/NotificationPage";
 import ProfileManagePage from "@/pages/my/account/ProfileManagePage";
 import PaymentMethodManagePage from "@/pages/my/payment/PaymentMethodManagePage";
 import MoneyManagePage from "@/pages/my/payment/MoneyManagePage";
+import MyPageAccountRegisterPage from "@/pages/my/payment/MyPageAccountRegisterPage";
 import PaymentHistoryPage from "@/pages/my/payment/PaymentHistoryPage";
 import PartyHistoryPage from "@/pages/my/usage/PartyHistoryPage";
 import SettingsPage from "@/pages/my/account/SettingsPage";
@@ -113,6 +115,10 @@ const router = createBrowserRouter([
           { path: "/event", element: <EventPage /> },
           { path: "/support", element: <SupportPage /> },
           { path: "/parties", element: <PartyListPage /> },
+          {
+            path: "/parties/:type/:partyId",
+            element: <PartyVacancyDetailPage />,
+          },
           { path: "/parties/:type", element: <PartyListPage /> },
           { path: "/myparty", element: <Myparty /> },
           { path: "/myparty/:partyId", element: <MyPartyDetailPage /> },
@@ -223,6 +229,10 @@ const router = createBrowserRouter([
             element: <MainLayout />,
             children: [
               // { path: "/notification", element: <NotificationPage /> },
+              {
+                path: "/mypage/account-register",
+                element: <MyPageAccountRegisterPage />,
+              },
               {
                 path: "/mypage",
                 element: <MyPage />,
