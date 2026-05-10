@@ -404,8 +404,10 @@ export default function PartyListPage() {
                       </p>
                     </div>
 
-                    <button
-                      type="button"
+                    <Link
+                      to={`/parties/${
+                        party.recruitRole === "HOST" ? "hosts" : "members"
+                      }/${party.id}`}
                       className={[
                         "inline-flex h-10 shrink-0 items-center justify-center rounded-2xl px-4 text-sm font-semibold text-white transition-all",
                         isMember
@@ -414,7 +416,7 @@ export default function PartyListPage() {
                       ].join(" ")}
                     >
                       {actionLabel}
-                    </button>
+                    </Link>
                   </div>
 
                   <div className="mt-4 grid grid-cols-3 gap-2">

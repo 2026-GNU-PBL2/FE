@@ -1,7 +1,9 @@
 import { Icon } from "@iconify/react";
+import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import { getApiErrorMessage } from "@/utils/api-error";
 
 type SettlementStatus = "ACCRUED" | string;
 type WithdrawStatus = "REQUESTED" | "COMPLETED" | "REJECTED" | string;
@@ -37,13 +39,22 @@ type WithdrawRequestItem = {
 
 type PrimaryBankAccountResponse = {
   id: number;
-  fintechUseNum: string;
-  bankName: string;
-  accountAlias: string;
-  accountNumMasked: string;
+  fintechUseNum: string | null;
+  bankName: string | null;
+  accountAlias: string | null;
+  accountNumMasked: string | null;
   accountType: string | null;
   isPrimary: boolean;
-  verificationStatus: string;
+  verificationStatus: string | null;
+};
+
+type AuthorizeUrlResponse = {
+  authorizeUrl?: string;
+  url?: string;
+  data?: {
+    authorizeUrl?: string;
+    url?: string;
+  };
 };
 
 type ApiEnvelope<T> = {
@@ -87,6 +98,10 @@ function unwrapResponse<T>(
   }
 
   return value as T;
+}
+
+function getAuthorizeUrl(value: AuthorizeUrlResponse | null) {
+  return value?.authorizeUrl ?? value?.url ?? value?.data?.authorizeUrl ?? value?.data?.url ?? "";
 }
 
 function unwrapList<T>(value: unknown): T[] {
@@ -253,6 +268,10 @@ export default function MoneyManagePage() {
   const [isSettlementLoading, setIsSettlementLoading] = useState(false);
   const [isWithdrawLoading, setIsWithdrawLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBankAuthLoading, setIsBankAuthLoading] = useState(false);
+  const [isSettlementReleaseLoading, setIsSettlementReleaseLoading] =
+    useState(false);
+  const [isReleaseConfirmOpen, setIsReleaseConfirmOpen] = useState(false);
 
   const numericWithdrawAmount = useMemo(() => {
     return Number(withdrawAmount.replaceAll(",", ""));
@@ -317,7 +336,11 @@ export default function MoneyManagePage() {
 
       const data = unwrapResponse<PrimaryBankAccountResponse>(response.data);
 
-      setPrimaryBankAccount(data ?? null);
+      setPrimaryBankAccount(
+        data?.accountType === "SETTLEMENT" && data.isPrimary === true
+          ? data
+          : null,
+      );
     } catch (error) {
       console.error(error);
       setPrimaryBankAccount(null);
@@ -401,6 +424,62 @@ export default function MoneyManagePage() {
     fetchSettlementHistory,
     fetchWithdrawRequests,
   ]);
+
+  const handleAuthorizeSettlementAccount = async () => {
+    if (isBankAuthLoading) return;
+
+    try {
+      setIsBankAuthLoading(true);
+
+      const response = await api.get<
+        AuthorizeUrlResponse | ApiEnvelope<AuthorizeUrlResponse>
+      >("/api/v1/bank/authorize-url/mypage");
+
+      const authorizeUrl = getAuthorizeUrl(
+        unwrapResponse<AuthorizeUrlResponse>(response.data),
+      );
+
+      if (!authorizeUrl) {
+        toast.error("계좌인증 URL을 가져오지 못했습니다.");
+        return;
+      }
+
+      window.location.href = authorizeUrl;
+    } catch (error) {
+      console.error(error);
+      toast.error(getApiErrorMessage(error, "계좌인증 URL을 가져오지 못했습니다."));
+    } finally {
+      setIsBankAuthLoading(false);
+    }
+  };
+
+  const handleReleaseSettlementAccount = async () => {
+    if (isSettlementReleaseLoading) return;
+
+    try {
+      setIsSettlementReleaseLoading(true);
+
+      await api.delete("/api/v1/bank/settlement");
+
+      toast.success("정산계좌가 해제되었습니다.");
+      setIsReleaseConfirmOpen(false);
+      setPrimaryBankAccount(null);
+      await fetchPrimaryBankAccount();
+    } catch (error) {
+      console.error(error);
+
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        toast.info("이미 활성 정산계좌가 없습니다.");
+        setIsReleaseConfirmOpen(false);
+        setPrimaryBankAccount(null);
+        return;
+      }
+
+      toast.error(getApiErrorMessage(error, "정산계좌 해제에 실패했습니다."));
+    } finally {
+      setIsSettlementReleaseLoading(false);
+    }
+  };
 
   const handleWithdrawAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -576,20 +655,46 @@ export default function MoneyManagePage() {
                 </div>
               </div>
 
-              {primaryBankAccount ? (
-                <span
-                  className={[
-                    "inline-flex w-fit shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ring-1",
-                    getVerificationStatusClassName(
+              <div className="flex shrink-0 flex-wrap gap-2">
+                {primaryBankAccount ? (
+                  <span
+                    className={[
+                      "inline-flex w-fit shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ring-1",
+                      getVerificationStatusClassName(
+                        primaryBankAccount.verificationStatus,
+                      ),
+                    ].join(" ")}
+                  >
+                    {getVerificationStatusLabel(
                       primaryBankAccount.verificationStatus,
-                    ),
-                  ].join(" ")}
+                    )}
+                  </span>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={handleAuthorizeSettlementAccount}
+                  disabled={isBankAuthLoading}
+                  className="inline-flex h-8 items-center justify-center rounded-xl bg-blue-900 px-3 text-xs font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
                 >
-                  {getVerificationStatusLabel(
-                    primaryBankAccount.verificationStatus,
-                  )}
-                </span>
-              ) : null}
+                  {isBankAuthLoading
+                    ? "인증 요청 중"
+                    : primaryBankAccount
+                      ? "계좌 변경"
+                      : "계좌 인증"}
+                </button>
+
+                {primaryBankAccount ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsReleaseConfirmOpen(true)}
+                    disabled={isSettlementReleaseLoading}
+                    className="inline-flex h-8 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                  >
+                    해제
+                  </button>
+                ) : null}
+              </div>
             </div>
           </div>
         </div>
@@ -704,6 +809,14 @@ export default function MoneyManagePage() {
           )}
         </div>
       </section>
+
+      {isReleaseConfirmOpen ? (
+        <SettlementReleaseConfirmModal
+          isSubmitting={isSettlementReleaseLoading}
+          onClose={() => setIsReleaseConfirmOpen(false)}
+          onConfirm={handleReleaseSettlementAccount}
+        />
+      ) : null}
     </div>
   );
 }
@@ -776,6 +889,75 @@ function NoticeRow({
           {value}
         </p>
       </div>
+    </div>
+  );
+}
+
+function SettlementReleaseConfirmModal({
+  isSubmitting,
+  onClose,
+  onConfirm,
+}: {
+  isSubmitting: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6 backdrop-blur-sm">
+      <section
+        className="w-full max-w-[420px] rounded-[28px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] sm:px-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settlement-release-title"
+      >
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-100">
+            <Icon icon="solar:banknote-bold" className="h-6 w-6" />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <h2
+              id="settlement-release-title"
+              className="text-lg font-semibold text-slate-950"
+            >
+              정산계좌를 해제할까요?
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              해제하면 환급 요청 전 정산계좌를 다시 인증하고 설정해야 합니다.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="flex h-16 items-center justify-center rounded-2xl bg-[#F8FAFC] text-base font-bold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+          >
+            취소
+          </button>
+
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isSubmitting}
+            className="flex h-16 items-center justify-center gap-2 rounded-2xl bg-rose-50 text-base font-bold text-rose-600 ring-1 ring-rose-100 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
+          >
+            <Icon
+              icon={
+                isSubmitting
+                  ? "solar:refresh-circle-bold"
+                  : "solar:trash-bin-trash-bold"
+              }
+              className={`h-5 w-5 ${isSubmitting ? "animate-spin" : ""}`}
+            />
+            <span className="whitespace-nowrap">
+              {isSubmitting ? "해제 중" : "해제하기"}
+            </span>
+          </button>
+        </div>
+      </section>
     </div>
   );
 }

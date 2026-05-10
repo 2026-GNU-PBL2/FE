@@ -359,8 +359,8 @@ function RecruitPartyCard({
             <p className="mt-1 text-sm text-slate-500">{party.host}</p>
           </div>
 
-          <button
-            type="button"
+          <Link
+            to={`/parties/${party.recruitRole === "HOST" ? "hosts" : "members"}/${party.id}`}
             className={[
               "inline-flex h-10 shrink-0 items-center justify-center rounded-2xl px-4 text-sm font-semibold text-white shadow-md transition",
               isMint
@@ -369,7 +369,7 @@ function RecruitPartyCard({
             ].join(" ")}
           >
             {actionLabel}
-          </button>
+          </Link>
         </div>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
@@ -561,8 +561,6 @@ export default function HomePage() {
         const memberData = unwrapResponse<PartyVacancyItem[]>(
           memberResponse.data,
         );
-        console.log(hostData);
-        console.log(memberData);
 
         const nextHostParties = Array.isArray(hostData)
           ? hostData

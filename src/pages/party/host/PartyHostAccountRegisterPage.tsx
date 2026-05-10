@@ -8,13 +8,17 @@ type SettlementAccountType = "SETTLEMENT" | "REFUND";
 
 type BankAccountResponse = {
   id: number;
-  fintechUseNum: string;
-  bankName: string;
-  accountAlias: string;
-  accountNumMasked: string;
+  fintechUseNum: string | null;
+  bankName: string | null;
+  accountAlias: string | null;
+  accountNumMasked: string | null;
   accountType: string | null;
   isPrimary: boolean;
-  verificationStatus: string;
+  verificationStatus: string | null;
+  bankCode?: string | null;
+  accountNumber?: string | null;
+  accountHolderName?: string | null;
+  accountHolderBirthDate?: string | null;
 };
 
 type SaveSettlementAccountRequest = {
@@ -97,6 +101,14 @@ function getAgreementPath(productId: string) {
   return `/party/create/${productId}/host/agreement`;
 }
 
+function getAccountLabel(account: BankAccountResponse) {
+  const bankName = account.bankName || "은행 정보 없음";
+  const masked = account.accountNumMasked || "계좌번호 미확인";
+  const alias = account.accountAlias ? ` · ${account.accountAlias}` : "";
+
+  return `${bankName} · ${masked}${alias}`;
+}
+
 export default function PartyHostAccountRegisterPage() {
   const navigate = useNavigate();
   const { productId = "" } = useParams();
@@ -108,11 +120,19 @@ export default function PartyHostAccountRegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isAccountsLoading, setIsAccountsLoading] = useState(false);
 
-  const [fintechUseNum, setFintechUseNum] = useState("");
+  const [accounts, setAccounts] = useState<BankAccountResponse[]>([]);
+  const [selectedAccountId, setSelectedAccountId] = useState("");
   const [bankCode, setBankCode] = useState("");
   const [accountHolderName, setAccountHolderName] = useState("");
   const [accountHolderBirthDate, setAccountHolderBirthDate] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
+
+  const selectedAccount = useMemo(() => {
+    return (
+      accounts.find((account) => String(account.id) === selectedAccountId) ??
+      null
+    );
+  }, [accounts, selectedAccountId]);
 
   const selectedBankName = useMemo(() => {
     return bankOptions.find((bank) => bank.code === bankCode)?.label ?? "";
@@ -120,7 +140,7 @@ export default function PartyHostAccountRegisterPage() {
 
   const isFormValid = useMemo(() => {
     return (
-      fintechUseNum.trim().length > 0 &&
+      Boolean(selectedAccount?.fintechUseNum?.trim()) &&
       bankCode.trim().length > 0 &&
       accountHolderName.trim().length > 0 &&
       normalizeNumber(accountHolderBirthDate).length === 8 &&
@@ -131,7 +151,7 @@ export default function PartyHostAccountRegisterPage() {
     accountHolderName,
     accountNumber,
     bankCode,
-    fintechUseNum,
+    selectedAccount,
   ]);
 
   useEffect(() => {
@@ -162,18 +182,34 @@ export default function PartyHostAccountRegisterPage() {
           BankAccountResponse[] | ApiEnvelope<BankAccountResponse[]>
         >("/api/v1/bank/accounts");
 
-        const accounts = unwrapResponse<BankAccountResponse[]>(response.data);
+        const payload = unwrapResponse<BankAccountResponse[]>(response.data);
+        const nextAccounts = Array.isArray(payload)
+          ? payload.filter((account) => Boolean(account.fintechUseNum?.trim()))
+          : [];
 
-        console.log("bank accounts response:", accounts);
+        setAccounts(nextAccounts);
 
-        const firstAccount = accounts?.[0];
+        const activeSettlementAccount = nextAccounts.find(
+          (account) =>
+            account.accountType === "SETTLEMENT" && account.isPrimary === true,
+        );
+        const firstSelectableAccount =
+          activeSettlementAccount ?? nextAccounts[0] ?? null;
 
-        if (!firstAccount?.fintechUseNum) {
+        if (!firstSelectableAccount?.fintechUseNum) {
           toast.error("연결된 계좌 정보를 찾을 수 없습니다.");
           return;
         }
 
-        setFintechUseNum(firstAccount.fintechUseNum);
+        setSelectedAccountId(String(firstSelectableAccount.id));
+        setBankCode(firstSelectableAccount.bankCode ?? "");
+        setAccountHolderName(firstSelectableAccount.accountHolderName ?? "");
+        setAccountHolderBirthDate(
+          formatBirthDate(firstSelectableAccount.accountHolderBirthDate ?? ""),
+        );
+        setAccountNumber(
+          normalizeNumber(firstSelectableAccount.accountNumber ?? ""),
+        );
       } catch (error) {
         console.error("bank accounts error:", error);
         toast.error("연결 계좌 정보를 불러오지 못했습니다.");
@@ -184,6 +220,20 @@ export default function PartyHostAccountRegisterPage() {
 
     fetchBankAccounts();
   }, []);
+
+  const handleSelectedAccountChange = (accountId: string) => {
+    setSelectedAccountId(accountId);
+
+    const account = accounts.find((item) => String(item.id) === accountId);
+    if (!account) return;
+
+    setBankCode(account.bankCode ?? "");
+    setAccountHolderName(account.accountHolderName ?? "");
+    setAccountHolderBirthDate(
+      formatBirthDate(account.accountHolderBirthDate ?? ""),
+    );
+    setAccountNumber(normalizeNumber(account.accountNumber ?? ""));
+  };
 
   const handleSubmit = async () => {
     if (!productId) {
@@ -197,7 +247,7 @@ export default function PartyHostAccountRegisterPage() {
     }
 
     const requestBody: SaveSettlementAccountRequest = {
-      fintechUseNum: fintechUseNum.trim(),
+      fintechUseNum: selectedAccount?.fintechUseNum?.trim() ?? "",
       bankCode,
       accountNumber: normalizeNumber(accountNumber),
       accountHolderName: accountHolderName.trim(),
@@ -231,15 +281,6 @@ export default function PartyHostAccountRegisterPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleGoBack = () => {
-    if (!productId) {
-      navigate("/parties");
-      return;
-    }
-
-    navigate(getAgreementPath(productId));
   };
 
   return (
@@ -294,6 +335,31 @@ export default function PartyHostAccountRegisterPage() {
             <div className="mt-5 space-y-5">
               <div>
                 <label className="mb-2 block text-[14px] font-semibold text-slate-900">
+                  연결 계좌
+                </label>
+                <select
+                  value={selectedAccountId}
+                  onChange={(event) =>
+                    handleSelectedAccountChange(event.target.value)
+                  }
+                  disabled={isAccountsLoading || accounts.length === 0}
+                  className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-[15px] text-slate-900 outline-none transition focus:border-[#1E3A8A] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                >
+                  <option value="">
+                    {isAccountsLoading
+                      ? "연결 계좌를 불러오는 중입니다"
+                      : "연결 계좌를 선택해주세요"}
+                  </option>
+                  {accounts.map((account) => (
+                    <option key={account.id} value={account.id}>
+                      {getAccountLabel(account)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-[14px] font-semibold text-slate-900">
                   핀테크 이용번호
                 </label>
                 <input
@@ -301,10 +367,10 @@ export default function PartyHostAccountRegisterPage() {
                   value={
                     isAccountsLoading
                       ? "연결 계좌 정보를 불러오는 중입니다..."
-                      : fintechUseNum
+                      : (selectedAccount?.fintechUseNum ?? "")
                   }
                   readOnly
-                  placeholder="오픈뱅킹 fintechUseNum"
+                  placeholder="연결 계좌를 선택해주세요"
                   className="h-14 w-full cursor-not-allowed rounded-2xl border border-slate-200 bg-slate-50 px-4 text-[15px] text-slate-500 outline-none placeholder:text-slate-400"
                 />
               </div>
@@ -412,14 +478,6 @@ export default function PartyHostAccountRegisterPage() {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={handleGoBack}
-                  className="inline-flex h-14 items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 text-[15px] font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  이전으로
-                </button>
-
                 <button
                   type="button"
                   onClick={handleSubmit}

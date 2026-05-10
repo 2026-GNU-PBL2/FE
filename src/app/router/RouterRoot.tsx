@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import axios from "axios";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import ScrollToTop from "./ScrollToTop";
 import { API_BASE_URL } from "@/api/axios";
 import {
@@ -32,6 +33,7 @@ function normalizeUser(data: UserMeResponse): AuthUser {
 
 export default function RouterRoot() {
   const location = useLocation();
+  const navigate = useNavigate();
   const accessToken = useAuthStore((state) => state.accessToken);
   const authStatus = useAuthStore((state) => state.authStatus);
   const setAuthChecking = useAuthStore((state) => state.setAuthChecking);
@@ -39,6 +41,28 @@ export default function RouterRoot() {
   const clearAuth = useAuthStore((state) => state.clearAuth);
 
   const isMyPageDashboardRoute = location.pathname.startsWith("/mypage");
+
+  useEffect(() => {
+    if (location.pathname !== "/" || !location.search) return;
+
+    const searchParams = new URLSearchParams(location.search);
+    const bankAuthSuccess = searchParams.get("bankAuthSuccess");
+    const bankAuthMessage = searchParams.get("message");
+
+    if (!bankAuthSuccess) return;
+
+    if (bankAuthSuccess === "false") {
+      toast.error(bankAuthMessage || "계좌 인증에 실패했습니다.");
+    } else if (bankAuthSuccess === "true") {
+      toast.success(bankAuthMessage || "계좌 인증이 완료되었습니다.");
+    }
+
+    searchParams.delete("bankAuthSuccess");
+    searchParams.delete("message");
+
+    const nextSearch = searchParams.toString();
+    navigate(nextSearch ? `/?${nextSearch}` : "/", { replace: true });
+  }, [location.pathname, location.search, navigate]);
 
   useEffect(() => {
     if (!accessToken) {
