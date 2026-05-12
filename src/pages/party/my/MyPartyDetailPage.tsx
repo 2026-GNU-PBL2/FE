@@ -12,6 +12,7 @@ type ProvisionType =
   | string;
 type ProvisionStatus = "WAITING" | "ACTIVE" | "RESET_REQUIRED" | string;
 type PartyRole = "HOST" | "MEMBER" | string;
+type PartyHistoryStatus = "USING" | "SCHEDULED" | "ENDED" | string;
 type MemberStatus =
   | "WAITING"
   | "ACTIVE"
@@ -65,15 +66,22 @@ type MyPartyDetailLocationState = {
   productId?: string;
   productName?: string;
   role?: PartyRole;
+  status?: PartyHistoryStatus;
+  startAt?: string | null;
+  endAt?: string | null;
   operationType?: ProvisionType | null;
   provisionType?: ProvisionType | null;
 };
 
 type PartyHistoryItem = {
   partyId: number;
+  displayPartyId?: string;
   productId: string;
   productName: string;
   role: PartyRole;
+  status?: PartyHistoryStatus;
+  startAt?: string | null;
+  endAt?: string | null;
 };
 
 type PartyJoinRequestItem = {
@@ -175,6 +183,20 @@ function formatDateTime(value: string | null) {
   }).format(date);
 }
 
+function formatDate(value?: string | null) {
+  if (!value) return "다음 결제일 확인 중";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "다음 결제일 확인 중";
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
 export default function MyPartyDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -194,12 +216,16 @@ export default function MyPartyDetailPage() {
   );
   const isHost = partyMeta?.role === "HOST";
   const isMember = partyMeta?.role === "MEMBER";
+  const isScheduledParty = partyMeta?.status === "SCHEDULED";
   const partyOperationType =
     partyMeta?.operationType ?? partyMeta?.provisionType;
   const isInviteProduct = isInviteProvisionType(partyOperationType);
   const isRecruitFull = recruitStatus?.recruitStatus === "FULL";
   const canSetupProvision =
-    Boolean(partyId && partyMeta?.productId) && isHost && isRecruitFull;
+    Boolean(partyId && partyMeta?.productId) &&
+    isHost &&
+    isRecruitFull &&
+    !isScheduledParty;
 
   const waitingTitle = isMember
     ? "이용 안내를 준비 중입니다"
@@ -264,6 +290,12 @@ export default function MyPartyDetailPage() {
       }
 
       if (!partyMeta?.role) {
+        setIsLoading(false);
+        return;
+      }
+
+      if (isScheduledParty) {
+        setIsWaitingRecruit(true);
         setIsLoading(false);
         return;
       }
@@ -335,12 +367,38 @@ export default function MyPartyDetailPage() {
     };
 
     fetchProvision();
-  }, [isHost, partyId, partyMeta?.role]);
+  }, [isHost, isScheduledParty, partyId, partyMeta?.role]);
 
   useEffect(() => {
-    if (!partyId || partyMeta?.productId) return;
+    if (!partyId) return;
 
     const fetchPartyMeta = async () => {
+      try {
+        const response = await api.get("/api/v1/me/party-history");
+        const data = unwrapResponse<PartyHistoryItem[]>(response.data) ?? [];
+        console.log(data);
+        const currentParty = data.find(
+          (party) => String(party.partyId) === partyId,
+        );
+
+        if (currentParty) {
+          setPartyMeta((current) => ({
+            ...current,
+            productId: currentParty.productId,
+            productName: current?.productName ?? currentParty.productName,
+            role: currentParty.role,
+            status: currentParty.status,
+            startAt: currentParty.startAt,
+            endAt: currentParty.endAt,
+          }));
+          return;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+
+      if (partyMeta?.productId) return;
+
       try {
         const joinResponse = await api.get("/api/v1/party-join/me");
         const joinData =
@@ -352,34 +410,15 @@ export default function MyPartyDetailPage() {
           (request) => String(request.partyId) === partyId,
         );
 
-        if (currentJoinRequest) {
-          setPartyMeta({
-            productId: currentJoinRequest.productId,
-            productName: currentJoinRequest.productName,
-            role: "MEMBER",
-          });
-          return;
-        }
-      } catch (joinError) {
-        console.error(joinError);
-      }
-
-      try {
-        const response = await api.get("/api/v1/me/party-history");
-        const data = unwrapResponse<PartyHistoryItem[]>(response.data) ?? [];
-        const currentParty = data.find(
-          (party) => String(party.partyId) === partyId,
-        );
-
-        if (!currentParty) return;
+        if (!currentJoinRequest) return;
 
         setPartyMeta({
-          productId: currentParty.productId,
-          productName: currentParty.productName,
-          role: currentParty.role,
+          productId: currentJoinRequest.productId,
+          productName: currentJoinRequest.productName,
+          role: "MEMBER",
         });
-      } catch (error) {
-        console.error(error);
+      } catch (joinError) {
+        console.error(joinError);
       }
     };
 
@@ -458,9 +497,9 @@ export default function MyPartyDetailPage() {
     }
 
     try {
-      const response = await api.get<ProductResponse | ApiEnvelope<ProductResponse>>(
-        `/api/v1/products/${partyMeta.productId}`,
-      );
+      const response = await api.get<
+        ProductResponse | ApiEnvelope<ProductResponse>
+      >(`/api/v1/products/${partyMeta.productId}`);
       const productData = unwrapResponse<ProductResponse>(response.data);
 
       if (productData?.operationType === "INVITE_CODE") {
@@ -514,6 +553,59 @@ export default function MyPartyDetailPage() {
               파티 이용 현황을 불러오는 중입니다
             </p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isScheduledParty) {
+    return (
+      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
+        <div className="mx-auto w-full max-w-3xl">
+          <section className="rounded-3xl border border-amber-100 bg-white px-6 py-12 text-center shadow-sm sm:px-10">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-600">
+              <Icon icon="solar:clock-circle-bold" className="h-9 w-9" />
+            </div>
+
+            <h1 className="mt-6 text-2xl font-extrabold text-slate-950">
+              다음 결제일부터 이용 예정입니다
+            </h1>
+
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
+              결원 파티 참여가 완료되었습니다. 현재 회차가 끝난 뒤 다음
+              결제일부터 파티 이용이 시작됩니다.
+            </p>
+
+            <div className="mx-auto mt-7 grid max-w-lg gap-3 text-left sm:grid-cols-2">
+              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200">
+                <p className="text-xs font-bold text-slate-400">상품</p>
+                <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
+                  {partyMeta?.productName ?? "상품 정보 확인 중"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-amber-50 px-4 py-4 ring-1 ring-amber-100">
+                <p className="text-xs font-bold text-amber-600">시작 예정일</p>
+                <p className="mt-1 text-sm font-extrabold text-amber-700">
+                  {formatDate(partyMeta?.startAt)}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200 sm:col-span-2">
+                <p className="text-xs font-bold text-slate-400">역할</p>
+                <p className="mt-1 text-sm font-extrabold text-slate-900">
+                  {isHost ? "파티장" : "파티원"}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate("/myparty")}
+              className="mt-8 rounded-2xl bg-blue-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-950"
+            >
+              나의 파티 목록으로 이동
+            </button>
+          </section>
         </div>
       </div>
     );

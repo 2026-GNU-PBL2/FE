@@ -66,6 +66,85 @@ function unwrapResponse<T>(
 const INVITE_CODE_PROVISION_GUIDE =
   "파티장이 이용 정보를 등록하면 초대 코드형 이용 안내를 확인한 뒤 이용 확인을 완료해주세요.";
 const INVITE_CODE_PLACEHOLDER_VALUE = "https://submate.example/invite-code";
+
+type OttInviteLink = {
+  serviceNames: string[];
+  title: string;
+  description: string;
+  url: string;
+  buttonLabel: string;
+  note?: string;
+};
+
+const OTT_INVITE_LINKS: OttInviteLink[] = [
+  {
+    serviceNames: ["넷플릭스", "netflix"],
+    title: "넷플릭스 파티원 초대",
+    description:
+      "넷플릭스 계정으로 로그인해 파티원 이메일을 입력하고 초대 메일을 보내세요.",
+    url: "https://www.netflix.com/accountowner/addextramember",
+    buttonLabel: "초대하러 가기",
+  },
+  {
+    serviceNames: ["디즈니플러스", "디즈니+", "disney", "disneyplus"],
+    title: "디즈니플러스 파티원 초대",
+    description:
+      "디즈니플러스 계정으로 로그인해 파티원 이메일을 입력하고 초대 메일을 보내세요.",
+    url: "https://www.disneyplus.com/account",
+    buttonLabel: "초대하러 가기",
+  },
+  {
+    serviceNames: ["유튜브", "youtube"],
+    title: "유튜브 가족 멤버 초대",
+    description:
+      "유튜브 Premium 가족 공유 설정에서 파티원 계정을 초대하세요.",
+    url: "https://www.youtube.com/paid_memberships",
+    buttonLabel: "초대하러 가기",
+    note: "가족 요금제는 동일 거주지 조건이 적용될 수 있습니다.",
+  },
+  {
+    serviceNames: ["애플티비", "애플tv", "apple", "appletv"],
+    title: "Apple TV+ 가족 공유 설정",
+    description:
+      "Apple 가족 공유에서 파티원 계정을 초대한 뒤 Apple TV+ 구독을 공유하세요.",
+    url: "https://support.apple.com/108380",
+    buttonLabel: "설정하러 가기",
+    note: "Apple TV 앱 안에서는 가족 그룹을 직접 만들 수 없습니다.",
+  },
+  {
+    serviceNames: ["티빙", "tving"],
+    title: "티빙 파티원 초대",
+    description:
+      "티빙 계정으로 로그인해 파티원 이메일을 입력하고 초대 메일을 보내세요.",
+    url: "https://www.tving.com",
+    buttonLabel: "초대하러 가기",
+  },
+  {
+    serviceNames: ["웨이브", "wavve", "wave"],
+    title: "웨이브 파티원 초대",
+    description:
+      "웨이브 계정으로 로그인해 파티원 이메일을 입력하고 초대 메일을 보내세요.",
+    url: "https://www.wavve.com",
+    buttonLabel: "초대하러 가기",
+  },
+  {
+    serviceNames: ["왓챠", "watcha"],
+    title: "왓챠 파티원 초대",
+    description:
+      "왓챠 계정으로 로그인해 파티원 이메일을 입력하고 초대 메일을 보내세요.",
+    url: "https://watcha.com",
+    buttonLabel: "초대하러 가기",
+  },
+  {
+    serviceNames: ["라프텔", "laftel"],
+    title: "라프텔 파티원 초대",
+    description:
+      "라프텔 계정으로 로그인해 파티원 이메일을 입력하고 초대 메일을 보내세요.",
+    url: "https://laftel.net",
+    buttonLabel: "초대하러 가기",
+  },
+];
+
 const inviteSteps = [
   {
     icon: "solar:cart-large-2-bold",
@@ -108,6 +187,26 @@ function getStatusStyle(status: MemberStatus) {
   }
 
   return "bg-slate-100 text-slate-600 ring-slate-200";
+}
+
+function normalizeServiceName(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/\s/g, "")
+    .replace(/[+＋]/g, "plus")
+    .replace(/[^a-z0-9가-힣]/g, "");
+}
+
+function getOttInviteLink(serviceName: string) {
+  const normalizedServiceName = normalizeServiceName(serviceName);
+
+  return OTT_INVITE_LINKS.find((link) =>
+    link.serviceNames.some((serviceNameCandidate) =>
+      normalizedServiceName.includes(
+        normalizeServiceName(serviceNameCandidate),
+      ),
+    ),
+  );
 }
 
 export default function PartyHostInviteSetupPage() {
@@ -231,6 +330,8 @@ export default function PartyHostInviteSetupPage() {
 
   if (!product) return null;
 
+  const ottInviteLink = getOttInviteLink(product.serviceName);
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-[760px]">
@@ -313,6 +414,47 @@ export default function PartyHostInviteSetupPage() {
                 </div>
               </div>
             </div>
+
+            {ottInviteLink && (
+              <section className="mt-6 rounded-[28px] border border-blue-100 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)]">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex min-w-0 gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-900 ring-1 ring-blue-100">
+                      <Icon icon="solar:cart-large-2-bold" className="h-6 w-6" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-sky-600">
+                        OTT 바로가기
+                      </p>
+                      <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+                        {ottInviteLink.title}
+                      </h2>
+                      <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                        {ottInviteLink.description}
+                      </p>
+                      {ottInviteLink.note && (
+                        <p className="mt-2 text-xs font-semibold leading-5 text-amber-700">
+                          {ottInviteLink.note}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <a
+                    href={ottInviteLink.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-blue-900 px-4 text-sm font-bold text-white transition hover:bg-blue-950"
+                  >
+                    {ottInviteLink.buttonLabel}
+                    <Icon
+                      icon="solar:arrow-right-up-linear"
+                      className="h-5 w-5"
+                    />
+                  </a>
+                </div>
+              </section>
+            )}
 
             <section className="mt-6 rounded-[28px] border border-sky-100 bg-sky-50 px-5 py-5">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-sky-600 ring-1 ring-sky-100">

@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { api } from "@/api/axios";
 
 type PartyRole = "HOST" | "MEMBER" | string;
-type PartyHistoryStatus = "USING" | "ENDED" | string;
+type PartyHistoryStatus = "USING" | "SCHEDULED" | "ENDED" | string;
 
 type PartyHistoryItem = {
   partyId: number;
@@ -53,11 +53,16 @@ function formatDate(value: string | null) {
   });
 }
 
-function getDateRange(startAt: string | null, endAt: string | null) {
+function getDateRange(
+  startAt: string | null,
+  endAt: string | null,
+  status: PartyHistoryStatus,
+) {
   const start = formatDate(startAt);
   const end = formatDate(endAt);
 
   if (!start) return "이용 기간 정보 없음";
+  if (status === "SCHEDULED") return `${start}부터 이용 예정`;
   if (!end) return `${start} ~ 이용 중`;
 
   return `${start} ~ ${end}`;
@@ -71,6 +76,7 @@ function getRoleLabel(role: PartyRole) {
 
 function getStatusLabel(status: PartyHistoryStatus) {
   if (status === "USING") return "이용 중";
+  if (status === "SCHEDULED") return "이용 예정";
   if (status === "ENDED") return "종료";
   return status;
 }
@@ -88,6 +94,10 @@ function getStatusClassName(status: PartyHistoryStatus) {
     return "bg-[#2DD4BF]/10 text-[#0F766E] ring-[#2DD4BF]/20";
   }
 
+  if (status === "SCHEDULED") {
+    return "bg-amber-50 text-amber-700 ring-amber-100";
+  }
+
   return "bg-slate-100 text-slate-600 ring-slate-200";
 }
 
@@ -100,7 +110,6 @@ export default function PartyHistoryPage() {
       try {
         const response = await api.get("/api/v1/me/party-history");
         const data = unwrapResponse<PartyHistoryItem[]>(response.data);
-        console.log(data);
         setHistories(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error(error);
@@ -118,6 +127,8 @@ export default function PartyHistoryPage() {
     return [...histories].sort((a, b) => {
       if (a.status === "USING" && b.status !== "USING") return -1;
       if (a.status !== "USING" && b.status === "USING") return 1;
+      if (a.status === "SCHEDULED" && b.status !== "SCHEDULED") return -1;
+      if (a.status !== "SCHEDULED" && b.status === "SCHEDULED") return 1;
 
       const aTime = a.startAt ? new Date(a.startAt).getTime() : 0;
       const bTime = b.startAt ? new Date(b.startAt).getTime() : 0;
@@ -215,7 +226,7 @@ export default function PartyHistoryPage() {
                       className="h-4 w-4 shrink-0 text-[#2DD4BF]"
                     />
                     <span className="truncate">
-                      {getDateRange(item.startAt, item.endAt)}
+                      {getDateRange(item.startAt, item.endAt, item.status)}
                     </span>
                   </div>
                 </div>

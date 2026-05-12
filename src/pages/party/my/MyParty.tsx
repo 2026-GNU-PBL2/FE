@@ -7,7 +7,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { getAdultCheckKey } from "./provision/shared/provisionStorage";
 
 type PartyRole = "HOST" | "MEMBER" | string;
-type PartyHistoryStatus = "USING" | "ENDED" | string;
+type PartyHistoryStatus = "USING" | "SCHEDULED" | "ENDED" | string;
 
 type PartyHistoryItem = {
   partyId: number;
@@ -86,6 +86,7 @@ function getRoleLabel(role: PartyRole) {
 
 function getStatusLabel(status: PartyHistoryStatus) {
   if (status === "USING") return "이용 중";
+  if (status === "SCHEDULED") return "이용 예정";
   if (status === "ENDED") return "종료";
   return status;
 }
@@ -97,6 +98,10 @@ function getStatusStyle(status: PartyHistoryStatus) {
 
   if (status === "ENDED") {
     return "bg-slate-100 text-slate-500 ring-slate-200";
+  }
+
+  if (status === "SCHEDULED") {
+    return "bg-amber-50 text-amber-700 ring-amber-100";
   }
 
   return "bg-[#38BDF8]/10 text-[#0369A1] ring-[#38BDF8]/20";
@@ -163,6 +168,12 @@ function formatUsageDayCount(startDate?: string | null) {
   return `${Math.max(1, diffDays + 1)}일째 이용 중`;
 }
 
+function formatScheduledStartText(startDate?: string | null) {
+  const formattedDate = formatDate(startDate ?? null);
+  if (formattedDate === "-") return "다음 결제일부터 이용 예정";
+  return `${formattedDate}부터 이용 예정`;
+}
+
 function formatPrice(value?: number | null) {
   if (typeof value !== "number") return "-";
   return `${value.toLocaleString("ko-KR")}원`;
@@ -203,6 +214,10 @@ export default function MyParty() {
 
   const usingParties = useMemo(() => {
     return parties.filter((party) => party.status === "USING");
+  }, [parties]);
+
+  const scheduledParties = useMemo(() => {
+    return parties.filter((party) => party.status === "SCHEDULED");
   }, [parties]);
 
   const endedParties = useMemo(() => {
@@ -283,7 +298,15 @@ export default function MyParty() {
       productId: party.productId,
       productName: party.productName,
       role: party.role,
+      status: party.status,
+      startAt: party.startAt,
+      endAt: party.endAt,
     };
+
+    if (party.status === "SCHEDULED") {
+      navigate(`/myparty/${party.partyId}`, { state: detailState });
+      return;
+    }
 
     if (party.role !== "HOST") {
       try {
@@ -444,16 +467,27 @@ export default function MyParty() {
 
                 <p className="mt-3 max-w-[520px] text-sm leading-6 text-slate-500">
                   이용 중인 공동구독 파티와 종료된 이용 내역을 확인할 수
-                  있습니다.
+                  있습니다. 다음 결제일부터 시작되는 파티는 이용 예정으로
+                  표시됩니다.
                 </p>
               </div>
             </div>
 
-            <div className="relative mt-7 grid grid-cols-2 gap-3">
+            <div className="relative mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="rounded-3xl bg-[#F8FAFC] px-5 py-4 ring-1 ring-slate-200">
                 <p className="text-xs font-bold text-slate-400">이용 중</p>
                 <p className="mt-1 text-2xl font-extrabold text-[#1E3A8A]">
                   {usingParties.length}
+                  <span className="ml-1 text-sm font-bold text-slate-400">
+                    개
+                  </span>
+                </p>
+              </div>
+
+              <div className="rounded-3xl bg-[#F8FAFC] px-5 py-4 ring-1 ring-slate-200">
+                <p className="text-xs font-bold text-slate-400">이용 예정</p>
+                <p className="mt-1 text-2xl font-extrabold text-amber-600">
+                  {scheduledParties.length}
                   <span className="ml-1 text-sm font-bold text-slate-400">
                     개
                   </span>
@@ -554,6 +588,30 @@ export default function MyParty() {
             )}
           </div>
         </section>
+
+        {!isLoading && scheduledParties.length > 0 && (
+          <section className="mt-8">
+            <div>
+              <p className="text-sm font-bold text-amber-600">이용 예정</p>
+              <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+                다음 결제일부터 참여할 파티
+              </h2>
+            </div>
+
+            <div className="mt-4 overflow-hidden rounded-[28px] border border-amber-100 bg-white shadow-[0_20px_70px_-55px_rgba(15,23,42,0.35)]">
+              <div className="divide-y divide-slate-100">
+                {scheduledParties.map((party) => (
+                  <PartyListItem
+                    key={party.partyId}
+                    party={party}
+                    usagePeriod={usagePeriods[party.partyId]}
+                    onClick={() => handleGoDetail(party)}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {!isLoading && endedParties.length > 0 && (
           <section className="mt-8">
@@ -873,6 +931,12 @@ function PartyListItem({
         {party.status === "USING" && usagePeriod && (
           <p className="mt-1 text-xs font-bold text-[#0F766E]">
             {formatUsageDayCount(usagePeriod.currentStartDate)}
+          </p>
+        )}
+
+        {party.status === "SCHEDULED" && (
+          <p className="mt-1 text-xs font-bold text-amber-600">
+            {formatScheduledStartText(party.startAt)}
           </p>
         )}
       </div>

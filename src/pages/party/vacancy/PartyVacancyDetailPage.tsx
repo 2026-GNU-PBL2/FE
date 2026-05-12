@@ -213,6 +213,9 @@ export default function PartyVacancyDetailPage() {
           productId: payload?.productId ?? detail.productId,
           productName: payload?.productName ?? detail.productName,
           role: isHostRecruit ? "HOST" : "MEMBER",
+          status: "SCHEDULED",
+          startAt: detail.nextPaymentDate,
+          endAt: null,
           operationType: detail.operationType,
         },
       });
