@@ -100,10 +100,6 @@ function getProvisionTypeLabel(type: ProvisionType) {
   return type;
 }
 
-function isInviteCodeProvision(type: ProvisionType) {
-  return type === "INVITE_CODE" || type === "INVITE_LINK";
-}
-
 function getStatusStyle(status: string) {
   if (status === "ACTIVE") {
     return "bg-teal-50 text-teal-700 ring-teal-100";
@@ -334,8 +330,6 @@ export default function PartyProvisionDashboardPage() {
   }
 
   const provisionTone = getStatusTone(provision.provisionStatus);
-  const showInviteGuideButton = isInviteCodeProvision(provision.provisionType);
-
   return (
     <div className="min-h-screen bg-[#F8FAFC] px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-[760px]">
@@ -438,34 +432,6 @@ export default function PartyProvisionDashboardPage() {
           </div>
 
         </section>
-
-        {showInviteGuideButton && (
-          <section className="mt-5 rounded-[28px] border border-sky-100 bg-sky-50 px-5 py-5 sm:px-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-sky-600">INVITE</p>
-                <h2 className="mt-1 text-lg font-extrabold text-slate-950">
-                  파티원 초대 방법
-                </h2>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
-                  OTT 사이트의 추가 회원 초대 화면에 파티원 이메일을
-                  입력해주세요.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(`/myparty/${partyId}/provision/invite-guide`)
-                }
-                className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-blue-900 px-5 text-sm font-bold text-white transition hover:bg-blue-950"
-              >
-                <Icon icon="solar:map-arrow-right-bold" className="h-5 w-5" />
-                초대 방법 보기
-              </button>
-            </div>
-          </section>
-        )}
 
         <section className="mt-7">
           <div className="flex items-end justify-between gap-4">

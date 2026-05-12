@@ -68,6 +68,7 @@ import PartyHostSettingsPage from "@/pages/party/my/provision/host/PartyHostSett
 import PartyMemberProvisionConfirmPage from "@/pages/party/my/provision/member/PartyMemberProvisionConfirmPage";
 import PartyMemberProvisionDashboardPage from "@/pages/party/my/provision/member/PartyMemberProvisionDashboardPage";
 import PartyMemberSettingsPage from "@/pages/party/my/provision/member/PartyMemberSettingsPage";
+import PartyMemberInviteActivationPage from "@/pages/party/my/provision/member/PartyMemberInviteActivationPage";
 
 const router = createBrowserRouter([
   {
@@ -149,6 +150,10 @@ const router = createBrowserRouter([
           {
             path: "/myparty/:partyId/provision/confirm",
             element: <PartyMemberProvisionConfirmPage />,
+          },
+          {
+            path: "/myparty/:partyId/provision/invite-activation",
+            element: <PartyMemberInviteActivationPage />,
           },
           {
             path: "/myparty/:partyId/provision/member-dashboard",

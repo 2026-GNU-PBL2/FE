@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import { getApiErrorMessage } from "@/utils/api-error";
 
 type PartyVacancyDetail = {
   partyId: number;
@@ -20,6 +21,14 @@ type PartyVacancyDetail = {
   operationStatus: string;
   vacancyType: string;
   joinAvailable: boolean;
+};
+
+type PartyVacancyJoinResponse = {
+  partyId: number;
+  productId: string;
+  productName: string;
+  joinedAt: string;
+  message: string;
 };
 
 type ApiEnvelope<T> = {
@@ -97,6 +106,7 @@ export default function PartyVacancyDetailPage() {
   }>();
   const [detail, setDetail] = useState<PartyVacancyDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isJoining, setIsJoining] = useState(false);
 
   const isHostRecruit = type === "hosts";
   const isMemberRecruit = type === "members";
@@ -156,7 +166,6 @@ export default function PartyVacancyDetailPage() {
         >(`/api/v1/party-vacancy/${type}/${partyId}`);
 
         const payload = unwrapResponse<PartyVacancyDetail>(response.data);
-        console.log(payload);
         if (!mounted) return;
 
         if (!payload) {
@@ -183,6 +192,39 @@ export default function PartyVacancyDetailPage() {
       mounted = false;
     };
   }, [isHostRecruit, isMemberRecruit, navigate, partyId, type]);
+
+  const handleJoinVacancyParty = async () => {
+    if (!partyId || !detail?.joinAvailable || isJoining) return;
+
+    try {
+      setIsJoining(true);
+
+      const response = await api.post<
+        PartyVacancyJoinResponse | ApiEnvelope<PartyVacancyJoinResponse>
+      >(`/api/v1/party-vacancy/${partyId}/join`);
+
+      const payload = unwrapResponse<PartyVacancyJoinResponse>(response.data);
+      const nextPartyId = payload?.partyId ?? detail.partyId;
+
+      toast.success(payload?.message || "결원 파티 참여가 완료되었습니다.");
+      navigate(`/myparty/${nextPartyId}`, {
+        replace: true,
+        state: {
+          productId: payload?.productId ?? detail.productId,
+          productName: payload?.productName ?? detail.productName,
+          role: isHostRecruit ? "HOST" : "MEMBER",
+          operationType: detail.operationType,
+        },
+      });
+    } catch (error) {
+      console.error("결원 파티 참여 실패", error);
+      toast.error(
+        getApiErrorMessage(error, "결원 파티 참여 중 문제가 발생했습니다."),
+      );
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -356,16 +398,22 @@ export default function PartyVacancyDetailPage() {
 
         <button
           type="button"
-          disabled={!detail.joinAvailable}
+          onClick={handleJoinVacancyParty}
+          disabled={!detail.joinAvailable || isJoining}
           className={[
             "mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl px-5 text-[15px] font-semibold text-white shadow-[0_20px_46px_-24px_rgba(20,184,166,0.42)] transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none",
-            detail.joinAvailable
+            detail.joinAvailable && !isJoining
               ? `${pageTone.bg} ${pageTone.buttonHover}`
               : "",
           ].join(" ")}
         >
-          {pageTone.action}
-          <Icon icon="solar:arrow-right-linear" className="h-5 w-5" />
+          {isJoining ? "참여 처리 중..." : pageTone.action}
+          <Icon
+            icon={
+              isJoining ? "solar:refresh-circle-bold" : "solar:arrow-right-linear"
+            }
+            className={["h-5 w-5", isJoining ? "animate-spin" : ""].join(" ")}
+          />
         </button>
       </main>
     </div>

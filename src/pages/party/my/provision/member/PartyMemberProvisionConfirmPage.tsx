@@ -124,6 +124,14 @@ export default function PartyMemberProvisionConfirmPage() {
   }, [isInviteProvision, productName]);
 
   useEffect(() => {
+    if (!partyId || isLoading || !isInviteProvision) return;
+
+    navigate(`/myparty/${partyId}/provision/invite-activation`, {
+      replace: true,
+    });
+  }, [isInviteProvision, isLoading, navigate, partyId]);
+
+  useEffect(() => {
     const fetchConfirmMeta = async () => {
       if (!partyId) {
         setIsLoading(false);
@@ -232,7 +240,7 @@ export default function PartyMemberProvisionConfirmPage() {
     };
 
     fetchConfirmMeta();
-  }, [partyId]);
+  }, [locationState, partyId]);
 
   const handleConfirm = async () => {
     if (!partyId || isSubmitting) return;
