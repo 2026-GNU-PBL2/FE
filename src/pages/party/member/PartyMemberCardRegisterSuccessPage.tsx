@@ -65,12 +65,6 @@ function isDuplicateCardError(error: unknown) {
   return axios.isAxiosError(error) && error.response?.status === 400;
 }
 
-function mask(value: string) {
-  if (!value) return "-";
-  if (value.length <= 10) return "********";
-  return `${value.slice(0, 6)}...${value.slice(-4)}`;
-}
-
 function requestBillingAuthorization(authKey: string) {
   const dedupeKey = `billing-auth:${authKey}`;
 
@@ -129,11 +123,6 @@ export default function PartyMemberCardRegisterSuccessPage() {
     [searchParams],
   );
   const authKey = useMemo(() => rawAuthKey.replace(/ /g, "+"), [rawAuthKey]); // '+' 오염 보정
-
-  const customerKey = useMemo(
-    () => (searchParams.get("customerKey") ?? "").replace(/ /g, "+"),
-    [searchParams],
-  );
 
   useEffect(() => {
     let cancelled = false;
@@ -235,26 +224,6 @@ export default function PartyMemberCardRegisterSuccessPage() {
                 !duplicated &&
                 (errorMessage || "승인 처리 중 문제가 발생했습니다.")}
             </p>
-          </div>
-
-          <div className="mt-8 space-y-3 rounded-[28px] bg-slate-50 px-5 py-5">
-            <div className="rounded-2xl bg-white px-4 py-4">
-              <p className="text-xs font-semibold tracking-[0.12em] text-slate-400">
-                CUSTOMER KEY
-              </p>
-              <p className="mt-2 break-all text-sm font-semibold text-slate-900">
-                {customerKey || "-"}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white px-4 py-4">
-              <p className="text-xs font-semibold tracking-[0.12em] text-slate-400">
-                AUTH KEY
-              </p>
-              <p className="mt-2 break-all text-sm font-semibold text-slate-900">
-                {mask(authKey)}
-              </p>
-            </div>
           </div>
 
           <div className="mt-8 space-y-3">

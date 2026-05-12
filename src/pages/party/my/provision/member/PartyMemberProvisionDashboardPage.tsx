@@ -99,8 +99,8 @@ function isInviteProvisionType(type?: ProvisionType | null) {
   return type === "INVITE_CODE" || type === "INVITE_LINK";
 }
 
-function isInviteCodeProvisionType(type?: ProvisionType | null) {
-  return type === "INVITE_CODE";
+function isConfirmedStatus(status?: MemberStatus | null) {
+  return status === "ACTIVE" || status === "COMPLETED";
 }
 
 function getProvisionStatusLabel(status?: ProvisionStatus | null) {
@@ -210,6 +210,24 @@ export default function PartyMemberProvisionDashboardPage() {
   }, [provisionMe]);
 
   useEffect(() => {
+    if (!partyId || !provisionMe) return;
+
+    const provisionType =
+      provisionMe.provision?.provisionType ?? provisionMe.provisionType;
+    const memberStatus =
+      provisionMe.member?.memberStatus ?? provisionMe.memberStatus;
+
+    if (
+      isInviteProvisionType(provisionType) &&
+      !isConfirmedStatus(memberStatus)
+    ) {
+      navigate(`/myparty/${partyId}/provision/invite-activation`, {
+        replace: true,
+      });
+    }
+  }, [navigate, partyId, provisionMe]);
+
+  useEffect(() => {
     const fetchProvisionMe = async () => {
       if (!partyId) {
         setIsLoading(false);
@@ -225,6 +243,7 @@ export default function PartyMemberProvisionDashboardPage() {
         const data = unwrapResponse<PartyMemberProvisionMeResponse>(
           response.data,
         );
+        console.log(data);
 
         if (!data) {
           toast.error("파티원 이용 현황을 확인할 수 없습니다.");
@@ -252,9 +271,7 @@ export default function PartyMemberProvisionDashboardPage() {
       const response = await api.post(
         `/api/v1/parties/${partyId}/provision/me/password`,
       );
-      const data = unwrapResponse<SharedAccountPasswordResponse>(
-        response.data,
-      );
+      const data = unwrapResponse<SharedAccountPasswordResponse>(response.data);
 
       if (!data?.sharedAccountPassword) {
         toast.error("비밀번호를 확인할 수 없습니다.");
@@ -310,15 +327,37 @@ export default function PartyMemberProvisionDashboardPage() {
     );
   }
 
+  if (
+    isInviteProvisionType(view.provisionType) &&
+    !isConfirmedStatus(view.memberStatus)
+  ) {
+    return (
+      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
+        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-3xl border border-slate-200 bg-white">
+          <Icon
+            icon="solar:refresh-circle-bold"
+            className="h-11 w-11 animate-spin text-blue-900"
+          />
+        </div>
+      </div>
+    );
+  }
+
   const memberTone = getStatusTone(view.memberStatus);
   const canRevealPassword = Boolean(
     partyId &&
-      view.maskedSharedAccountPassword &&
-      view.passwordRevealAvailable &&
-      !isInviteProvisionType(view.provisionType) &&
-      view.memberStatus !== "WAITING",
+    view.maskedSharedAccountPassword &&
+    view.passwordRevealAvailable &&
+    !isInviteProvisionType(view.provisionType) &&
+    view.memberStatus !== "WAITING",
   );
-  const isInviteCodeProvision = isInviteCodeProvisionType(view.provisionType);
+  const isInviteProvision = isInviteProvisionType(view.provisionType);
+  const shouldShowEmptyAccessState =
+    !view.sharedAccountEmail &&
+    !view.maskedSharedAccountPassword &&
+    !view.inviteValue &&
+    !isInviteProvision &&
+    !view.provisionGuide;
   const metrics = [
     {
       label: "방식",
@@ -391,7 +430,9 @@ export default function PartyMemberProvisionDashboardPage() {
                   이용 정보 확인
                 </h2>
                 <p className="mt-1.5 text-sm font-normal leading-6 text-slate-500">
-                  공유계정 안내 확인과 이용 활성화 상태를 확인할 수 있습니다.
+                  {isInviteProvision
+                    ? "OTT 계정 활성화와 이용 확인 상태를 확인할 수 있습니다."
+                    : "공유계정 안내 확인과 이용 활성화 상태를 확인할 수 있습니다."}
                 </p>
               </div>
 
@@ -414,108 +455,105 @@ export default function PartyMemberProvisionDashboardPage() {
               </div>
             )}
           </div>
-
         </section>
 
-        <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-medium text-slate-400">ACCESS</p>
-              <h2 className="mt-1 text-lg font-bold text-slate-950">
-                이용 정보
-              </h2>
-            </div>
-            <Icon
-              icon="solar:lock-password-bold"
-              className="h-6 w-6 text-slate-300"
-            />
-          </div>
-
-          <div className="mt-5 space-y-3">
-            {view.sharedAccountEmail && (
-              <InfoRow
-                icon="solar:user-id-bold"
-                label="계정 아이디"
-                value={view.sharedAccountEmail}
-              />
-            )}
-            {view.maskedSharedAccountPassword && (
-              <InfoRow
-                icon="solar:password-bold"
-                label="계정 비밀번호"
-                value={sharedAccountPassword ?? view.maskedSharedAccountPassword}
-                action={
-                  !sharedAccountPassword && canRevealPassword ? (
-                    <button
-                      type="button"
-                      onClick={handleRevealPassword}
-                      disabled={isPasswordLoading}
-                      className="flex h-9 shrink-0 items-center justify-center rounded-xl bg-[#14B8A6] px-3 text-xs font-bold text-white transition hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-300"
-                    >
-                      {isPasswordLoading ? "조회 중" : "보기"}
-                    </button>
-                  ) : null
-                }
-              />
-            )}
-            {view.inviteValue && (
-              <InfoRow
-                icon="solar:link-circle-bold"
-                label="초대 링크"
-                value={view.inviteValue}
-              />
-            )}
-            {isInviteCodeProvision && (
-              <div className="rounded-2xl bg-[#F8FAFC] px-4 py-4 ring-1 ring-slate-100">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#1E3A8A] ring-1 ring-slate-200">
-                    <Icon icon="solar:letter-bold" className="h-5 w-5" />
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-slate-400">
-                      초대 코드 안내
-                    </p>
-                    <p className="mt-1.5 text-sm font-normal leading-6 text-slate-600">
-                      파티장이 마이페이지 메일함으로 초대 코드를 발송하면, 받은
-                      링크를 통해 OTT 계정을 활성화해주세요.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => navigate("/mypage/mailbox")}
-                      className="mt-3 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-white px-3 text-xs font-bold text-[#1E3A8A] ring-1 ring-slate-200 transition hover:bg-slate-50"
-                    >
-                      메일함 확인
-                      <Icon
-                        icon="solar:alt-arrow-right-linear"
-                        className="h-4 w-4"
-                      />
-                    </button>
-                  </div>
-                </div>
+        {isInviteProvision ? (
+          <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EAFBF5] text-[#0F766E] ring-1 ring-[#BDEFE4]">
+                <Icon icon="solar:check-circle-bold" className="h-6 w-6" />
               </div>
-            )}
-            {view.provisionGuide && (
-              <div className="rounded-2xl bg-[#F8FAFC] px-4 py-4 ring-1 ring-slate-100">
-                <p className="text-xs font-medium text-slate-400">이용 안내</p>
-                <p className="mt-2 text-sm font-normal leading-6 text-slate-600">
-                  {view.provisionGuide}
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium text-slate-400">STATUS</p>
+                <h2 className="mt-1 text-lg font-bold text-slate-950">
+                  OTT 계정 활성화 완료
+                </h2>
+                <p className="mt-2 text-sm font-normal leading-6 text-slate-500">
+                  이용 확인이 완료되었습니다. 초대 메일이나 OTT 계정 관련 내용은
+                  메일함에서 확인할 수 있습니다.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => navigate("/mypage/mailbox")}
+                  className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-[#1E3A8A] ring-1 ring-slate-200 transition hover:bg-slate-50"
+                >
+                  <Icon icon="solar:inbox-bold" className="h-4 w-4" />
+                  메일함 확인
+                </button>
               </div>
-            )}
-            {!view.sharedAccountEmail &&
-              !view.maskedSharedAccountPassword &&
-              !view.inviteValue &&
-              !isInviteCodeProvision &&
-              !view.provisionGuide && (
+            </div>
+          </section>
+        ) : (
+          <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-medium text-slate-400">ACCESS</p>
+                <h2 className="mt-1 text-lg font-bold text-slate-950">
+                  이용 정보
+                </h2>
+              </div>
+              <Icon
+                icon="solar:lock-password-bold"
+                className="h-6 w-6 text-slate-300"
+              />
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {view.sharedAccountEmail && (
+                <InfoRow
+                  icon="solar:user-id-bold"
+                  label="계정 아이디"
+                  value={view.sharedAccountEmail}
+                />
+              )}
+              {view.maskedSharedAccountPassword && (
+                <InfoRow
+                  icon="solar:password-bold"
+                  label="계정 비밀번호"
+                  value={
+                    sharedAccountPassword ?? view.maskedSharedAccountPassword
+                  }
+                  action={
+                    !sharedAccountPassword && canRevealPassword ? (
+                      <button
+                        type="button"
+                        onClick={handleRevealPassword}
+                        disabled={isPasswordLoading}
+                        className="flex h-9 shrink-0 items-center justify-center rounded-xl bg-[#14B8A6] px-3 text-xs font-bold text-white transition hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-300"
+                      >
+                        {isPasswordLoading ? "조회 중" : "보기"}
+                      </button>
+                    ) : null
+                  }
+                />
+              )}
+              {view.inviteValue && (
+                <InfoRow
+                  icon="solar:link-circle-bold"
+                  label="초대 링크"
+                  value={view.inviteValue}
+                />
+              )}
+              {view.provisionGuide && (
+                <div className="rounded-2xl bg-[#F8FAFC] px-4 py-4 ring-1 ring-slate-100">
+                  <p className="text-xs font-medium text-slate-400">
+                    이용 안내
+                  </p>
+                  <p className="mt-2 text-sm font-normal leading-6 text-slate-600">
+                    {view.provisionGuide}
+                  </p>
+                </div>
+              )}
+              {shouldShowEmptyAccessState && (
                 <div className="rounded-2xl bg-[#F8FAFC] px-4 py-5 text-center ring-1 ring-slate-100">
                   <p className="text-sm font-normal text-slate-500">
                     표시할 이용 정보가 없습니다.
                   </p>
                 </div>
               )}
-          </div>
-        </section>
+            </div>
+          </section>
+        )}
 
         {view.provisionMessage && (
           <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">

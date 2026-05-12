@@ -488,7 +488,11 @@ export default function MyPartyDetailPage() {
   const handleGoMemberGuide = () => {
     if (!partyId) return;
 
-    navigate(`/myparty/${partyId}/provision/confirm`, {
+    const nextPath = isInviteProvisionType(partyOperationType)
+      ? `/myparty/${partyId}/provision/invite-activation`
+      : `/myparty/${partyId}/provision/confirm`;
+
+    navigate(nextPath, {
       state: {
         operationType: partyOperationType,
         productId: partyMeta?.productId,
