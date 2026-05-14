@@ -51,12 +51,12 @@ const roleContents: Record<PartyRole, RoleContent> = {
     footer: "직접 운영과 관리가 필요하다면 파티장이 적합합니다.",
     icon: "solar:crown-bold",
     iconWrapClassName:
-      "bg-[#EEF4FF] text-[#1E3A8A] ring-1 ring-inset ring-[#D9E7FF]",
-    softBadgeClassName: "bg-[#EEF4FF] text-[#1E3A8A]",
+      "bg-blue-50 text-brand-main ring-1 ring-inset ring-blue-100",
+    softBadgeClassName: "bg-blue-50 text-brand-main",
     selectedRingClassName:
-      "ring-[10px] ring-[#DBEAFE] border-[#1E3A8A] bg-[#F8FBFF]",
+      "ring-[10px] ring-blue-100 border-brand-main bg-white",
     buttonClassName:
-      "bg-[#1E3A8A] text-white shadow-[0_20px_46px_-24px_rgba(30,58,138,0.45)] hover:bg-[#1D4ED8]",
+      "bg-brand-main text-white shadow-lg shadow-blue-900/20 hover:bg-blue-800",
   },
   MEMBER: {
     roleLabel: "파티원",
@@ -72,12 +72,12 @@ const roleContents: Record<PartyRole, RoleContent> = {
     footer: "복잡한 운영 없이 편하게 이용하고 싶다면 파티원이 적합합니다.",
     icon: "solar:user-plus-bold",
     iconWrapClassName:
-      "bg-[#ECFEF8] text-[#0F766E] ring-1 ring-inset ring-[#C9F7EA]",
+      "bg-teal-50 text-[#0F766E] ring-1 ring-inset ring-teal-100",
     softBadgeClassName: "bg-[#ECFEF8] text-[#0F766E]",
     selectedRingClassName:
-      "ring-[10px] ring-[#CCFBF1] border-[#14B8A6] bg-[#F7FFFD]",
+      "ring-[10px] ring-teal-100 border-[#14B8A6] bg-white",
     buttonClassName:
-      "bg-[#14B8A6] text-white shadow-[0_20px_46px_-24px_rgba(20,184,166,0.42)] hover:bg-[#0D9488]",
+      "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/20 hover:bg-[#0D9488]",
   },
 };
 
@@ -111,7 +111,7 @@ function RoleCircleCard({
       type="button"
       onClick={() => onSelect(role)}
       className={[
-        "group flex flex-col items-center text-center transition-all duration-500 ease-out",
+        "group flex flex-col items-center text-center transition-all duration-500 ease-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100",
         isDimmed ? "scale-[0.96] opacity-40" : "scale-100 opacity-100",
       ].join(" ")}
     >
@@ -120,8 +120,8 @@ function RoleCircleCard({
           "relative flex items-center justify-center rounded-full border bg-white transition-all duration-500 ease-out",
           compact ? "h-36 w-36 sm:h-40 sm:w-40" : "h-44 w-44 sm:h-48 sm:w-48",
           isSelected
-            ? `${content.selectedRingClassName} shadow-[0_26px_60px_-32px_rgba(15,23,42,0.22)]`
-            : "border-slate-200 shadow-[0_18px_44px_-30px_rgba(15,23,42,0.14)] hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_24px_54px_-30px_rgba(15,23,42,0.18)]",
+            ? `${content.selectedRingClassName} shadow-xl shadow-slate-900/10`
+            : "border-slate-100 shadow-xl shadow-slate-900/6 hover:-translate-y-1 hover:border-sky-100 hover:shadow-xl hover:shadow-blue-900/8",
         ].join(" ")}
       >
         <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.92),transparent_55%)]" />
@@ -151,7 +151,7 @@ function RoleCircleCard({
         </div>
       </div>
 
-      <div className="mt-4 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 transition-all duration-300 group-hover:bg-slate-200">
+      <div className="mt-4 inline-flex items-center rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-100 transition-all duration-300 group-hover:text-brand-main">
         {content.badge}
       </div>
     </button>
@@ -203,23 +203,30 @@ export default function PartyRoleSelectPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F8FB] px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-[980px] items-center justify-center">
-        <section className="w-full overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_30px_90px_-52px_rgba(15,23,42,0.18)]">
-          <div className="px-5 py-8 sm:px-8 sm:py-10">
-            <div className="mx-auto max-w-xl text-center">
-              <h1 className="text-[28px] font-semibold tracking-tight text-slate-950 sm:text-[34px]">
-                역할을 선택해 주세요
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <div className="mx-auto flex min-h-[calc(100vh-96px)] w-full max-w-6xl items-center justify-center">
+        <section className="w-full overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+            <div className="mx-auto max-w-2xl text-center">
+              <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-brand-main shadow-sm ring-1 ring-blue-100">
+                <span className="h-1.5 w-1.5 rounded-full bg-brand-accent" />
+                파티 역할 선택
+              </div>
+
+              <h1 className="mt-4 text-[30px] font-extrabold tracking-tight text-slate-950 sm:text-[38px]">
+                어떤 방식으로 시작할까요?
               </h1>
-              <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-[15px]">
-                파티장 또는 파티원을 선택하면 오른쪽에 간단한 설명이 표시됩니다.
+              <p className="mt-3 text-base leading-7 text-slate-500">
+                직접 파티를 운영하거나, 만들어진 파티에 바로 참여할 수 있어요.
               </p>
             </div>
+          </div>
 
-            <div className="mx-auto mt-10 max-w-[860px] overflow-hidden">
+          <div className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+            <div className="mx-auto max-w-[960px] overflow-hidden">
               <div
                 className={[
-                  "grid items-center gap-8 transition-all duration-500 ease-out",
+                  "grid items-center gap-8 transition-all duration-500 ease-out lg:gap-10",
                   selectedRole
                     ? "grid-cols-1 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,0.92fr)]"
                     : "grid-cols-1",
@@ -273,26 +280,26 @@ export default function PartyRoleSelectPage() {
                   ].join(" ")}
                 >
                   {selectedContent ? (
-                    <div className="rounded-[28px] border border-slate-200 bg-[#FBFCFE] p-5 shadow-[0_22px_56px_-38px_rgba(15,23,42,0.16)] sm:p-6">
+                    <div className="rounded-[32px] bg-white p-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 sm:p-6">
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <div
                             className={[
-                              "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold",
+                              "inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold",
                               selectedContent.softBadgeClassName,
                             ].join(" ")}
                           >
                             {selectedContent.badge}
                           </div>
 
-                          <h2 className="mt-4 text-[23px] font-semibold tracking-tight text-slate-950 sm:text-[27px]">
+                          <h2 className="mt-4 text-[24px] font-extrabold tracking-tight text-slate-950 sm:text-[28px]">
                             {selectedContent.title}
                           </h2>
                         </div>
 
                         <div
                           className={[
-                            "flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px]",
+                            "flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] shadow-sm",
                             selectedContent.iconWrapClassName,
                           ].join(" ")}
                         >
@@ -303,7 +310,7 @@ export default function PartyRoleSelectPage() {
                         </div>
                       </div>
 
-                      <p className="mt-5 text-sm leading-6 text-slate-600 sm:text-[15px]">
+                      <p className="mt-5 text-[15px] leading-7 text-slate-600">
                         {selectedContent.summary}
                       </p>
 
@@ -311,7 +318,7 @@ export default function PartyRoleSelectPage() {
                         {selectedContent.points.map((point) => (
                           <div
                             key={point.title}
-                            className="flex items-center gap-3 rounded-[20px] border border-slate-200 bg-white px-4 py-3"
+                            className="flex items-center gap-3 rounded-[20px] bg-slate-50 px-4 py-3"
                           >
                             <div
                               className={[
@@ -322,15 +329,15 @@ export default function PartyRoleSelectPage() {
                               <Icon icon={point.icon} className="h-5 w-5" />
                             </div>
 
-                            <p className="text-sm font-medium text-slate-900">
+                            <p className="text-sm font-bold text-slate-950">
                               {point.title}
                             </p>
                           </div>
                         ))}
                       </div>
 
-                      <div className="mt-5 rounded-[20px] bg-slate-50 px-4 py-4">
-                        <p className="text-sm leading-6 text-slate-500">
+                      <div className="mt-5 rounded-[20px] bg-blue-50/60 px-4 py-4 ring-1 ring-blue-100/70">
+                        <p className="text-sm font-medium leading-6 text-slate-600">
                           {selectedContent.footer}
                         </p>
                       </div>
@@ -341,7 +348,7 @@ export default function PartyRoleSelectPage() {
                           onClick={handleGoNext}
                           disabled={isLoading}
                           className={[
-                            "inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60",
+                            "inline-flex h-14 w-full items-center justify-center gap-2 rounded-full px-5 text-base font-bold transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60",
                             selectedContent.buttonClassName,
                           ].join(" ")}
                         >

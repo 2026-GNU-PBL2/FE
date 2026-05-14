@@ -542,12 +542,12 @@ export default function MyPartyDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-3xl border border-slate-200 bg-white">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
           <div className="text-center">
             <Icon
               icon="solar:refresh-circle-bold"
-              className="mx-auto h-11 w-11 animate-spin text-blue-900"
+              className="mx-auto h-11 w-11 animate-spin text-slate-900"
             />
             <p className="mt-4 text-sm font-semibold text-slate-600">
               파티 이용 현황을 불러오는 중입니다
@@ -560,14 +560,15 @@ export default function MyPartyDetailPage() {
 
   if (isScheduledParty) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-3xl">
-          <section className="rounded-3xl border border-amber-100 bg-white px-6 py-12 text-center shadow-sm sm:px-10">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-600">
+          <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-amber-100">
+            <div className="bg-linear-to-br from-amber-50 via-white to-white px-6 py-10 sm:px-10">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-amber-600 shadow-sm ring-1 ring-amber-100">
               <Icon icon="solar:clock-circle-bold" className="h-9 w-9" />
             </div>
 
-            <h1 className="mt-6 text-2xl font-extrabold text-slate-950">
+            <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
               다음 결제일부터 이용 예정입니다
             </h1>
 
@@ -575,9 +576,10 @@ export default function MyPartyDetailPage() {
               결원 파티 참여가 완료되었습니다. 현재 회차가 끝난 뒤 다음
               결제일부터 파티 이용이 시작됩니다.
             </p>
+            </div>
 
-            <div className="mx-auto mt-7 grid max-w-lg gap-3 text-left sm:grid-cols-2">
-              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200">
+            <div className="mx-auto grid max-w-lg gap-3 px-6 py-6 text-left sm:grid-cols-2 sm:px-10">
+              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
                 <p className="text-xs font-bold text-slate-400">상품</p>
                 <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
                   {partyMeta?.productName ?? "상품 정보 확인 중"}
@@ -591,7 +593,7 @@ export default function MyPartyDetailPage() {
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200 sm:col-span-2">
+              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100 sm:col-span-2">
                 <p className="text-xs font-bold text-slate-400">역할</p>
                 <p className="mt-1 text-sm font-extrabold text-slate-900">
                   {isHost ? "파티장" : "파티원"}
@@ -601,7 +603,7 @@ export default function MyPartyDetailPage() {
 
             <button
               onClick={() => navigate("/myparty")}
-              className="mt-8 rounded-2xl bg-blue-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-950"
+              className="mb-6 inline-flex h-13 items-center justify-center rounded-full bg-slate-950 px-6 text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition hover:-translate-y-0.5"
             >
               나의 파티 목록으로 이동
             </button>
@@ -613,48 +615,50 @@ export default function MyPartyDetailPage() {
 
   if (isMember) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-3xl">
-          <section className="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm sm:px-10">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-sky-50 text-sky-500">
+          <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+            <div className="bg-linear-to-br from-teal-50 via-white to-emerald-50 px-6 py-10 sm:px-10">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-[#0F766E] shadow-sm ring-1 ring-teal-100">
               <Icon icon="solar:users-group-rounded-bold" className="h-9 w-9" />
             </div>
 
-            <h1 className="mt-6 text-2xl font-extrabold text-slate-950">
+            <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
               파티 참여가 완료되었습니다
             </h1>
 
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
               {memberDescription}
             </p>
+            </div>
 
-            <div className="mx-auto mt-7 grid max-w-lg gap-3 text-left sm:grid-cols-2">
-              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200">
+            <div className="mx-auto grid max-w-lg gap-3 px-6 py-6 text-left sm:grid-cols-2 sm:px-10">
+              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
                 <p className="text-xs font-bold text-slate-400">상품</p>
                 <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
                   {partyMeta?.productName ?? "상품 정보 확인 중"}
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200">
-                <p className="text-xs font-bold text-slate-400">이용 방식</p>
-                <p className="mt-1 text-sm font-extrabold text-slate-900">
+              <div className="rounded-2xl bg-teal-50 px-4 py-4 ring-1 ring-teal-100">
+                <p className="text-xs font-bold text-[#0F766E]">이용 방식</p>
+                <p className="mt-1 text-sm font-extrabold text-[#0F766E]">
                   {provisionTypeText}
                 </p>
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="flex flex-col items-center justify-center gap-3 px-6 pb-6 sm:flex-row sm:px-10">
               <button
                 onClick={handleGoMemberGuide}
-                className="rounded-2xl bg-blue-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-950"
+                className="inline-flex h-13 w-full items-center justify-center rounded-full bg-[#14B8A6] px-6 text-sm font-bold text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488] sm:w-auto"
               >
                 안내사항 확인하기
               </button>
 
               <button
                 onClick={() => navigate("/myparty")}
-                className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex h-13 w-full items-center justify-center rounded-full border border-slate-100 bg-white px-6 text-sm font-bold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md sm:w-auto"
               >
                 나의 파티 목록으로 이동
               </button>
@@ -667,33 +671,35 @@ export default function MyPartyDetailPage() {
 
   if (!isMember && (isWaitingRecruit || !provision)) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-3xl">
-          <section className="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm sm:px-10">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-sky-50 text-sky-500">
+          <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+            <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-6 py-10 sm:px-10">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-brand-main shadow-sm ring-1 ring-blue-100">
               <Icon icon="solar:users-group-rounded-bold" className="h-9 w-9" />
             </div>
 
-            <h1 className="mt-6 text-2xl font-extrabold text-slate-950">
+            <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
               {waitingTitle}
             </h1>
 
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
               {waitingDescription}
             </p>
+            </div>
 
             {isRecruitFull && (
-              <div className="mx-auto mt-7 grid max-w-lg gap-3 text-left sm:grid-cols-2">
-                <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200">
+              <div className="mx-auto grid max-w-lg gap-3 px-6 py-6 text-left sm:grid-cols-2 sm:px-10">
+                <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
                   <p className="text-xs font-bold text-slate-400">상품</p>
                   <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
                     {partyMeta?.productName ?? "상품 정보 확인 중"}
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-200">
-                  <p className="text-xs font-bold text-slate-400">모집 현황</p>
-                  <p className="mt-1 text-sm font-extrabold text-slate-900">
+                <div className="rounded-2xl bg-blue-50 px-4 py-4 ring-1 ring-blue-100">
+                  <p className="text-xs font-bold text-brand-main">모집 현황</p>
+                  <p className="mt-1 text-sm font-extrabold text-brand-main">
                     {recruitStatus?.currentMemberCount ?? "-"} /{" "}
                     {recruitStatus?.capacity ?? "-"}명
                   </p>
@@ -701,11 +707,11 @@ export default function MyPartyDetailPage() {
               </div>
             )}
 
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="flex flex-col items-center justify-center gap-3 px-6 pb-6 sm:flex-row sm:px-10">
               {canSetupProvision && (
                 <button
                   onClick={handleGoProvisionSetup}
-                  className="rounded-2xl bg-blue-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-950"
+                  className="inline-flex h-13 w-full items-center justify-center rounded-full bg-brand-main px-6 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5 hover:bg-blue-800 sm:w-auto"
                 >
                   {isProvisionRegistered
                     ? isInviteProvisionType(provision?.provisionType)
@@ -717,7 +723,7 @@ export default function MyPartyDetailPage() {
 
               <button
                 onClick={() => navigate("/myparty")}
-                className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex h-13 w-full items-center justify-center rounded-full border border-slate-100 bg-white px-6 text-sm font-bold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md sm:w-auto"
               >
                 나의 파티 목록으로 이동
               </button>
@@ -729,29 +735,29 @@ export default function MyPartyDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <div className="mx-auto w-full max-w-3xl">
         <button
           onClick={() => navigate(-1)}
-          className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-slate-500 transition hover:text-blue-900"
+          className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-slate-500 transition hover:text-brand-main"
         >
           <Icon icon="solar:alt-arrow-left-linear" className="h-5 w-5" />
           이전으로
         </button>
 
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="bg-blue-900 px-6 py-7 text-white sm:px-8">
+        <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-6 py-7 sm:px-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className="text-sm font-bold text-sky-200">
-                  Submate Provision
+                <p className="text-[13px] font-extrabold text-brand-main">
+                  파티장 관리
                 </p>
 
-                <h1 className="mt-2 text-2xl font-extrabold">
+                <h1 className="mt-2 text-[28px] font-extrabold tracking-tight text-slate-950">
                   {isHost ? "파티 이용 현황" : "파티 이용 안내"}
                 </h1>
 
-                <p className="mt-3 text-sm leading-6 text-blue-100">
+                <p className="mt-3 max-w-[520px] text-sm leading-6 text-slate-500">
                   {isHost
                     ? "파티 이용 정보와 멤버별 이용 확인 상태를 확인할 수 있습니다."
                     : "공유계정 안내사항을 확인한 뒤 이용 확인을 완료해주세요."}
@@ -766,7 +772,7 @@ export default function MyPartyDetailPage() {
             </div>
           </div>
 
-          <div className="px-6 py-7 sm:px-8">
+          <div className="border-t border-slate-100 px-6 py-7 sm:px-8">
             <div className="grid gap-3 sm:grid-cols-3">
               <InfoCard
                 label="이용 방식"
@@ -785,7 +791,7 @@ export default function MyPartyDetailPage() {
               />
             </div>
 
-            <div className="mt-6 rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-200">
+            <div className="mt-6 rounded-[24px] bg-slate-50 p-5 ring-1 ring-slate-100">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-extrabold text-slate-900">
@@ -796,14 +802,14 @@ export default function MyPartyDetailPage() {
                   </p>
                 </div>
 
-                <p className="text-xl font-extrabold text-blue-900">
+                <p className="text-xl font-extrabold text-brand-main">
                   {progressPercent}%
                 </p>
               </div>
 
-              <div className="mt-4 h-3 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
+              <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white ring-1 ring-slate-100">
                 <div
-                  className="h-full rounded-full bg-teal-400"
+                  className="h-full rounded-full bg-brand-main"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -812,7 +818,7 @@ export default function MyPartyDetailPage() {
             {isHost &&
               provision &&
               (visibleInviteValue || provision.sharedAccountEmail) && (
-                <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-5">
+                <div className="mt-6 rounded-[24px] bg-white p-5 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <p className="text-sm font-extrabold text-slate-900">
@@ -835,7 +841,7 @@ export default function MyPartyDetailPage() {
                     {visibleInviteValue && (
                       <button
                         onClick={handleCopyInviteValue}
-                        className="shrink-0 rounded-2xl bg-sky-50 px-4 py-2 text-sm font-bold text-sky-700 transition hover:bg-sky-100"
+                        className="shrink-0 rounded-full bg-blue-50 px-4 py-2 text-sm font-bold text-brand-main transition hover:bg-blue-100"
                       >
                         복사
                       </button>
@@ -853,7 +859,7 @@ export default function MyPartyDetailPage() {
             {!isHost && (
               <button
                 onClick={handleGoMemberGuide}
-                className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-blue-900 text-base font-bold text-white transition hover:bg-blue-950"
+                className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#14B8A6] text-base font-bold text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488]"
               >
                 안내사항 확인하기
                 <Icon icon="solar:alt-arrow-right-linear" className="h-5 w-5" />
@@ -865,13 +871,13 @@ export default function MyPartyDetailPage() {
         {isHost && provision && (
           <section className="mt-8">
             <div>
-              <p className="text-sm font-bold text-slate-400">Members</p>
-              <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+              <p className="text-[13px] font-extrabold text-brand-main">Members</p>
+              <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
                 파티원 이용 확인
               </h2>
             </div>
 
-            <div className="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <div className="mt-4 overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
               {provision.members.length > 0 ? (
                 <div className="divide-y divide-slate-100">
                   {provision.members.map((member) => (
@@ -910,8 +916,8 @@ function InfoCard({
   icon: string;
 }) {
   return (
-    <div className="rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-200">
-      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-blue-900 ring-1 ring-slate-200">
+    <div className="rounded-[22px] bg-slate-50 p-5 ring-1 ring-slate-100">
+      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-brand-main ring-1 ring-blue-100">
         <Icon icon={icon} className="h-6 w-6" />
       </div>
 
@@ -923,9 +929,9 @@ function InfoCard({
 
 function MemberItem({ member }: { member: ProvisionMember }) {
   return (
-    <div className="px-5 py-5">
+    <div className="px-5 py-5 sm:px-6">
       <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-blue-900 ring-1 ring-slate-200">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
           <Icon icon="solar:user-rounded-bold" className="h-7 w-7" />
         </div>
 
@@ -957,10 +963,18 @@ function MemberItem({ member }: { member: ProvisionMember }) {
           )}
 
           <div className="mt-4 grid gap-2 text-xs font-semibold text-slate-500 sm:grid-cols-2">
-            <p>초대 발송: {formatDateTime(member.inviteSentAt)}</p>
-            <p>완료 기한: {formatDateTime(member.mustCompleteBy)}</p>
-            <p>확인 완료: {formatDateTime(member.confirmedAt)}</p>
-            <p>이용 활성화: {formatDateTime(member.activatedAt)}</p>
+            <p className="rounded-2xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
+              초대 발송: {formatDateTime(member.inviteSentAt)}
+            </p>
+            <p className="rounded-2xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
+              완료 기한: {formatDateTime(member.mustCompleteBy)}
+            </p>
+            <p className="rounded-2xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
+              확인 완료: {formatDateTime(member.confirmedAt)}
+            </p>
+            <p className="rounded-2xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
+              이용 활성화: {formatDateTime(member.activatedAt)}
+            </p>
           </div>
         </div>
       </div>

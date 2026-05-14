@@ -142,50 +142,83 @@ export default function PartyMemberCardRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F4F7]">
-      <div className="mx-auto w-full max-w-[780px] px-4 py-6 sm:px-6 sm:py-10 lg:py-12">
-        <section className="overflow-hidden rounded-[28px] bg-white shadow-[0_20px_60px_-40px_rgba(15,23,42,0.22)] sm:rounded-[34px]">
-          <div className="border-b border-[#D9FBEF] bg-[#F7FFFD] px-5 py-7 sm:px-8 sm:py-9">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-[#0F766E] shadow-[0_8px_22px_-18px_rgba(20,184,166,0.45)]">
-                CARD REGISTER
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <div className="mx-auto w-full max-w-[720px]">
+        <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="px-5 py-6 sm:px-8 sm:py-8">
+            <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_220px] md:items-center">
+              <div className="min-w-0">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-[#0F766E]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+                  카드 등록
+                </div>
+
+                <h1 className="mt-3 text-[26px] font-extrabold tracking-tight text-slate-950 sm:text-[32px]">
+                  결제 카드를 등록해 주세요
+                </h1>
+
+                <p className="mt-3 max-w-md text-[14px] font-medium leading-7 text-slate-500 sm:text-[15px]">
+                  토스페이먼츠 보안 결제창에서 자동승인 결제에 사용할 카드를
+                  안전하게 등록합니다.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleRequestBillingAuth}
+                  disabled={!isReady || loading || requesting}
+                  className={[
+                    "mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full text-[15px] font-bold transition sm:w-auto sm:min-w-[220px] sm:px-7",
+                    !isReady || loading || requesting
+                      ? "cursor-not-allowed bg-slate-200 text-slate-400"
+                      : "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/20 hover:-translate-y-0.5 hover:bg-[#0D9488]",
+                  ].join(" ")}
+                >
+                  <Icon icon="solar:card-send-bold" className="h-5 w-5" />
+                  {loading
+                    ? "등록 정보 확인 중..."
+                    : requesting
+                      ? "결제창 준비 중..."
+                      : "카드 등록하기"}
+                </button>
               </div>
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#14B8A6] shadow-[0_10px_28px_-22px_rgba(20,184,166,0.45)] sm:h-14 sm:w-14">
-                <Icon
-                  icon="solar:card-bold"
-                  className="h-6 w-6 sm:h-7 sm:w-7"
-                />
+              <div className="relative hidden md:block">
+                <div className="rounded-[28px] bg-linear-to-br from-[#14B8A6] to-[#0F766E] p-5 text-white shadow-xl shadow-teal-900/20">
+                  <div className="flex items-center justify-between">
+                    <Icon icon="solar:card-bold" className="h-6 w-6" />
+                    <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold">
+                      SECURE
+                    </span>
+                  </div>
+
+                  <div className="mt-12">
+                    <div className="h-2 w-24 rounded-full bg-white/45" />
+                    <div className="mt-3 flex gap-2">
+                      <div className="h-2 w-10 rounded-full bg-white/30" />
+                      <div className="h-2 w-10 rounded-full bg-white/30" />
+                      <div className="h-2 w-10 rounded-full bg-white/30" />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div className="mt-5">
-              <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-4xl">
-                결제 카드를 등록해 주세요
-              </h1>
-
-              <p className="mt-3 text-[14px] leading-7 text-slate-500 sm:max-w-[620px] sm:text-[15px]">
-                자동승인 결제에 사용할 카드를 토스페이먼츠 보안 결제창에서
-                안전하게 등록합니다.
-              </p>
             </div>
           </div>
 
-          <div className="px-5 py-5 sm:px-8 sm:py-8">
-            <div className="rounded-[24px] border border-[#D9FBEF] bg-white px-5 py-5 shadow-[0_16px_42px_-34px_rgba(20,184,166,0.22)] sm:rounded-[28px] sm:px-6 sm:py-6">
+          <div className="border-t border-slate-100 px-5 py-5 sm:px-8 sm:py-6">
+            <div className="rounded-[24px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100 sm:px-5">
               <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#ECFEF8] text-[#0F766E] sm:h-12 sm:w-12">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#0F766E] shadow-sm ring-1 ring-teal-100">
                   <Icon
                     icon="solar:lock-keyhole-bold"
-                    className="h-5 w-5 sm:h-6 sm:w-6"
+                    className="h-5 w-5"
                   />
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-[16px] font-semibold leading-6 tracking-tight text-slate-950 sm:text-[18px]">
+                  <p className="text-[15px] font-extrabold tracking-tight text-slate-950">
                     카드 정보는 Submate에 직접 저장되지 않습니다
                   </p>
-                  <p className="mt-2 text-[14px] leading-7 text-slate-500 sm:text-[15px]">
+                  <p className="mt-1.5 text-[13px] leading-6 text-slate-500 sm:text-[14px]">
                     카드번호 입력과 본인 확인은 토스페이먼츠에서 처리됩니다.
                     Submate는 자동결제 승인을 위한 인증 결과만 전달받아 등록을
                     완료합니다.
@@ -194,7 +227,7 @@ export default function PartyMemberCardRegisterPage() {
               </div>
             </div>
 
-            <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-3">
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
               {[
                 {
                   icon: "solar:shield-check-bold",
@@ -214,18 +247,18 @@ export default function PartyMemberCardRegisterPage() {
               ].map((item) => (
                 <div
                   key={item.title}
-                  className="rounded-[22px] border border-slate-200 bg-[#F8FAFC] px-4 py-4 sm:rounded-[24px]"
+                  className="rounded-2xl bg-white px-4 py-3 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100"
                 >
                   <div className="flex items-start gap-3 sm:block">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#14B8A6]">
-                      <Icon icon={item.icon} className="h-5 w-5" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-[#0F766E]">
+                      <Icon icon={item.icon} className="h-4 w-4" />
                     </div>
 
-                    <div className="min-w-0 sm:mt-4">
-                      <p className="text-[14px] font-semibold text-slate-950">
+                    <div className="min-w-0 sm:mt-3">
+                      <p className="text-[13px] font-extrabold text-slate-950">
                         {item.title}
                       </p>
-                      <p className="mt-1 text-[13px] leading-5 text-slate-500">
+                      <p className="mt-1 text-[12px] font-semibold leading-5 text-slate-500">
                         {item.description}
                       </p>
                     </div>
@@ -234,43 +267,23 @@ export default function PartyMemberCardRegisterPage() {
               ))}
             </div>
 
-            <div className="mt-4 rounded-[22px] bg-[#F8FAFC] px-4 py-4 sm:mt-5 sm:rounded-[26px] sm:px-5 sm:py-5">
+            <div className="mt-4 rounded-2xl bg-teal-50/80 px-4 py-3 ring-1 ring-teal-100">
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-500">
-                  <Icon icon="solar:info-circle-linear" className="h-5 w-5" />
-                </div>
+                <Icon
+                  icon="solar:info-circle-linear"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                />
 
                 <div>
-                  <p className="text-[14px] font-semibold text-slate-900">
+                  <p className="text-[13px] font-extrabold text-slate-950">
                     결제 안내
                   </p>
-                  <p className="mt-1 text-[14px] leading-6 text-slate-500 sm:text-[15px]">
+                  <p className="mt-1 text-[13px] font-semibold leading-6 text-slate-600">
                     카드 등록만으로 즉시 결제되지 않습니다. 실제 결제는 파티
                     참여 및 결제 승인 시점에 진행됩니다.
                   </p>
                 </div>
               </div>
-            </div>
-
-            <div className="mt-6 sm:mt-7">
-              <button
-                type="button"
-                onClick={handleRequestBillingAuth}
-                disabled={!isReady || loading || requesting}
-                className={[
-                  "inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-[15px] font-semibold transition sm:h-15 sm:rounded-[22px]",
-                  !isReady || loading || requesting
-                    ? "cursor-not-allowed bg-slate-200 text-slate-400"
-                    : "bg-[#14B8A6] text-white shadow-[0_20px_46px_-24px_rgba(20,184,166,0.42)] hover:bg-[#0D9488]",
-                ].join(" ")}
-              >
-                <Icon icon="solar:card-send-bold" className="h-5 w-5" />
-                {loading
-                  ? "등록 정보 확인 중..."
-                  : requesting
-                    ? "결제창 준비 중..."
-                    : "카드 등록하기"}
-              </button>
             </div>
           </div>
         </section>

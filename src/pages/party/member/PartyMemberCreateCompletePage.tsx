@@ -12,7 +12,7 @@ function getStatusContent(result: PartyJoinApplyResponse | null) {
     return {
       badge: "ACTIVE",
       icon: "solar:check-circle-bold",
-      iconClassName: "bg-[#EAFBF5] text-[#2DD4BF]",
+      iconClassName: "bg-white text-[#0F766E] ring-teal-100",
       title: "파티 참여가 완료되었습니다",
       description:
         result.message || "즉시 참여 가능한 파티에 정상적으로 참여했습니다.",
@@ -23,7 +23,7 @@ function getStatusContent(result: PartyJoinApplyResponse | null) {
     return {
       badge: "WAITING",
       icon: "solar:clock-circle-bold",
-      iconClassName: "bg-amber-50 text-amber-500",
+      iconClassName: "bg-white text-amber-500 ring-amber-100",
       title: "자동 매칭 대기열에 등록되었습니다",
       description:
         result.message ||
@@ -34,7 +34,7 @@ function getStatusContent(result: PartyJoinApplyResponse | null) {
   return {
     badge: "REQUESTED",
     icon: "solar:clipboard-check-bold",
-    iconClassName: "bg-[#EEF4FF] text-[#1E3A8A]",
+    iconClassName: "bg-white text-[#0F766E] ring-teal-100",
     title: "파티 참여 신청이 접수되었습니다",
     description: result?.message || "파티 참여 신청 결과를 확인해 주세요.",
   };
@@ -46,44 +46,52 @@ export default function PartyMemberCreateCompletePage() {
   const content = getStatusContent(result);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-      <div className="mx-auto flex min-h-[calc(100vh-64px)] max-w-120 items-center justify-center">
-        <div className="w-full rounded-[32px] border border-slate-200 bg-white px-5 py-6 text-center shadow-[0_24px_70px_-36px_rgba(15,23,42,0.22)] sm:px-8 sm:py-8">
-          <div
-            className={[
-              "mx-auto flex h-18 w-18 items-center justify-center rounded-full",
-              content.iconClassName,
-            ].join(" ")}
-          >
-            <Icon icon={content.icon} className="h-9 w-9" />
+    <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-80px)] w-full max-w-[520px] items-center justify-center">
+        <div className="w-full overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="bg-linear-to-br from-teal-50 via-white to-emerald-50 px-6 py-10">
+            <div
+              className={[
+                "mx-auto flex h-18 w-18 items-center justify-center rounded-full shadow-sm ring-1",
+                content.iconClassName,
+              ].join(" ")}
+            >
+              <Icon icon={content.icon} className="h-10 w-10" />
+            </div>
+
+            <p className="mt-6 text-[11px] font-extrabold tracking-[0.16em] text-[#0F766E]">
+              {content.badge}
+            </p>
+
+            <h1 className="mt-3 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
+              {content.title}
+            </h1>
+
+            <p className="mt-3 text-[15px] leading-6 text-slate-500">
+              {content.description}
+            </p>
           </div>
 
-          <p className="mt-6 text-xs font-semibold tracking-[0.14em] text-[#0F766E]">
-            {content.badge}
-          </p>
+          <div className="px-6 py-6">
+            <div className="mx-auto mb-6 flex h-2 w-16 overflow-hidden rounded-full bg-teal-50">
+              <div className="h-full w-full rounded-full bg-[#14B8A6]" />
+            </div>
 
-          <h1 className="mt-3 text-[28px] font-semibold tracking-tight text-slate-950 sm:text-[32px]">
-            {content.title}
-          </h1>
-
-          <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
-            {content.description}
-          </p>
-
-          <div className="mt-8 space-y-3">
+            <div className="flex flex-col gap-3">
             <Link
               to="/myparty"
-              className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-[#14B8A6] text-base font-semibold tracking-tight text-white"
+              className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#14B8A6] text-[15px] font-bold text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488]"
             >
               내 파티로 이동
             </Link>
 
             <Link
               to="/parties/member"
-              className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm font-semibold tracking-tight text-slate-700"
+              className="inline-flex h-14 w-full items-center justify-center rounded-full border border-slate-100 bg-white text-[15px] font-bold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
             >
               파티 목록으로 이동
             </Link>
+            </div>
           </div>
         </div>
       </div>

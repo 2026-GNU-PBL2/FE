@@ -100,14 +100,14 @@ export default function PartyMemberPaymentPreviewPage() {
 
   if (!preview) {
     return (
-      <div className="min-h-screen bg-[#F2F4F7] px-4 py-10">
-        <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-[520px] items-center justify-center">
-          <section className="w-full rounded-[28px] bg-white px-6 py-10 text-center shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)]">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#ECFEF8] text-[#0F766E]">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-2xl items-center justify-center">
+          <section className="w-full rounded-[28px] bg-white px-6 py-10 text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-[#0F766E]">
               <Icon icon="solar:info-circle-bold" className="h-7 w-7" />
             </div>
 
-            <h1 className="mt-5 text-[24px] font-semibold tracking-tight text-slate-950">
+            <h1 className="mt-5 text-[24px] font-extrabold tracking-tight text-slate-950">
               결제 정보를 불러올 수 없습니다
             </h1>
 
@@ -140,132 +140,156 @@ export default function PartyMemberPaymentPreviewPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F2F4F7] px-4 py-10 sm:px-6">
-      <main className="mx-auto w-full max-w-[640px]">
-        <div className="mb-8">
-          <div className="inline-flex items-center rounded-full bg-[#ECFEF8] px-3 py-1.5 text-[12px] font-semibold text-[#0F766E]">
-            MEMBER PAYMENT
-          </div>
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <main className="mx-auto w-full max-w-3xl">
+        <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="bg-white px-5 py-5 sm:px-8 sm:py-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100">
+                  {preview.thumbnailUrl ? (
+                    <img
+                      src={preview.thumbnailUrl}
+                      alt={preview.productName}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <Icon
+                      icon="solar:play-circle-bold"
+                      className="h-6 w-6 text-brand-main"
+                    />
+                  )}
+                </div>
 
-          <h1 className="mt-4 text-[30px] font-semibold leading-tight tracking-tight text-slate-950 sm:text-[36px]">
-            결제 금액을 확인해 주세요
-          </h1>
-
-          <p className="mt-4 text-[15px] leading-7 text-slate-500">
-            선택한 상품으로 파티 참여를 신청하기 전에 상품 금액, 수수료, 보증금,
-            다음 정산일부터 결제될 금액을 확인합니다.
-          </p>
-        </div>
-
-        <section className="rounded-[32px] bg-white px-5 py-6 shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)] sm:px-6">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#ECFEF8]">
-              {preview.thumbnailUrl ? (
-                <img
-                  src={preview.thumbnailUrl}
-                  alt={preview.productName}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <Icon
-                  icon="solar:play-circle-bold"
-                  className="h-7 w-7 text-[#0F766E]"
-                />
-              )}
-            </div>
-
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-slate-400">선택한 상품</p>
-              <h2 className="mt-1 truncate text-lg font-semibold text-slate-950">
-                {preview.productName}
-              </h2>
-            </div>
-          </div>
-
-          <div className="mt-7 rounded-[28px] bg-[#F7FFFD] px-5 py-5 ring-1 ring-inset ring-[#D9FBEF]">
-            <p className="text-sm font-medium text-[#0F766E]">
-              최초 결제 예정 금액
-            </p>
-
-            <p className="mt-2 text-[34px] font-bold tracking-tight text-slate-950">
-              {formatPrice(preview.firstPaymentAmount)}
-            </p>
-          </div>
-
-          <div className="mt-6 divide-y divide-slate-100">
-            {paymentRows.map((row) => (
-              <div
-                key={row.label}
-                className="flex items-center justify-between gap-4 py-4"
-              >
-                <p className="text-[15px] text-slate-500">{row.label}</p>
-                <p className="text-[15px] font-semibold text-slate-950">
-                  {formatPrice(row.value)}
-                </p>
+                <div className="min-w-0 flex-1">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-[#0F766E]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+                    파티원 결제 확인
+                  </div>
+                  <h1 className="mt-2 truncate text-[22px] font-extrabold tracking-tight text-slate-950 sm:text-[26px]">
+                    {preview.productName}
+                  </h1>
+                </div>
               </div>
-            ))}
+
+              <p className="text-xs font-bold text-slate-400 sm:text-right">
+                결제 전 최종 확인
+              </p>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-100 px-5 py-5 sm:px-8 sm:py-6">
+            <div className="rounded-[24px] bg-slate-50 p-5 ring-1 ring-slate-100">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold text-slate-500">
+                    최초 결제 예정 금액
+                  </p>
+                  <p className="mt-1.5 text-[30px] font-extrabold tracking-tight text-slate-950 sm:text-[38px]">
+                    {formatPrice(preview.firstPaymentAmount)}
+                  </p>
+                </div>
+
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0F766E] shadow-sm ring-1 ring-teal-100">
+                  <Icon icon="solar:card-bold" className="h-5 w-5" />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-[24px] bg-white p-5 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100 sm:p-6">
+              <h2 className="text-[17px] font-extrabold tracking-tight text-slate-950">
+                결제 상세
+              </h2>
+
+              <div className="mt-4 divide-y divide-slate-100">
+                {paymentRows.map((row) => (
+                  <div
+                    key={row.label}
+                    className="flex items-center justify-between gap-4 py-2.5"
+                  >
+                    <p className="text-[14px] font-semibold text-slate-500">
+                      {row.label}
+                    </p>
+                    <p className="text-right text-[14px] font-extrabold text-slate-950">
+                      {formatPrice(row.value)}
+                    </p>
+                  </div>
+                ))}
+
+                <div className="flex items-center justify-between gap-4 pt-4">
+                  <p className="text-[16px] font-extrabold text-slate-950">
+                    최초 결제 예정 금액
+                  </p>
+                  <p className="text-right text-[22px] font-extrabold text-[#0F766E]">
+                    {formatPrice(preview.firstPaymentAmount)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {preview.paymentNotice ? (
+              <section className="mt-4 rounded-2xl bg-teal-50/80 px-4 py-3 ring-1 ring-teal-100">
+                <div className="flex gap-3">
+                  <Icon
+                    icon="solar:info-circle-bold"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                  />
+
+                  <div>
+                    <p className="text-[13px] font-extrabold text-slate-950">
+                      결제 안내
+                    </p>
+                    <p className="mt-1 text-[13px] font-semibold leading-6 text-slate-600">
+                      {preview.paymentNotice}
+                    </p>
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
+            {!isBillingLoading && hasBillingMethod ? (
+              <section className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100">
+                <div className="flex gap-3">
+                  <Icon
+                    icon="solar:card-bold"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                  />
+
+                  <div>
+                    <p className="text-[13px] font-extrabold text-slate-950">
+                      등록된 결제수단을 사용합니다
+                    </p>
+                    <p className="mt-1 text-[13px] font-semibold leading-6 text-slate-600">
+                      이미 등록된 카드가 있어 약관 동의와 카드 등록 단계를
+                      건너뛰고 파티 신청으로 이동합니다.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={handleGoNext}
+              disabled={isBillingLoading}
+              className="mt-5 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#14B8A6] px-5 text-[15px] font-bold text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
+            >
+              {isBillingLoading ? (
+                <>
+                  <Icon
+                    icon="solar:refresh-bold"
+                    className="h-5 w-5 animate-spin"
+                  />
+                  결제수단 확인 중
+                </>
+              ) : hasBillingMethod ? (
+                "파티 신청으로 이동"
+              ) : (
+                "약관 동의로 이동"
+              )}
+            </button>
           </div>
         </section>
-
-        {preview.paymentNotice ? (
-          <section className="mt-4 rounded-[28px] bg-[#F7FFFD] px-5 py-5 ring-1 ring-inset ring-[#D9FBEF]">
-            <div className="flex gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#0F766E]">
-                <Icon icon="solar:info-circle-bold" className="h-5 w-5" />
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-slate-950">
-                  결제 안내
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  {preview.paymentNotice}
-                </p>
-              </div>
-            </div>
-          </section>
-        ) : null}
-
-        {!isBillingLoading && hasBillingMethod ? (
-          <section className="mt-4 rounded-[28px] bg-white px-5 py-5 ring-1 ring-inset ring-slate-200">
-            <div className="flex gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ECFEF8] text-[#0F766E]">
-                <Icon icon="solar:card-bold" className="h-5 w-5" />
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-slate-950">
-                  등록된 결제수단을 사용합니다
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  이미 등록된 카드가 있어 약관 동의와 카드 등록 단계를 건너뛰고
-                  파티 신청으로 이동합니다.
-                </p>
-              </div>
-            </div>
-          </section>
-        ) : null}
-
-        <button
-          type="button"
-          onClick={handleGoNext}
-          disabled={isBillingLoading}
-          className="mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#14B8A6] px-5 text-[15px] font-semibold text-white shadow-[0_20px_46px_-24px_rgba(20,184,166,0.42)] transition hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
-        >
-          {isBillingLoading ? (
-            <>
-              <Icon
-                icon="solar:refresh-circle-bold"
-                className="h-5 w-5 animate-spin"
-              />
-              결제수단 확인 중
-            </>
-          ) : hasBillingMethod ? (
-            "파티 신청으로 이동"
-          ) : (
-            "약관 동의로 이동"
-          )}
-        </button>
       </main>
     </div>
   );
