@@ -119,14 +119,14 @@ function AgreementModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 p-0 sm:items-center sm:p-6">
-      <div className="flex h-[88vh] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-[0_32px_80px_-24px_rgba(15,23,42,0.35)] sm:h-auto sm:max-h-[85vh] sm:rounded-[32px]">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 p-0 backdrop-blur-sm sm:items-center sm:p-6">
+      <div className="flex h-[88vh] w-full max-w-[680px] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl shadow-slate-950/20 sm:h-auto sm:max-h-[85vh] sm:rounded-[32px]">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-7 sm:py-5">
           <div className="pr-4">
-            <div className="inline-flex items-center rounded-full bg-[#ECFEF8] px-3 py-1 text-[11px] font-semibold text-[#0F766E]">
+            <div className="inline-flex items-center rounded-full bg-teal-50 px-3 py-1.5 text-[11px] font-bold text-[#0F766E]">
               필수 동의
             </div>
-            <h2 className="mt-3 text-[20px] font-semibold tracking-tight text-slate-950 sm:text-[24px]">
+            <h2 className="mt-3 text-[20px] font-extrabold tracking-tight text-slate-950 sm:text-[24px]">
               {item.detailTitle}
             </h2>
           </div>
@@ -145,7 +145,7 @@ function AgreementModal({
             {item.detailContent.map((paragraph, index) => (
               <div
                 key={`${item.key}-${index}`}
-                className="rounded-[22px] bg-[#F7FFFD] px-4 py-4 ring-1 ring-inset ring-[#D9FBEF] sm:px-5"
+                className="rounded-[20px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100 sm:px-5"
               >
                 <p className="text-[14px] leading-7 text-slate-600 sm:text-[15px]">
                   {paragraph}
@@ -163,8 +163,8 @@ function AgreementModal({
               className={[
                 "inline-flex h-13 w-full items-center justify-center gap-2 rounded-2xl px-5 text-[15px] font-semibold transition",
                 agreed
-                  ? "bg-[#E8FFF7] text-[#0F766E]"
-                  : "bg-[#14B8A6] text-white shadow-[0_20px_46px_-24px_rgba(20,184,166,0.42)] hover:bg-[#0D9488]",
+                  ? "bg-teal-50 text-[#0F766E]"
+                  : "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/20 hover:bg-[#0D9488]",
               ].join(" ")}
             >
               <Icon
@@ -196,16 +196,16 @@ function AgreementCard({
       type="button"
       onClick={() => onOpen(item)}
       className={[
-        "group w-full rounded-[28px] border px-5 py-5 text-left transition sm:px-6 sm:py-6",
+        "group w-full rounded-[22px] border px-4 py-4 text-left transition hover:-translate-y-0.5 hover:shadow-md sm:px-5",
         checked
-          ? "border-[#C9F7EA] bg-[#F7FFFD] shadow-[0_18px_40px_-30px_rgba(20,184,166,0.18)]"
-          : "border-slate-200 bg-white hover:border-[#BFEDE2] hover:bg-[#FCFFFE]",
+          ? "border-teal-100 bg-teal-50/70 shadow-teal-900/5"
+          : "border-slate-100 bg-white shadow-sm shadow-slate-900/5 hover:border-teal-100",
       ].join(" ")}
     >
       <div className="flex items-start gap-4">
         <div
           className={[
-            "mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition",
+            "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition",
             checked
               ? "bg-[#14B8A6] text-white"
               : "bg-slate-100 text-slate-400 group-hover:bg-[#ECFEF8] group-hover:text-[#0F766E]",
@@ -219,22 +219,22 @@ function AgreementCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[16px] font-semibold tracking-tight text-slate-950 sm:text-[17px]">
+            <p className="text-[15px] font-extrabold tracking-tight text-slate-950 sm:text-[16px]">
               {item.title}
             </p>
 
             {item.required ? (
-              <span className="inline-flex items-center rounded-full bg-[#ECFEF8] px-2.5 py-1 text-[11px] font-semibold text-[#0F766E]">
+              <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-[#0F766E] ring-1 ring-teal-100">
                 필수
               </span>
             ) : null}
           </div>
 
-          <p className="mt-2 text-[14px] leading-6 text-slate-500 sm:text-[15px]">
+          <p className="mt-1.5 text-[13px] leading-6 text-slate-500 sm:text-[14px]">
             {item.summary}
           </p>
 
-          <div className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#0F766E]">
+          <div className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-[#0F766E]">
             {checked ? "동의 완료" : "자세히 보기"}
             <Icon icon="solar:alt-arrow-right-linear" className="h-4 w-4" />
           </div>
@@ -300,109 +300,103 @@ export default function PartyMemberAgreementPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-[#F2F4F7]">
-        <div className="mx-auto w-full max-w-[760px] px-4 py-8 sm:px-6 sm:py-12">
-          <section className="rounded-[32px] bg-white px-5 py-7 shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)] sm:px-8 sm:py-9">
-            <div className="flex items-center gap-2">
-              <div className="inline-flex items-center rounded-full bg-[#ECFEF8] px-3 py-1.5 text-[12px] font-semibold text-[#0F766E]">
-                MEMBER AGREEMENT
-              </div>
-              <div className="inline-flex items-center rounded-full bg-[#F0FDF9] px-3 py-1.5 text-[12px] font-semibold text-[#0F766E]">
-                {agreedRequiredCount}/{requiredItems.length}
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <h1 className="text-[30px] font-semibold tracking-tight text-slate-950 sm:text-[36px]">
-                결제 전 동의가 필요해요
-              </h1>
-              <p className="mt-3 text-[15px] leading-7 text-slate-500">
-                각 항목을 눌러 내용을 확인한 뒤 동의해 주세요.
-                <br className="hidden sm:block" />
-                모든 필수 항목에 동의하면 다음 단계로 진행할 수 있습니다.
-              </p>
-            </div>
-
-            <div className="mt-7 rounded-[28px] bg-[#F7FFFD] px-5 py-5 ring-1 ring-inset ring-[#D9FBEF] sm:px-6">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-[#0F766E] shadow-[0_10px_30px_-20px_rgba(20,184,166,0.45)]">
-                  <Icon icon="solar:shield-check-bold" className="h-6 w-6" />
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <p className="text-[16px] font-semibold tracking-tight text-slate-950">
-                    빠르게 한 번에 동의할 수도 있어요
-                  </p>
-                  <p className="mt-2 text-[14px] leading-6 text-slate-500 sm:text-[15px]">
-                    이미 내용을 충분히 확인하셨다면 전체 동의 후 바로 결제
-                    단계로 이동할 수 있습니다.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleAgreeAll}
-                  className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-white px-4 text-[13px] font-semibold text-[#0F766E] shadow-[0_10px_24px_-18px_rgba(20,184,166,0.35)] transition hover:bg-[#F0FDF9]"
-                >
-                  전체 동의
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              {agreementItems.map((item) => (
-                <AgreementCard
-                  key={item.key}
-                  item={item}
-                  checked={agreements[item.key]}
-                  onOpen={handleOpenItem}
-                />
-              ))}
-            </div>
-
-            <div className="mt-8 rounded-[28px] bg-[#F8FAFC] px-5 py-5 sm:px-6">
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-500">
-                  <Icon icon="solar:info-circle-linear" className="h-5 w-5" />
-                </div>
-
-                <div>
-                  <p className="text-[15px] font-semibold text-slate-900">
-                    안내
-                  </p>
-                  <p className="mt-2 text-[14px] leading-6 text-slate-500 sm:text-[15px]">
-                    파티원 참여는 결제와 연결되는 단계라서, 결제 전에 정책
-                    내용을 충분히 확인하는 흐름으로 구성하는 것이 좋습니다.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 rounded-[28px] border border-[#D9FBEF] bg-white px-5 py-5 shadow-[0_18px_48px_-34px_rgba(20,184,166,0.14)] sm:px-6 sm:py-6">
+      <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+        <div className="mx-auto w-full max-w-3xl">
+          <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+            <div className="bg-white px-5 py-5 sm:px-8 sm:py-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-[13px] font-medium text-slate-400">
-                    필수 동의 진행 상태
-                  </p>
-                  <p className="mt-1 text-[17px] font-semibold tracking-tight text-slate-950">
-                    {agreedRequiredCount} / {requiredItems.length} 완료
-                  </p>
+                <div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-[#0F766E]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+                    파티원 약관 동의
+                  </div>
+
+                  <h1 className="mt-2 text-[24px] font-extrabold tracking-tight text-slate-950 sm:text-[28px]">
+                    결제 전 동의가 필요해요
+                  </h1>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleGoNext}
-                  disabled={!allRequiredChecked}
-                  className={[
-                    "inline-flex h-14 shrink-0 items-center justify-center gap-2 rounded-2xl px-6 text-[15px] font-semibold transition sm:min-w-[220px]",
-                    allRequiredChecked
-                      ? "bg-[#14B8A6] text-white shadow-[0_20px_46px_-24px_rgba(20,184,166,0.42)] hover:bg-[#0D9488]"
-                      : "cursor-not-allowed bg-slate-200 text-slate-400",
-                  ].join(" ")}
-                >
-                  결제 단계로 이동
-                  <Icon icon="solar:arrow-right-linear" className="h-4 w-4" />
-                </button>
+                <div className="inline-flex items-center rounded-full bg-slate-50 px-3 py-1.5 text-[12px] font-bold text-slate-500">
+                  {agreedRequiredCount}/{requiredItems.length} 완료
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 px-5 py-5 sm:px-8 sm:py-6">
+              <div className="rounded-[24px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100 sm:px-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#0F766E] shadow-sm ring-1 ring-teal-100">
+                    <Icon icon="solar:shield-check-bold" className="h-5 w-5" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[15px] font-extrabold tracking-tight text-slate-950">
+                      내용을 확인했다면 한 번에 동의할 수 있어요
+                    </p>
+                    <p className="mt-1.5 text-[13px] leading-6 text-slate-500 sm:text-[14px]">
+                      모든 필수 항목에 동의하면 결제 단계로 이동할 수 있습니다.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAgreeAll}
+                    className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-white px-4 text-[13px] font-bold text-[#0F766E] shadow-sm ring-1 ring-teal-100 transition hover:-translate-y-0.5 hover:bg-teal-50"
+                  >
+                    전체 동의
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-4 space-y-2.5">
+                {agreementItems.map((item) => (
+                  <AgreementCard
+                    key={item.key}
+                    item={item}
+                    checked={agreements[item.key]}
+                    onOpen={handleOpenItem}
+                  />
+                ))}
+              </div>
+
+              <div className="mt-5 rounded-[24px] bg-white px-4 py-4 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100 sm:px-5">
+                <div className="mb-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-[#14B8A6] transition-all"
+                    style={{
+                      width: `${(agreedRequiredCount / requiredItems.length) * 100}%`,
+                    }}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-bold text-slate-400">
+                      필수 동의 진행 상태
+                    </p>
+                    <p className="mt-1 text-[17px] font-extrabold tracking-tight text-slate-950">
+                      {agreedRequiredCount} / {requiredItems.length} 완료
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleGoNext}
+                    disabled={!allRequiredChecked}
+                    className={[
+                      "inline-flex h-13 shrink-0 items-center justify-center gap-2 rounded-full px-6 text-[15px] font-bold transition sm:min-w-[220px]",
+                      allRequiredChecked
+                        ? "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/20 hover:-translate-y-0.5 hover:bg-[#0D9488]"
+                        : "cursor-not-allowed bg-slate-200 text-slate-400",
+                    ].join(" ")}
+                  >
+                    결제 단계로 이동
+                    <Icon
+                      icon="solar:arrow-right-linear"
+                      className="h-4 w-4"
+                    />
+                  </button>
+                </div>
               </div>
             </div>
           </section>

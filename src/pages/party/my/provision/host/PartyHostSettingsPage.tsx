@@ -347,12 +347,12 @@ export default function PartyHostSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] px-4 py-10 sm:px-6">
-        <div className="mx-auto flex min-h-96 w-full max-w-[720px] items-center justify-center rounded-[28px] border border-slate-200 bg-white">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
           <div className="text-center">
             <Icon
               icon="solar:refresh-circle-bold"
-              className="mx-auto h-11 w-11 animate-spin text-blue-900"
+              className="mx-auto h-11 w-11 animate-spin text-brand-main"
             />
             <p className="mt-4 text-sm font-semibold text-slate-600">
               파티 설정을 불러오는 중입니다
@@ -364,22 +364,43 @@ export default function PartyHostSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mx-auto w-full max-w-[720px]">
+    <div className="min-h-screen bg-brand-bg px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mx-auto w-full max-w-4xl">
         <header className="flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => navigate(`/myparty/${partyId}/provision/dashboard`)}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-100 transition hover:bg-slate-50 hover:text-brand-main"
             aria-label="파티장 대시보드로 이동"
           >
             <Icon icon="solar:alt-arrow-left-linear" className="h-5 w-5" />
           </button>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-500 ring-1 ring-slate-200">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-brand-main shadow-sm ring-1 ring-blue-100">
             <Icon icon="solar:settings-bold" className="h-4 w-4" />
             파티 설정
           </span>
         </header>
+
+        <section className="mt-5 overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-5 py-6 sm:px-8">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-[13px] font-extrabold text-brand-main">
+                  HOST SETTINGS
+                </p>
+                <h1 className="mt-2 truncate text-[28px] font-extrabold tracking-tight text-slate-950">
+                  {partySettings?.ottServiceName || "파티 설정"}
+                </h1>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+                  정산 정보와 해지 예약 상태를 확인합니다.
+                </p>
+              </div>
+              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main shadow-sm ring-1 ring-blue-100">
+                <Icon icon="solar:settings-bold" className="h-6 w-6" />
+              </div>
+            </div>
+          </div>
+        </section>
 
         {partySettings && (
           <>
@@ -392,7 +413,7 @@ export default function PartyHostSettingsPage() {
           </>
         )}
 
-        <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 sm:px-6">
+        <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 sm:px-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-bold text-amber-700">LEAVE RESERVED</p>
@@ -408,7 +429,7 @@ export default function PartyHostSettingsPage() {
             </div>
           </div>
 
-          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
+          <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-slate-100">
             {activeReservations.length > 0 ? (
               <div className="divide-y divide-slate-100 bg-white">
                 {activeReservations.map((reservation) => (
@@ -420,7 +441,7 @@ export default function PartyHostSettingsPage() {
                 ))}
               </div>
             ) : (
-              <div className="bg-[#F8FAFC] px-5 py-8 text-center">
+              <div className="bg-slate-50 px-5 py-8 text-center">
                 <Icon
                   icon="solar:user-check-bold"
                   className="mx-auto h-10 w-10 text-slate-300"
@@ -434,8 +455,8 @@ export default function PartyHostSettingsPage() {
         </section>
 
         <section
-          className={`mt-5 rounded-[24px] border bg-white px-4 py-4 shadow-[0_14px_46px_-42px_rgba(15,23,42,0.24)] sm:px-5 ${
-            hasHostReservation ? "border-teal-100" : "border-rose-100"
+          className={`mt-5 rounded-[24px] bg-white px-4 py-4 shadow-lg shadow-slate-900/5 ring-1 sm:px-5 ${
+            hasHostReservation ? "ring-teal-100" : "ring-rose-100"
           }`}
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -456,10 +477,10 @@ export default function PartyHostSettingsPage() {
               />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="text-base font-semibold text-slate-950">
+              <h2 className="text-base font-extrabold text-slate-950">
                 {hasHostReservation ? "파티 해지 취소" : "파티 해지하기"}
               </h2>
-              <p className="mt-1 text-sm font-normal leading-6 text-slate-500">
+              <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
                 {hasHostReservation
                   ? "등록한 해지를 취소하고 기존 이용 상태로 되돌립니다."
                   : "다음 결제일에 탈퇴가 반영됩니다."}
@@ -473,7 +494,7 @@ export default function PartyHostSettingsPage() {
                   : setIsLeaveConfirmOpen(true)
               }
               disabled={isSubmitting}
-              className={`flex h-10 w-full shrink-0 items-center justify-center gap-1.5 rounded-2xl px-3 text-xs font-semibold ring-1 transition disabled:cursor-not-allowed sm:w-auto ${
+              className={`flex h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-bold ring-1 transition disabled:cursor-not-allowed sm:w-auto ${
                 hasHostReservation
                   ? "bg-teal-50 text-teal-700 ring-teal-100 hover:bg-teal-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
                   : "bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
@@ -542,23 +563,25 @@ function SettlementSection({
   onLoadDetail: () => void;
 }) {
   return (
-    <section className="mt-5 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)]">
+    <section className="mt-5 overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
       <div className="px-5 py-5 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-bold text-[#1E3A8A]">SETTLEMENT</p>
-            <h2 className="mt-1 text-lg font-bold text-slate-950">정산 정보</h2>
-            <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
+            <p className="text-[13px] font-extrabold text-brand-main">SETTLEMENT</p>
+            <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
+              정산 정보
+            </h2>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
               파티 운영 정산 계좌와 예정 금액을 확인합니다.
             </p>
           </div>
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EEF4FF] text-[#1E3A8A] ring-1 ring-[#D9E6FF]">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
             <Icon icon="solar:wallet-money-bold" className="h-6 w-6" />
           </div>
         </div>
       </div>
 
-      <div className="border-t border-slate-100 bg-[#F8FAFC] px-5 py-5 sm:px-6">
+      <div className="border-t border-slate-100 bg-slate-50 px-5 py-5 sm:px-6">
         <div className="grid gap-2 sm:grid-cols-2">
           <SettlementTile
             icon="solar:calendar-date-bold"
@@ -576,7 +599,7 @@ function SettlementSection({
           type="button"
           onClick={onLoadDetail}
           disabled={isLoading}
-          className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#EEF4FF] text-sm font-bold text-[#1E3A8A] ring-1 ring-[#D9E6FF] transition hover:bg-[#E0EAFF] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
+          className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white text-sm font-bold text-brand-main ring-1 ring-blue-100 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
         >
           <Icon
             icon={
@@ -599,16 +622,18 @@ function SettlementAccountSection({
   settings: PartySettingsResponse;
 }) {
   return (
-    <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
+    <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 sm:px-6">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-xs font-bold text-[#1E3A8A]">ACCOUNT</p>
-          <h2 className="mt-1 text-lg font-bold text-slate-950">정산 계좌</h2>
-          <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
+          <p className="text-[13px] font-extrabold text-brand-main">ACCOUNT</p>
+          <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
+            정산 계좌
+          </h2>
+          <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
             정산금을 입금받을 계좌 정보입니다.
           </p>
         </div>
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EEF4FF] text-[#1E3A8A] ring-1 ring-[#D9E6FF]">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
           <Icon icon="solar:banknote-bold" className="h-6 w-6" />
         </div>
       </div>
@@ -639,13 +664,13 @@ function SettlementTile({
   value: string;
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-white px-4 py-4 ring-1 ring-slate-200">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#EEF4FF] text-[#1E3A8A] ring-1 ring-[#D9E6FF]">
+    <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-white px-4 py-4 ring-1 ring-slate-100">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
         <Icon icon={icon} className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-semibold text-slate-400">{label}</p>
-        <p className="mt-1 truncate text-sm font-bold text-slate-900">
+        <p className="text-xs font-bold text-slate-400">{label}</p>
+        <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
           {value}
         </p>
       </div>
@@ -667,7 +692,7 @@ function FeeDetailModal({
       role="presentation"
     >
       <section
-        className="no-scrollbar max-h-[86vh] w-full max-w-[560px] overflow-y-auto rounded-[30px] bg-white shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)]"
+        className="no-scrollbar max-h-[86vh] w-full max-w-[560px] overflow-y-auto rounded-[30px] bg-white shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] ring-1 ring-slate-100"
         onMouseDown={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -676,18 +701,18 @@ function FeeDetailModal({
         <div className="px-5 py-6 sm:px-7">
           <div className="flex items-start justify-between gap-5">
             <div>
-              <p className="text-xs font-bold text-[#1E3A8A]">SETTLEMENT</p>
+              <p className="text-xs font-extrabold text-brand-main">SETTLEMENT</p>
               <h2
                 id="fee-detail-title"
-                className="mt-1 text-2xl font-bold text-slate-950"
+                className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950"
               >
                 정산 내역 자세히 보기
               </h2>
-              <p className="mt-2 text-sm font-medium text-slate-500">
+              <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
                 파티원 분담금에서 플랫폼 수수료를 제외한 정산 예정 금액입니다.
               </p>
             </div>
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EEF4FF] text-[#1E3A8A] ring-1 ring-[#D9E6FF]">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
               <Icon icon="solar:chart-square-bold" className="h-6 w-6" />
             </div>
           </div>
@@ -709,28 +734,28 @@ function FeeDetailModal({
             />
           </div>
 
-          <div className="mt-3 rounded-2xl border border-blue-100 bg-[#EEF4FF] px-5 py-4">
+          <div className="mt-3 rounded-2xl bg-blue-50 px-5 py-4 ring-1 ring-blue-100">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-bold text-[#1E3A8A]">
+                <p className="text-xs font-bold text-brand-main">
                   매달 정산 금액
                 </p>
-                <p className="mt-1 text-2xl font-bold text-slate-950">
+                <p className="mt-1 text-2xl font-extrabold text-slate-950">
                   {formatWon(detail.monthlySettlementAmount)}
                 </p>
               </div>
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#1E3A8A] ring-1 ring-blue-100">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main ring-1 ring-blue-100">
                 <Icon icon="solar:wallet-money-bold" className="h-5 w-5" />
               </div>
             </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-[#F8FAFC] px-4 py-3 ring-1 ring-slate-200">
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100">
             <div>
-              <p className="text-xs font-semibold text-slate-400">
+              <p className="text-xs font-bold text-slate-400">
                 정산 보장제
               </p>
-              <p className="mt-1 text-sm font-bold text-slate-900">
+              <p className="mt-1 text-sm font-extrabold text-slate-900">
                 {detail.isSettlementGuaranteeApplied ? "적용" : "미적용"}
               </p>
             </div>
@@ -765,20 +790,20 @@ function FeeFlowChart({ detail }: { detail: PartyFeeDetailResponse }) {
   );
 
   return (
-    <div className="mt-6 rounded-[24px] bg-[#F8FAFC] p-4 ring-1 ring-slate-200">
+    <div className="mt-6 rounded-[24px] bg-slate-50 p-4 ring-1 ring-slate-100">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold text-slate-400">정산 흐름</p>
-          <p className="mt-1 text-lg font-bold text-slate-950">
+          <p className="text-xs font-bold text-slate-400">정산 흐름</p>
+          <p className="mt-1 text-lg font-extrabold text-slate-950">
             {formatWon(shareAmount)}
           </p>
         </div>
       </div>
 
-      <div className="mt-4 h-4 overflow-hidden rounded-full bg-slate-200">
+      <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-200">
         <div className="flex h-full w-full">
           <div
-            className="h-full bg-[#60A5FA]"
+            className="h-full bg-brand-main"
             style={{ width: `${settlementPercent}%` }}
           />
           <div
@@ -791,21 +816,21 @@ function FeeFlowChart({ detail }: { detail: PartyFeeDetailResponse }) {
       <div className="mt-4 grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-slate-100">
           <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#60A5FA]" />
-            <p className="text-xs font-semibold text-slate-400">정산 예정</p>
+            <span className="h-2.5 w-2.5 rounded-full bg-brand-main" />
+            <p className="text-xs font-bold text-slate-400">정산 예정</p>
           </div>
-          <p className="mt-1 text-sm font-bold text-slate-900">
+          <p className="mt-1 text-sm font-extrabold text-slate-900">
             {formatWon(settlementAmount)}
           </p>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-slate-100">
           <div className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-            <p className="text-xs font-semibold text-slate-400">
+            <p className="text-xs font-bold text-slate-400">
               플랫폼 수수료
             </p>
           </div>
-          <p className="mt-1 text-sm font-bold text-slate-900">
+          <p className="mt-1 text-sm font-extrabold text-slate-900">
             {formatWon(platformFee)}
           </p>
         </div>
@@ -816,9 +841,11 @@ function FeeFlowChart({ detail }: { detail: PartyFeeDetailResponse }) {
 
 function FeeDetailCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-2xl bg-[#F8FAFC] px-4 py-4 ring-1 ring-slate-200">
-      <p className="text-xs font-semibold text-slate-400">{label}</p>
-      <p className="mt-1 truncate text-sm font-bold text-slate-900">{value}</p>
+    <div className="min-w-0 rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
+      <p className="text-xs font-bold text-slate-400">{label}</p>
+      <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
+        {value}
+      </p>
     </div>
   );
 }
@@ -892,7 +919,7 @@ function LeaveReserveConfirmModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex h-11 items-center justify-center rounded-2xl bg-[#F8FAFC] text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+            className="flex h-11 items-center justify-center rounded-full bg-slate-50 text-sm font-bold text-slate-600 ring-1 ring-slate-100 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
           >
             취소
           </button>
@@ -900,7 +927,7 @@ function LeaveReserveConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={isSubmitting}
-            className={`flex h-11 items-center justify-center gap-2 rounded-2xl text-sm font-semibold ring-1 transition disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200 ${buttonClassName}`}
+            className={`flex h-11 items-center justify-center gap-2 rounded-full text-sm font-bold ring-1 transition disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200 ${buttonClassName}`}
           >
             <Icon
               icon={

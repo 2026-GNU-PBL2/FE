@@ -93,7 +93,7 @@ function getStatusLabel(status: PartyHistoryStatus) {
 
 function getStatusStyle(status: PartyHistoryStatus) {
   if (status === "USING") {
-    return "bg-[#2DD4BF]/10 text-[#0F766E] ring-[#2DD4BF]/20";
+    return "bg-teal-50 text-[#0F766E] ring-teal-100";
   }
 
   if (status === "ENDED") {
@@ -105,6 +105,30 @@ function getStatusStyle(status: PartyHistoryStatus) {
   }
 
   return "bg-[#38BDF8]/10 text-[#0369A1] ring-[#38BDF8]/20";
+}
+
+function getRoleStyle(role: PartyRole) {
+  if (role === "HOST") {
+    return {
+      iconBg: "bg-blue-50 text-brand-main ring-blue-100",
+      badge: "bg-blue-50 text-brand-main ring-blue-100",
+      accent: "bg-brand-main",
+    };
+  }
+
+  if (role === "MEMBER") {
+    return {
+      iconBg: "bg-teal-50 text-[#0F766E] ring-teal-100",
+      badge: "bg-teal-50 text-[#0F766E] ring-teal-100",
+      accent: "bg-[#14B8A6]",
+    };
+  }
+
+  return {
+    iconBg: "bg-slate-50 text-slate-600 ring-slate-100",
+    badge: "bg-slate-50 text-slate-500 ring-slate-100",
+    accent: "bg-slate-400",
+  };
 }
 
 function getJoinStatusStyle(status: PartyJoinStatus) {
@@ -441,67 +465,51 @@ export default function MyParty() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-4 py-10 sm:px-6">
-      <div className="mx-auto w-full max-w-[760px]">
-        <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_24px_80px_-55px_rgba(15,23,42,0.35)]">
-          <div className="relative px-6 py-7 sm:px-8 sm:py-8">
-            <div className="absolute right-6 top-6 hidden h-24 w-24 rounded-[32px] bg-[#38BDF8]/10 sm:block" />
-            <div className="absolute right-12 top-12 hidden h-14 w-14 rounded-3xl bg-[#2DD4BF]/15 sm:block" />
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div className="mx-auto w-full max-w-5xl">
+        <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="px-5 py-6 sm:px-8 sm:py-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="flex items-start gap-4">
+                <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-slate-900/15">
+                  <Icon
+                    icon="solar:users-group-rounded-bold"
+                    className="h-7 w-7"
+                  />
+                </div>
 
-            <div className="relative flex items-start gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-[#1E3A8A] text-white shadow-[0_16px_35px_-25px_rgba(30,58,138,0.8)]">
-                <Icon
-                  icon="solar:users-group-rounded-bold"
-                  className="h-8 w-8"
+                <div>
+                  <p className="text-[13px] font-extrabold text-slate-400">
+                    MY PARTY
+                  </p>
+
+                  <h1 className="mt-2 text-[28px] font-extrabold leading-tight tracking-tight text-slate-950 sm:text-[34px]">
+                    내 파티
+                  </h1>
+
+                  <p className="mt-3 max-w-[560px] text-[15px] leading-6 text-slate-500">
+                    참여 중인 구독, 시작 예정인 파티, 자동 매칭 신청 현황을
+                    한곳에서 확인하세요.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 rounded-[24px] bg-slate-50 p-2 ring-1 ring-slate-100 sm:min-w-[360px]">
+                <SummaryCount
+                  label="이용 중"
+                  count={usingParties.length}
+                  className="text-[#0F766E]"
                 />
-              </div>
-
-              <div>
-                <p className="text-sm font-bold text-[#38BDF8]">
-                  Submate Party
-                </p>
-
-                <h1 className="mt-2 text-2xl font-extrabold leading-tight text-slate-950 sm:text-3xl">
-                  나의 파티 관리
-                </h1>
-
-                <p className="mt-3 max-w-[520px] text-sm leading-6 text-slate-500">
-                  이용 중인 공동구독 파티와 종료된 이용 내역을 확인할 수
-                  있습니다. 다음 결제일부터 시작되는 파티는 이용 예정으로
-                  표시됩니다.
-                </p>
-              </div>
-            </div>
-
-            <div className="relative mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-3xl bg-[#F8FAFC] px-5 py-4 ring-1 ring-slate-200">
-                <p className="text-xs font-bold text-slate-400">이용 중</p>
-                <p className="mt-1 text-2xl font-extrabold text-[#1E3A8A]">
-                  {usingParties.length}
-                  <span className="ml-1 text-sm font-bold text-slate-400">
-                    개
-                  </span>
-                </p>
-              </div>
-
-              <div className="rounded-3xl bg-[#F8FAFC] px-5 py-4 ring-1 ring-slate-200">
-                <p className="text-xs font-bold text-slate-400">이용 예정</p>
-                <p className="mt-1 text-2xl font-extrabold text-amber-600">
-                  {scheduledParties.length}
-                  <span className="ml-1 text-sm font-bold text-slate-400">
-                    개
-                  </span>
-                </p>
-              </div>
-
-              <div className="rounded-3xl bg-[#F8FAFC] px-5 py-4 ring-1 ring-slate-200">
-                <p className="text-xs font-bold text-slate-400">종료</p>
-                <p className="mt-1 text-2xl font-extrabold text-slate-700">
-                  {endedParties.length}
-                  <span className="ml-1 text-sm font-bold text-slate-400">
-                    개
-                  </span>
-                </p>
+                <SummaryCount
+                  label="예정"
+                  count={scheduledParties.length}
+                  className="text-amber-600"
+                />
+                <SummaryCount
+                  label="종료"
+                  count={endedParties.length}
+                  className="text-slate-700"
+                />
               </div>
             </div>
           </div>
@@ -509,18 +517,18 @@ export default function MyParty() {
 
         <section className="mt-8">
           <div>
-            <p className="text-sm font-bold text-slate-400">이용중인 파티</p>
-            <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+            <p className="text-[13px] font-extrabold text-[#0F766E]">이용 중</p>
+            <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
               현재 이용 중인 구독
             </h2>
           </div>
 
-          <div className="mt-4 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_70px_-55px_rgba(15,23,42,0.35)]">
+          <div className="mt-4 overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
             {isLoading ? (
               <div className="flex min-h-56 flex-col items-center justify-center px-6 py-10 text-center">
                 <Icon
                   icon="solar:refresh-circle-bold"
-                  className="h-10 w-10 animate-spin text-[#1E3A8A]"
+                  className="h-10 w-10 animate-spin text-[#0F766E]"
                 />
                 <p className="mt-4 text-sm font-semibold text-slate-600">
                   파티 목록을 불러오는 중입니다
@@ -539,9 +547,9 @@ export default function MyParty() {
 
                 <button
                   onClick={() => navigate("/")}
-                  className="flex w-full items-center gap-4 px-5 py-5 text-left transition hover:bg-[#F8FAFC]"
+                  className="flex w-full items-center gap-4 px-5 py-5 text-left transition hover:bg-slate-50"
                 >
-                  <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-[#38BDF8]/10 text-[#38BDF8] ring-1 ring-[#38BDF8]/20">
+                  <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-500 ring-1 ring-slate-100">
                     <Icon icon="solar:add-circle-bold" className="h-7 w-7" />
                   </div>
 
@@ -564,9 +572,9 @@ export default function MyParty() {
               <div className="px-5 py-5">
                 <button
                   onClick={() => navigate("/")}
-                  className="flex w-full items-center gap-4 rounded-3xl bg-[#F8FAFC] px-4 py-5 text-left ring-1 ring-slate-200 transition hover:bg-white"
+                  className="flex w-full items-center gap-4 rounded-[24px] bg-slate-50 px-4 py-5 text-left ring-1 ring-slate-100 transition hover:bg-white"
                 >
-                  <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-white text-[#38BDF8] ring-1 ring-slate-200">
+                  <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0F766E] ring-1 ring-slate-100">
                     <Icon icon="solar:add-circle-bold" className="h-7 w-7" />
                   </div>
 
@@ -592,13 +600,15 @@ export default function MyParty() {
         {!isLoading && scheduledParties.length > 0 && (
           <section className="mt-8">
             <div>
-              <p className="text-sm font-bold text-amber-600">이용 예정</p>
-              <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+              <p className="text-[13px] font-extrabold text-amber-600">
+                이용 예정
+              </p>
+              <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
                 다음 결제일부터 참여할 파티
               </h2>
             </div>
 
-            <div className="mt-4 overflow-hidden rounded-[28px] border border-amber-100 bg-white shadow-[0_20px_70px_-55px_rgba(15,23,42,0.35)]">
+            <div className="mt-4 overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-amber-100">
               <div className="divide-y divide-slate-100">
                 {scheduledParties.map((party) => (
                   <PartyListItem
@@ -616,13 +626,15 @@ export default function MyParty() {
         {!isLoading && endedParties.length > 0 && (
           <section className="mt-8">
             <div>
-              <p className="text-sm font-bold text-slate-400">종료된 파티</p>
-              <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+              <p className="text-[13px] font-extrabold text-slate-400">
+                종료된 파티
+              </p>
+              <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
                 지난 이용 내역
               </h2>
             </div>
 
-            <div className="mt-4 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_70px_-55px_rgba(15,23,42,0.35)]">
+            <div className="mt-4 overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
               <div className="divide-y divide-slate-100">
                 {endedParties.map((party) => (
                   <PartyListItem
@@ -641,8 +653,10 @@ export default function MyParty() {
           <section className="mt-8">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-sm font-bold text-[#38BDF8]">자동 매칭</p>
-                <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+                <p className="text-[13px] font-extrabold text-[#0F766E]">
+                  자동 매칭
+                </p>
+                <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
                   신청 현황
                 </h2>
               </div>
@@ -653,7 +667,7 @@ export default function MyParty() {
               </span>
             </div>
 
-            <div className="mt-4 overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_24px_80px_-55px_rgba(15,23,42,0.35)]">
+            <div className="mt-4 overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
               {visibleJoinRequests.map((request) => (
                 <article
                   key={request.joinRequestId}
@@ -661,7 +675,7 @@ export default function MyParty() {
                 >
                   <div className="flex flex-col gap-5">
                     <div className="flex min-w-0 items-start gap-4">
-                      <div className="flex h-15 w-15 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-[#F8FAFC] text-[#1E3A8A] ring-1 ring-slate-200">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 text-[#0F766E] ring-1 ring-slate-100">
                         {request.thumbnailUrl ? (
                           <img
                             src={request.thumbnailUrl}
@@ -699,9 +713,9 @@ export default function MyParty() {
                     </div>
 
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      <div className="rounded-2xl bg-[#F8FAFC] px-3 py-3 ring-1 ring-slate-100">
+                      <div className="rounded-2xl bg-slate-50 px-3 py-3 ring-1 ring-slate-100">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#38BDF8] ring-1 ring-slate-200">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-500 ring-1 ring-slate-100">
                             <Icon
                               icon="solar:calendar-linear"
                               className="h-5 w-5"
@@ -719,7 +733,7 @@ export default function MyParty() {
                         </div>
                       </div>
 
-                      <div className="rounded-2xl bg-[#F7FFFD] px-3 py-3 ring-1 ring-[#D9FBEF]">
+                      <div className="rounded-2xl bg-teal-50 px-3 py-3 ring-1 ring-teal-100">
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0F766E] ring-1 ring-[#D9FBEF]">
                             <Icon
@@ -759,7 +773,7 @@ export default function MyParty() {
                             <button
                               type="button"
                               onClick={() => handleGoJoinRequestParty(request)}
-                              className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#1E3A8A] px-3 text-sm font-bold text-white transition hover:bg-blue-950"
+                              className="flex h-11 items-center justify-center gap-2 rounded-full bg-[#14B8A6] px-3 text-sm font-bold text-white shadow-sm shadow-teal-900/15 transition hover:bg-[#0D9488]"
                             >
                               상세 보기
                               <Icon
@@ -773,7 +787,7 @@ export default function MyParty() {
                           <button
                             type="button"
                             onClick={() => setCancelTarget(request)}
-                            className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-white px-3 text-sm font-bold text-rose-600 ring-1 ring-rose-100 transition hover:bg-rose-50"
+                            className="flex h-11 items-center justify-center gap-2 rounded-full bg-white px-3 text-sm font-bold text-rose-600 ring-1 ring-rose-100 transition hover:bg-rose-50"
                           >
                             <Icon
                               icon="solar:close-circle-bold"
@@ -887,6 +901,26 @@ function CancelJoinRequestModal({
   );
 }
 
+function SummaryCount({
+  label,
+  count,
+  className,
+}: {
+  label: string;
+  count: number;
+  className: string;
+}) {
+  return (
+    <div className="rounded-[18px] bg-white px-3 py-3 text-center ring-1 ring-slate-100">
+      <p className="text-[11px] font-extrabold text-slate-400">{label}</p>
+      <p className={`mt-1 text-[24px] font-extrabold ${className}`}>
+        {count}
+        <span className="ml-0.5 text-[12px] font-bold text-slate-400">개</span>
+      </p>
+    </div>
+  );
+}
+
 function PartyListItem({
   party,
   usagePeriod,
@@ -896,46 +930,58 @@ function PartyListItem({
   usagePeriod?: PartyUsagePeriodResponse;
   onClick: () => void;
 }) {
+  const roleStyle = getRoleStyle(party.role);
+
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-4 px-5 py-5 text-left transition hover:bg-[#F8FAFC]"
+      className="flex w-full items-center gap-4 px-5 py-5 text-left transition hover:bg-slate-50 sm:px-6"
     >
-      <div className="relative flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-[#F8FAFC] text-[#1E3A8A] ring-1 ring-slate-200">
+      <div
+        className={[
+          "relative flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl ring-1",
+          roleStyle.iconBg,
+        ].join(" ")}
+      >
         <Icon icon={getProductIcon(party.productName)} className="h-7 w-7" />
 
         {party.role === "HOST" && (
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#2DD4BF] text-white ring-2 ring-white">
+          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-main text-white ring-2 ring-white">
             <Icon icon="solar:crown-bold" className="h-3.5 w-3.5" />
           </span>
         )}
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           <p className="truncate text-base font-extrabold text-slate-800">
             {party.productName}
           </p>
 
           <span
-            className={`rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${getStatusStyle(party.status)}`}
+            className={`rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ${getStatusStyle(party.status)}`}
           >
             {getStatusLabel(party.status)}
           </span>
         </div>
 
-        <p className="mt-1 text-sm font-semibold text-slate-400">
+        <p
+          className={[
+            "mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-extrabold ring-1",
+            roleStyle.badge,
+          ].join(" ")}
+        >
           {getRoleLabel(party.role)}
         </p>
 
         {party.status === "USING" && usagePeriod && (
-          <p className="mt-1 text-xs font-bold text-[#0F766E]">
+          <p className="mt-2 text-xs font-bold text-[#0F766E]">
             {formatUsageDayCount(usagePeriod.currentStartDate)}
           </p>
         )}
 
         {party.status === "SCHEDULED" && (
-          <p className="mt-1 text-xs font-bold text-amber-600">
+          <p className="mt-2 text-xs font-bold text-amber-600">
             {formatScheduledStartText(party.startAt)}
           </p>
         )}

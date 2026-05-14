@@ -27,45 +27,50 @@ export default function PartyHostAdultCheckPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-      <div className="mx-auto w-full max-w-2xl">
-        <section className="rounded-3xl border border-slate-200 bg-white px-6 py-10 text-center shadow-sm sm:px-10">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-600">
-            <Icon icon="solar:shield-warning-bold" className="h-9 w-9" />
-          </div>
-
-          <p className="mt-6 text-sm font-bold text-sky-600">
-            {locationState?.productName ?? "공유계정 상품"}
-          </p>
-
-          <h1 className="mt-2 text-2xl font-extrabold text-slate-950">
-            계정 성인인증을 확인해주세요
-          </h1>
-
-          <p className="mx-auto mt-3 max-w-md text-sm font-semibold leading-6 text-slate-500">
-            파티원이 바로 이용할 수 있도록 공유 계정에서 성인인증이 완료되어
-            있는지 확인해주세요.
-          </p>
-
-          <div className="mt-7 rounded-3xl bg-slate-50 px-5 py-5 text-left ring-1 ring-slate-200">
-            <div className="flex items-start gap-3">
-              <Icon
-                icon="solar:check-circle-bold"
-                className="mt-0.5 h-5 w-5 shrink-0 text-teal-500"
-              />
-              <p className="text-sm font-semibold leading-6 text-slate-600">
-                성인인증이 필요한 콘텐츠가 있는 상품이라면, 파티원이 접속하기 전
-                계정 인증을 먼저 완료해주세요.
-              </p>
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div className="mx-auto flex min-h-[calc(100vh-80px)] w-full max-w-[560px] items-center justify-center">
+        <section className="w-full overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-6 py-10 sm:px-10">
+            <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-full bg-white text-brand-main shadow-sm ring-1 ring-blue-100">
+              <Icon icon="solar:shield-check-bold" className="h-10 w-10" />
             </div>
+
+            <p className="mt-6 inline-flex max-w-full rounded-full bg-blue-50 px-3 py-1 text-[12px] font-extrabold text-brand-main ring-1 ring-blue-100">
+              <span className="truncate">
+                {locationState?.productName ?? "공유계정 상품"}
+              </span>
+            </p>
+
+            <h1 className="mt-3 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
+              성인인증 확인
+            </h1>
+
+            <p className="mx-auto mt-3 max-w-md text-[15px] leading-6 text-slate-500">
+              파티원이 바로 이용할 수 있도록 공유 계정의 성인인증 완료 여부를
+              확인해 주세요.
+            </p>
           </div>
 
-          <button
-            onClick={handleComplete}
-            className="mt-8 flex h-14 w-full items-center justify-center rounded-2xl bg-blue-900 text-base font-bold text-white transition hover:bg-blue-950"
-          >
-            완료했어요
-          </button>
+          <div className="border-t border-slate-100 px-6 py-6 sm:px-8">
+            <div className="rounded-[24px] bg-slate-50 px-5 py-5 text-left ring-1 ring-slate-100">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main ring-1 ring-blue-100">
+                  <Icon icon="solar:check-circle-bold" className="h-5 w-5" />
+                </div>
+                <p className="text-sm font-semibold leading-6 text-slate-600">
+                  성인인증이 필요한 콘텐츠가 있는 상품이라면, 파티원이 접속하기
+                  전에 계정 인증을 먼저 완료해 주세요.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleComplete}
+              className="mt-6 flex h-14 w-full items-center justify-center rounded-full bg-brand-main text-base font-bold text-white shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5 hover:bg-blue-800"
+            >
+              확인 완료
+            </button>
+          </div>
         </section>
       </div>
     </div>

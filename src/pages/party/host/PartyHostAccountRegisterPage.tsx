@@ -101,14 +101,6 @@ function getAgreementPath(productId: string) {
   return `/party/create/${productId}/host/agreement`;
 }
 
-function getAccountLabel(account: BankAccountResponse) {
-  const bankName = account.bankName || "은행 정보 없음";
-  const masked = account.accountNumMasked || "계좌번호 미확인";
-  const alias = account.accountAlias ? ` · ${account.accountAlias}` : "";
-
-  return `${bankName} · ${masked}${alias}`;
-}
-
 export default function PartyHostAccountRegisterPage() {
   const navigate = useNavigate();
   const { productId = "" } = useParams();
@@ -212,7 +204,7 @@ export default function PartyHostAccountRegisterPage() {
         );
       } catch (error) {
         console.error("bank accounts error:", error);
-        toast.error("연결 계좌 정보를 불러오지 못했습니다.");
+        toast.error("계좌 정보를 불러오지 못했습니다.");
       } finally {
         setIsAccountsLoading(false);
       }
@@ -220,20 +212,6 @@ export default function PartyHostAccountRegisterPage() {
 
     fetchBankAccounts();
   }, []);
-
-  const handleSelectedAccountChange = (accountId: string) => {
-    setSelectedAccountId(accountId);
-
-    const account = accounts.find((item) => String(item.id) === accountId);
-    if (!account) return;
-
-    setBankCode(account.bankCode ?? "");
-    setAccountHolderName(account.accountHolderName ?? "");
-    setAccountHolderBirthDate(
-      formatBirthDate(account.accountHolderBirthDate ?? ""),
-    );
-    setAccountNumber(normalizeNumber(account.accountNumber ?? ""));
-  };
 
   const handleSubmit = async () => {
     if (!productId) {
@@ -284,216 +262,178 @@ export default function PartyHostAccountRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F4F7]">
-      <div className="mx-auto w-full max-w-[760px] px-4 py-8 sm:px-6 sm:py-12">
-        <section className="rounded-[32px] bg-white px-5 py-7 shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)] sm:px-8 sm:py-9">
-          <div className="flex items-center gap-2">
-            <div className="inline-flex items-center rounded-full bg-[#EEF4FF] px-3 py-1.5 text-[12px] font-semibold text-[#1E3A8A]">
-              SETTLEMENT ACCOUNT
-            </div>
-            <div className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1.5 text-[12px] font-semibold text-slate-500">
-              HOST ACCOUNT
-            </div>
-          </div>
+    <div className="min-h-screen bg-brand-bg">
+      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+        <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[12px] font-bold text-brand-main shadow-sm ring-1 ring-blue-100">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand-accent" />
+                  정산 계좌 등록
+                </div>
 
-          <div className="mt-5">
-            <h1 className="text-[30px] font-semibold tracking-tight text-slate-950 sm:text-[36px]">
-              정산 계좌를 등록해 주세요
-            </h1>
-            <p className="mt-3 text-[15px] leading-7 text-slate-500">
-              본인인증과 계좌연결이 완료되었습니다.
-              <br className="hidden sm:block" />
-              파티 운영 수익을 정산받을 계좌 정보를 입력해 주세요.
-            </p>
-          </div>
-
-          <div className="mt-7 rounded-[28px] bg-slate-50 px-5 py-5 sm:px-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-[#1E3A8A] shadow-[0_10px_30px_-20px_rgba(30,58,138,0.45)]">
-                <Icon icon="solar:wallet-money-bold" className="h-6 w-6" />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <p className="text-[16px] font-semibold tracking-tight text-slate-950">
-                  정산계좌 메타데이터를 저장합니다
-                </p>
-                <p className="mt-2 text-[14px] leading-6 text-slate-500 sm:text-[15px]">
-                  연결된 계좌의 fintech use num을 기준으로 정산계좌 정보를
-                  저장하고, 실명검증 상태를 반영합니다.
+                <h1 className="mt-5 text-[30px] font-extrabold tracking-tight text-slate-950 sm:text-[38px]">
+                  정산받을 계좌를 확인해 주세요
+                </h1>
+                <p className="mt-3 text-base leading-7 text-slate-500">
+                  본인인증과 계좌 연결이 완료되었습니다. 파티 운영 수익을
+                  정산받을 계좌 정보만 확인하면 됩니다.
                 </p>
               </div>
-            </div>
-          </div>
 
-          <div className="mt-6 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_48px_-34px_rgba(15,23,42,0.14)] sm:px-6 sm:py-6">
-            <div className="flex items-center gap-2">
-              <div className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-[12px] font-semibold text-slate-500">
-                ACCOUNT FORM
-              </div>
-            </div>
-
-            <div className="mt-5 space-y-5">
-              <div>
-                <label className="mb-2 block text-[14px] font-semibold text-slate-900">
-                  연결 계좌
-                </label>
-                <select
-                  value={selectedAccountId}
-                  onChange={(event) =>
-                    handleSelectedAccountChange(event.target.value)
-                  }
-                  disabled={isAccountsLoading || accounts.length === 0}
-                  className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-[15px] text-slate-900 outline-none transition focus:border-[#1E3A8A] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
-                >
-                  <option value="">
-                    {isAccountsLoading
-                      ? "연결 계좌를 불러오는 중입니다"
-                      : "연결 계좌를 선택해주세요"}
-                  </option>
-                  {accounts.map((account) => (
-                    <option key={account.id} value={account.id}>
-                      {getAccountLabel(account)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-[14px] font-semibold text-slate-900">
-                  핀테크 이용번호
-                </label>
-                <input
-                  type="text"
-                  value={
-                    isAccountsLoading
-                      ? "연결 계좌 정보를 불러오는 중입니다..."
-                      : (selectedAccount?.fintechUseNum ?? "")
-                  }
-                  readOnly
-                  placeholder="연결 계좌를 선택해주세요"
-                  className="h-14 w-full cursor-not-allowed rounded-2xl border border-slate-200 bg-slate-50 px-4 text-[15px] text-slate-500 outline-none placeholder:text-slate-400"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-[14px] font-semibold text-slate-900">
-                  은행명
-                </label>
-
-                <select
-                  value={bankCode}
-                  onChange={(event) => setBankCode(event.target.value)}
-                  className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-[15px] text-slate-900 outline-none transition focus:border-[#1E3A8A]"
-                >
-                  <option value="">은행을 선택해주세요</option>
-                  {bankOptions.map((bank) => (
-                    <option key={bank.code} value={bank.code}>
-                      {bank.label} ({bank.code})
-                    </option>
-                  ))}
-                </select>
-
-                {selectedBankName ? (
-                  <p className="mt-2 text-[13px] text-slate-400">
-                    선택된 은행: {selectedBankName}
-                  </p>
-                ) : null}
-              </div>
-
-              <div>
-                <label className="mb-2 block text-[14px] font-semibold text-slate-900">
-                  예금주명
-                </label>
-                <input
-                  type="text"
-                  value={accountHolderName}
-                  onChange={(event) => setAccountHolderName(event.target.value)}
-                  placeholder="예금주명을 입력해주세요"
-                  className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#1E3A8A]"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-[14px] font-semibold text-slate-900">
-                  생년월일
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={accountHolderBirthDate}
-                  onChange={(event) =>
-                    setAccountHolderBirthDate(
-                      formatBirthDate(event.target.value),
-                    )
-                  }
-                  placeholder="YYYY/MM/DD"
-                  className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#1E3A8A]"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-[14px] font-semibold text-slate-900">
-                  계좌번호
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={accountNumber}
-                  onChange={(event) =>
-                    setAccountNumber(normalizeNumber(event.target.value))
-                  }
-                  placeholder="숫자만 입력해주세요"
-                  className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#1E3A8A]"
-                />
+              <div className="inline-flex w-fit items-center gap-2 rounded-full bg-brand-main px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-900/20">
+                <Icon icon="solar:wallet-money-bold" className="h-4 w-4" />
+                안전한 정산 등록
               </div>
             </div>
           </div>
 
-          <div className="mt-8 rounded-[28px] bg-[#F8FAFC] px-5 py-5 sm:px-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-500">
-                <Icon icon="solar:info-circle-linear" className="h-5 w-5" />
+          <div className="grid gap-5 px-5 py-6 sm:px-8 sm:py-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-10 lg:py-10">
+            <div className="min-w-0">
+              <div className="rounded-[28px] bg-slate-50 px-5 py-5 ring-1 ring-slate-100 sm:px-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-brand-main shadow-sm">
+                    <Icon icon="solar:shield-check-bold" className="h-6 w-6" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[16px] font-extrabold tracking-tight text-slate-950">
+                      인증된 계좌 정보를 불러왔어요
+                    </p>
+                    <p className="mt-2 text-[14px] leading-6 text-slate-500 sm:text-[15px]">
+                      은행명, 예금주명, 생년월일, 계좌번호를 확인한 뒤 정산
+                      계좌로 등록해 주세요.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <p className="text-[15px] font-semibold text-slate-900">안내</p>
-                <p className="mt-2 text-[14px] leading-6 text-slate-500 sm:text-[15px]">
-                  등록된 계좌는 파티원 결제 금액 정산을 위한 지급 계좌로
-                  사용됩니다. 실제 지급 시점과 수수료 정책은 서비스 정책을
-                  따릅니다.
-                </p>
+              <div className="mt-5 rounded-[32px] bg-white px-5 py-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 sm:px-6 sm:py-6">
+                <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1.5 text-[12px] font-bold text-brand-main">
+                  계좌 정보
+                </div>
+
+                <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-[14px] font-bold text-slate-950">
+                      은행명
+                    </label>
+
+                    <select
+                      value={bankCode}
+                      onChange={(event) => setBankCode(event.target.value)}
+                      className="h-14 w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 text-[15px] font-semibold text-slate-950 outline-none transition focus:border-brand-main focus:bg-white"
+                    >
+                      <option value="">은행을 선택해주세요</option>
+                      {bankOptions.map((bank) => (
+                        <option key={bank.code} value={bank.code}>
+                          {bank.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    {selectedBankName ? (
+                      <p className="mt-2 text-[13px] font-medium text-slate-400">
+                        선택된 은행: {selectedBankName}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-[14px] font-bold text-slate-950">
+                      예금주명
+                    </label>
+                    <input
+                      type="text"
+                      value={accountHolderName}
+                      onChange={(event) =>
+                        setAccountHolderName(event.target.value)
+                      }
+                      placeholder="예금주명을 입력해주세요"
+                      className="h-14 w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 text-[15px] font-semibold text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-main focus:bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-[14px] font-bold text-slate-950">
+                      생년월일
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={accountHolderBirthDate}
+                      onChange={(event) =>
+                        setAccountHolderBirthDate(
+                          formatBirthDate(event.target.value),
+                        )
+                      }
+                      placeholder="YYYY/MM/DD"
+                      className="h-14 w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 text-[15px] font-semibold text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-main focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-[14px] font-bold text-slate-950">
+                      계좌번호
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={accountNumber}
+                      onChange={(event) =>
+                        setAccountNumber(normalizeNumber(event.target.value))
+                      }
+                      placeholder="숫자만 입력해주세요"
+                      className="h-14 w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 text-[15px] font-semibold text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-main focus:bg-white"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="mt-8 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_48px_-34px_rgba(15,23,42,0.14)] sm:px-6 sm:py-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="text-[13px] font-medium text-slate-400">
+            <aside className="rounded-[32px] bg-white p-6 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 lg:sticky lg:top-8">
+              <h2 className="text-lg font-extrabold tracking-tight text-slate-950">
+                등록 상태
+              </h2>
+
+              <div className="mt-5 rounded-[24px] bg-slate-50 p-5">
+                <p className="text-sm font-bold text-slate-500">
                   등록 준비 상태
                 </p>
-                <p className="mt-1 text-[17px] font-semibold tracking-tight text-slate-950">
+                <p className="mt-2 text-2xl font-extrabold tracking-tight text-slate-950">
                   {isFormValid ? "저장 가능" : "입력 확인 필요"}
                 </p>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={!isFormValid || isLoading || isAccountsLoading}
-                  className={[
-                    "inline-flex h-14 items-center justify-center gap-2 rounded-2xl px-6 text-[15px] font-semibold transition sm:min-w-[220px]",
-                    !isFormValid || isLoading || isAccountsLoading
-                      ? "cursor-not-allowed bg-slate-200 text-slate-400"
-                      : "bg-[#1E3A8A] text-white shadow-[0_20px_46px_-24px_rgba(30,58,138,0.42)] hover:bg-[#1D4ED8]",
-                  ].join(" ")}
-                >
-                  {isLoading ? "정산 계좌 등록 중..." : "정산 계좌 저장하기"}
-                  <Icon icon="solar:arrow-right-linear" className="h-4 w-4" />
-                </button>
+              <div className="mt-5 rounded-[24px] bg-blue-50/60 p-5 ring-1 ring-blue-100/70">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-brand-main shadow-sm">
+                  <Icon icon="solar:info-circle-linear" className="h-5 w-5" />
+                </div>
+                <p className="mt-4 text-[15px] font-extrabold text-slate-950">
+                  안내
+                </p>
+                <p className="mt-2 text-[14px] leading-6 text-slate-600">
+                  등록된 계좌는 파티원 결제 금액 정산을 위한 지급 계좌로
+                  사용됩니다.
+                </p>
               </div>
-            </div>
+
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!isFormValid || isLoading || isAccountsLoading}
+                className={[
+                  "mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full px-6 text-[15px] font-bold transition",
+                  !isFormValid || isLoading || isAccountsLoading
+                    ? "cursor-not-allowed bg-slate-200 text-slate-400"
+                    : "bg-brand-main text-white shadow-lg shadow-blue-900/20 hover:-translate-y-0.5 hover:bg-blue-800",
+                ].join(" ")}
+              >
+                {isLoading ? "정산 계좌 등록 중..." : "정산 계좌 저장하기"}
+                <Icon icon="solar:arrow-right-linear" className="h-4 w-4" />
+              </button>
+            </aside>
           </div>
         </section>
       </div>

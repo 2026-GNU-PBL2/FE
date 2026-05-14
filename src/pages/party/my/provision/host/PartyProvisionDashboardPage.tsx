@@ -291,12 +291,12 @@ export default function PartyProvisionDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-3xl border border-slate-200 bg-white">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
           <div className="text-center">
             <Icon
               icon="solar:refresh-circle-bold"
-              className="mx-auto h-11 w-11 animate-spin text-blue-900"
+              className="mx-auto h-11 w-11 animate-spin text-brand-main"
             />
             <p className="mt-4 text-sm font-semibold text-slate-600">
               파티 이용 현황을 불러오는 중입니다
@@ -309,8 +309,8 @@ export default function PartyProvisionDashboardPage() {
 
   if (!provision) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-        <div className="mx-auto w-full max-w-3xl rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-3xl rounded-[32px] bg-white px-6 py-12 text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
           <Icon
             icon="solar:danger-circle-bold"
             className="mx-auto h-12 w-12 text-slate-300"
@@ -320,7 +320,7 @@ export default function PartyProvisionDashboardPage() {
           </p>
           <button
             onClick={() => navigate("/myparty")}
-            className="mt-7 rounded-2xl bg-blue-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-950"
+            className="mt-7 inline-flex h-13 items-center justify-center rounded-full bg-brand-main px-6 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5 hover:bg-blue-800"
           >
             나의 파티 목록으로 이동
           </button>
@@ -331,12 +331,12 @@ export default function PartyProvisionDashboardPage() {
 
   const provisionTone = getStatusTone(provision.provisionStatus);
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mx-auto w-full max-w-[760px]">
+    <div className="min-h-screen bg-brand-bg px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mx-auto w-full max-w-4xl">
         <header className="flex items-center justify-between gap-3">
           <button
             onClick={() => navigate("/myparty")}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-100 transition hover:bg-slate-50 hover:text-brand-main"
             aria-label="나의 파티로 이동"
           >
             <Icon icon="solar:alt-arrow-left-linear" className="h-5 w-5" />
@@ -344,7 +344,7 @@ export default function PartyProvisionDashboardPage() {
 
           <div className="flex items-center gap-2">
             <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ${provisionTone.className}`}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${provisionTone.className}`}
             >
               <Icon icon={provisionTone.icon} className="h-4 w-4" />
               {getProvisionStatusLabel(provision.provisionStatus)}
@@ -352,7 +352,7 @@ export default function PartyProvisionDashboardPage() {
             <button
               type="button"
               onClick={() => navigate(`/myparty/${partyId}/provision/settings`)}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-100 transition hover:bg-slate-50 hover:text-brand-main"
               aria-label="파티 설정으로 이동"
             >
               <Icon icon="solar:settings-bold" className="h-5 w-5" />
@@ -360,56 +360,58 @@ export default function PartyProvisionDashboardPage() {
           </div>
         </header>
 
-        <section className="mt-5 rounded-[24px] border border-slate-200 bg-white px-5 py-5 shadow-[0_16px_48px_-40px_rgba(15,23,42,0.28)] sm:px-6">
+        <section className="mt-5 overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-5 py-6 sm:px-8">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-xs font-medium text-[#1E3A8A]">HOST PARTY</p>
-              <h1 className="mt-1 truncate text-xl font-bold text-slate-950">
+              <p className="text-[13px] font-extrabold text-brand-main">HOST PARTY</p>
+              <h1 className="mt-2 truncate text-[28px] font-extrabold tracking-tight text-slate-950">
                 {partySettings?.ottServiceName || "파티 정보"}
               </h1>
-              <p className="mt-1.5 text-sm font-normal leading-6 text-slate-500">
+              <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
                 {partySettings?.partyCreatedAt
                   ? `${formatDate(partySettings.partyCreatedAt)} 생성`
                   : "운영 중인 파티"}
               </p>
             </div>
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EEF4FF] text-[#1E3A8A] ring-1 ring-[#D9E6FF]">
-              <Icon icon="solar:crown-star-bold" className="h-5 w-5" />
+            <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main shadow-sm ring-1 ring-blue-100">
+              <Icon icon="solar:crown-star-bold" className="h-6 w-6" />
             </div>
+          </div>
           </div>
         </section>
 
-        <section className="mt-5 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_56px_-46px_rgba(15,23,42,0.3)]">
-          <div className="px-5 py-5 sm:px-6">
+        <section className="mt-5 overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="px-5 py-5 sm:px-8 sm:py-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-xs font-medium text-[#1E3A8A]">
+                <p className="text-[13px] font-extrabold text-brand-main">
                   파티 이용 현황
                 </p>
-                <h2 className="mt-1 text-xl font-bold text-slate-950">
+                <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
                   이용 확인 현황
                 </h2>
-                <p className="mt-1.5 text-sm font-normal leading-6 text-slate-500">
+                <p className="mt-1.5 text-sm font-semibold leading-6 text-slate-500">
                   파티원 이용 확인 상태가 실시간으로 반영됩니다.
                 </p>
               </div>
 
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EEF4FF] text-[#1E3A8A] ring-1 ring-[#D9E6FF]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
                 <Icon icon="solar:chart-2-bold" className="h-5 w-5" />
               </div>
             </div>
 
             <div className="mt-5">
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-medium text-slate-400">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-slate-400">
                 <span>{progressPercent}% 확인 완료</span>
                 <span>
                   {provision.activeMemberCount}명 완료 / {pendingMemberCount}명
                   대기
                 </span>
               </div>
-              <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-100">
+              <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-100">
                 <div
-                  className="h-full rounded-full bg-[#60A5FA]"
+                  className="h-full rounded-full bg-brand-main"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -436,12 +438,12 @@ export default function PartyProvisionDashboardPage() {
         <section className="mt-7">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="text-sm font-bold text-[#1E3A8A]">Members</p>
-              <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+              <p className="text-[13px] font-extrabold text-brand-main">Members</p>
+              <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
                 파티원 확인 상태
               </h2>
             </div>
-            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-slate-500 ring-1 ring-slate-200">
+            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-500 ring-1 ring-slate-100">
               {provision.members.length}명
             </span>
           </div>
@@ -465,7 +467,7 @@ export default function PartyProvisionDashboardPage() {
             </div>
           )}
 
-          <div className="mt-4 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)]">
+          <div className="mt-4 overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
             {provision.members.length > 0 ? (
               <div className="divide-y divide-slate-100">
                 {provision.members.map((member) => (
@@ -493,9 +495,11 @@ export default function PartyProvisionDashboardPage() {
 
 function MetricTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-2xl bg-[#F8FAFC] px-3 py-4 text-center ring-1 ring-slate-100">
-      <p className="text-[11px] font-medium text-slate-400">{label}</p>
-      <p className="mt-1 truncate text-sm font-bold text-slate-900">{value}</p>
+    <div className="min-w-0 rounded-2xl bg-slate-50 px-3 py-4 text-center ring-1 ring-slate-100">
+      <p className="text-[11px] font-bold text-slate-400">{label}</p>
+      <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
+        {value}
+      </p>
     </div>
   );
 }
@@ -510,13 +514,13 @@ function ScheduleTile({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-4 ring-1 ring-slate-200">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F8FAFC] text-[#1E3A8A] ring-1 ring-slate-100">
+    <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-4 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
         <Icon icon={icon} className="h-5 w-5" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-medium text-slate-400">{label}</p>
-        <p className="mt-1 truncate text-sm font-bold text-slate-900">
+        <p className="text-xs font-bold text-slate-400">{label}</p>
+        <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
           {value}
         </p>
       </div>
@@ -528,7 +532,7 @@ function MemberItem({ member }: { member: ProvisionMember }) {
   const memberTone = getStatusTone(member.memberStatus);
 
   return (
-    <article className="px-5 py-5">
+    <article className="px-5 py-5 sm:px-6">
       <div className="flex items-start gap-3">
         <div
           className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ring-1 ${memberTone.className}`}
@@ -539,16 +543,16 @@ function MemberItem({ member }: { member: ProvisionMember }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="truncate text-base font-bold text-slate-900">
+              <p className="truncate text-base font-extrabold text-slate-900">
                 {member.nickname}
               </p>
-              <p className="mt-1 text-xs font-normal text-slate-400">
+              <p className="mt-1 text-xs font-semibold text-slate-400">
                 활성화 {formatDateTime(member.activatedAt)}
               </p>
             </div>
 
             <span
-              className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ${getStatusStyle(
+              className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${getStatusStyle(
                 member.memberStatus,
               )}`}
             >
@@ -557,7 +561,7 @@ function MemberItem({ member }: { member: ProvisionMember }) {
           </div>
 
           {member.provisionMessage && (
-            <p className="mt-2 text-sm font-normal leading-6 text-slate-500">
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
               {member.provisionMessage}
             </p>
           )}

@@ -22,6 +22,10 @@ type ProductResponse = {
   updatedAt: string;
 };
 
+type UserResponse = {
+  submateEmail?: string | null;
+};
+
 type ProvisionSetupLocationState = {
   productId?: string;
 };
@@ -115,6 +119,18 @@ export default function PartyHostProvisionSetupPage() {
         }
 
         setProduct(data);
+
+        try {
+          const userResponse = await api.get<
+            UserResponse | ApiEnvelope<UserResponse>
+          >("/api/v1/user");
+          const userData = unwrapResponse<UserResponse>(userResponse.data);
+          setSharedAccountEmail(userData?.submateEmail?.trim() ?? "");
+        } catch (userError) {
+          console.error(userError);
+          toast.error("사용자 이메일 정보를 불러오지 못했습니다.");
+          setSharedAccountEmail("");
+        }
       } catch (error) {
         console.error(error);
         toast.error("상품 정보를 불러오지 못했습니다.");
@@ -140,7 +156,7 @@ export default function PartyHostProvisionSetupPage() {
     }
 
     if (!isFormValid) {
-      toast.error("아이디와 비밀번호를 입력해주세요.");
+      toast.error("계정 아이디와 비밀번호를 확인해주세요.");
       return;
     }
 
@@ -171,12 +187,12 @@ export default function PartyHostProvisionSetupPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-        <div className="mx-auto flex min-h-96 w-full max-w-2xl items-center justify-center rounded-3xl border border-slate-200 bg-white">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-96 w-full max-w-2xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
           <div className="text-center">
             <Icon
               icon="solar:refresh-circle-bold"
-              className="mx-auto h-11 w-11 animate-spin text-blue-900"
+              className="mx-auto h-11 w-11 animate-spin text-brand-main"
             />
             <p className="mt-4 text-sm font-semibold text-slate-600">
               상품 정보를 불러오는 중입니다
@@ -192,39 +208,51 @@ export default function PartyHostProvisionSetupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-      <div className="mx-auto w-full max-w-2xl">
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 px-6 py-6 sm:px-8">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200">
-                {product.thumbnailUrl ? (
-                  <img
-                    src={product.thumbnailUrl}
-                    alt={product.serviceName}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <Icon icon="solar:play-circle-bold" className="h-7 w-7" />
-                )}
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div className="mx-auto w-full max-w-3xl">
+        <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-5 py-6 sm:px-8 sm:py-7">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-blue-100">
+                  {product.thumbnailUrl ? (
+                    <img
+                      src={product.thumbnailUrl}
+                      alt={product.serviceName}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <Icon
+                      icon="solar:play-circle-bold"
+                      className="h-7 w-7 text-brand-main"
+                    />
+                  )}
+                </div>
+
+                <div className="min-w-0">
+                  <p className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-extrabold text-brand-main ring-1 ring-blue-100">
+                    {getOperationTypeLabel(product.operationType)}
+                  </p>
+                  <h1 className="mt-2 truncate text-[25px] font-extrabold tracking-tight text-slate-950 sm:text-[29px]">
+                    {product.serviceName}
+                  </h1>
+                </div>
               </div>
 
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-sky-600">
-                  {getOperationTypeLabel(product.operationType)}
-                </p>
-                <h1 className="mt-1 truncate text-2xl font-extrabold text-slate-950">
-                  {product.serviceName}
-                </h1>
-              </div>
+              <p className="text-xs font-bold text-slate-400 sm:text-right">
+                파티장 이용 정보 등록
+              </p>
             </div>
           </div>
 
           {isAccountShare ? (
-            <form onSubmit={handleSubmit} className="px-6 py-7 sm:px-8">
-              <div className="mb-6 rounded-3xl bg-sky-50 px-5 py-5 ring-1 ring-sky-100">
+            <form
+              onSubmit={handleSubmit}
+              className="border-t border-slate-100 px-5 py-6 sm:px-8 sm:py-7"
+            >
+              <div className="mb-6 rounded-[24px] bg-blue-50 px-5 py-5 ring-1 ring-blue-100">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-sky-600 ring-1 ring-sky-100">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main ring-1 ring-blue-100">
                     <Icon icon="solar:shield-check-bold" className="h-6 w-6" />
                   </div>
 
@@ -245,22 +273,26 @@ export default function PartyHostProvisionSetupPage() {
                   <span className="text-sm font-bold text-slate-700">
                     계정 아이디
                   </span>
-                  <input
-                    value={sharedAccountEmail}
-                    onChange={(event) =>
-                      setSharedAccountEmail(event.target.value)
-                    }
-                    type="email"
-                    placeholder="submate@example.com"
-                    className="mt-2 h-13 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-blue-900 focus:ring-4 focus:ring-blue-900/10"
-                  />
+                  <div className="mt-2 flex h-14 items-center rounded-2xl bg-slate-50 px-4 ring-1 ring-slate-100">
+                    <Icon
+                      icon="solar:letter-bold-duotone"
+                      className="mr-3 h-5 w-5 shrink-0 text-brand-main"
+                    />
+                    <p className="min-w-0 flex-1 truncate text-sm font-extrabold text-slate-900">
+                      {sharedAccountEmail || "계정 아이디를 불러오지 못했습니다"}
+                    </p>
+                  </div>
                 </label>
 
                 <label className="block">
                   <span className="text-sm font-bold text-slate-700">
                     계정 비밀번호
                   </span>
-                  <div className="mt-2 flex h-13 items-center rounded-2xl border border-slate-200 bg-white pr-2 transition focus-within:border-blue-900 focus-within:ring-4 focus-within:ring-blue-900/10">
+                  <div className="mt-2 flex h-14 items-center rounded-2xl bg-slate-50 pl-4 pr-2 ring-1 ring-slate-100 transition focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
+                    <Icon
+                      icon="solar:lock-password-bold"
+                      className="mr-3 h-5 w-5 shrink-0 text-slate-400"
+                    />
                     <input
                       value={sharedAccountPassword}
                       onChange={(event) =>
@@ -268,7 +300,7 @@ export default function PartyHostProvisionSetupPage() {
                       }
                       type={isPasswordVisible ? "text" : "password"}
                       placeholder="비밀번호를 입력해주세요"
-                      className="h-full min-w-0 flex-1 rounded-2xl bg-transparent px-4 text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-300"
+                      className="h-full min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-300"
                     />
 
                     <button
@@ -276,7 +308,7 @@ export default function PartyHostProvisionSetupPage() {
                       onClick={() =>
                         setIsPasswordVisible((currentValue) => !currentValue)
                       }
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-blue-900"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-white hover:text-brand-main"
                       aria-label={
                         isPasswordVisible ? "비밀번호 숨기기" : "비밀번호 표시"
                       }
@@ -297,14 +329,14 @@ export default function PartyHostProvisionSetupPage() {
               <button
                 type="submit"
                 disabled={!isFormValid || isSubmitting}
-                className="mt-7 flex h-14 w-full items-center justify-center rounded-2xl bg-blue-900 text-base font-bold text-white transition hover:bg-blue-950 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="mt-7 flex h-14 w-full items-center justify-center rounded-full bg-brand-main text-base font-bold text-white shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5 hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none disabled:hover:translate-y-0"
               >
                 {isSubmitting ? "등록 중" : "다음"}
               </button>
             </form>
           ) : (
-            <div className="px-6 py-12 text-center sm:px-8">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100 text-slate-400">
+            <div className="border-t border-slate-100 px-6 py-12 text-center sm:px-8">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-50 text-slate-400 ring-1 ring-slate-100">
                 <Icon icon="solar:danger-circle-bold" className="h-9 w-9" />
               </div>
               <h2 className="mt-5 text-xl font-extrabold text-slate-950">

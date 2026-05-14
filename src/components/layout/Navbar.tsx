@@ -130,7 +130,7 @@ export default function Navbar() {
               key={item.to}
               type="button"
               onClick={() => handleProtectedRoute(item.to, item.requireAuth)}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[15px] font-bold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
             >
               {item.label}
             </button>
