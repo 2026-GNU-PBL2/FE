@@ -244,14 +244,15 @@ export default function ProfileManagePage() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="w-full max-w-3xl space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <form onSubmit={handleSubmit} className="w-full space-y-6">
+        <div className="overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+          <div className="p-5 sm:p-6">
           <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <p className="text-base font-semibold text-slate-900">
+              <p className="text-base font-extrabold text-slate-950">
                 회원 정보 관리
               </p>
-              <p className="mt-1 text-sm leading-6 text-slate-500">
+              <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
                 지금 보이는 정보 영역에서 바로 수정할 수 있습니다.
               </p>
             </div>
@@ -260,7 +261,7 @@ export default function ProfileManagePage() {
               <button
                 type="button"
                 onClick={() => setIsEditMode(true)}
-                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-[18px] bg-[#1E3A8A] px-5 text-sm font-semibold text-white transition hover:bg-[#1E40AF]"
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-slate-900 px-5 text-sm font-bold text-white transition hover:bg-slate-800"
               >
                 <Icon icon="solar:pen-new-square-bold" className="h-5 w-5" />
                 정보 수정
@@ -270,7 +271,7 @@ export default function ProfileManagePage() {
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="inline-flex h-11 items-center justify-center rounded-[18px] border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  className="inline-flex h-11 items-center justify-center rounded-full bg-white px-5 text-sm font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
                 >
                   취소
                 </button>
@@ -278,7 +279,7 @@ export default function ProfileManagePage() {
                 <button
                   type="submit"
                   disabled={isSubmitting || !isFormChanged}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-[18px] bg-[#1E3A8A] px-5 text-sm font-semibold text-white transition hover:bg-[#1E40AF] disabled:cursor-not-allowed disabled:bg-slate-300"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-slate-900 px-5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   <Icon icon="solar:diskette-bold" className="h-5 w-5" />
                   {isSubmitting ? "저장 중..." : "저장하기"}
@@ -299,7 +300,7 @@ export default function ProfileManagePage() {
                   value={nickname}
                   onChange={(event) => setNickname(event.target.value)}
                   placeholder="닉네임을 입력해 주세요"
-                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-[#38BDF8] focus:ring-4 focus:ring-sky-100"
+                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
                 />
               }
             />
@@ -310,7 +311,7 @@ export default function ProfileManagePage() {
               isEditMode={isEditMode}
               displayValue={displayEmail}
               editSlot={
-                <div className="flex items-center overflow-hidden rounded-2xl border border-slate-200 bg-white focus-within:border-[#38BDF8] focus-within:ring-4 focus-within:ring-sky-100">
+                <div className="flex items-center overflow-hidden rounded-2xl border border-slate-200 bg-white focus-within:border-slate-400 focus-within:ring-4 focus-within:ring-slate-100">
                   <input
                     type="text"
                     value={submateEmailId}
@@ -341,7 +342,7 @@ export default function ProfileManagePage() {
                     handlePhoneNumberChange(event.target.value)
                   }
                   placeholder="01012345678"
-                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-[#38BDF8] focus:ring-4 focus:ring-sky-100"
+                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
                 />
               }
             />
@@ -360,10 +361,11 @@ export default function ProfileManagePage() {
                     handlePinNumberChange(event.target.value)
                   }
                   placeholder="변경 시 4자리 숫자 입력"
-                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-[#38BDF8] focus:ring-4 focus:ring-sky-100"
+                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
                 />
               }
             />
+          </div>
           </div>
         </div>
 
@@ -405,9 +407,9 @@ function EditableInfoCard({
   editSlot: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm transition hover:shadow-md">
+    <div className="rounded-2xl bg-slate-50 px-5 py-5 ring-1 ring-slate-100 transition hover:bg-white">
       <div className="flex items-start gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white ring-1 ring-slate-100">
           <Icon icon={icon} className="h-5 w-5 text-slate-600" />
         </div>
 

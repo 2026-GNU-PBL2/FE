@@ -562,20 +562,20 @@ export default function MyPartyDetailPage() {
     return (
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-3xl">
-          <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-amber-100">
-            <div className="bg-linear-to-br from-amber-50 via-white to-white px-6 py-10 sm:px-10">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-amber-600 shadow-sm ring-1 ring-amber-100">
-              <Icon icon="solar:clock-circle-bold" className="h-9 w-9" />
-            </div>
+          <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+            <div className="border-b border-slate-100 px-6 py-10 sm:px-10">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-600 ring-1 ring-amber-100">
+                <Icon icon="solar:clock-circle-bold" className="h-9 w-9" />
+              </div>
 
-            <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
-              다음 결제일부터 이용 예정입니다
-            </h1>
+              <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
+                다음 결제일부터 이용 예정입니다
+              </h1>
 
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
-              결원 파티 참여가 완료되었습니다. 현재 회차가 끝난 뒤 다음
-              결제일부터 파티 이용이 시작됩니다.
-            </p>
+              <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
+                결원 파티 참여가 완료되었습니다. 현재 회차가 끝난 뒤 다음
+                결제일부터 파티 이용이 시작됩니다.
+              </p>
             </div>
 
             <div className="mx-auto grid max-w-lg gap-3 px-6 py-6 text-left sm:grid-cols-2 sm:px-10">
@@ -617,19 +617,19 @@ export default function MyPartyDetailPage() {
     return (
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-3xl">
-          <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-            <div className="bg-linear-to-br from-teal-50 via-white to-emerald-50 px-6 py-10 sm:px-10">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-[#0F766E] shadow-sm ring-1 ring-teal-100">
-              <Icon icon="solar:users-group-rounded-bold" className="h-9 w-9" />
-            </div>
+          <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+            <div className="border-b border-slate-100 px-6 py-10 sm:px-10">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-teal-50 text-[#0F766E] ring-1 ring-teal-100">
+                <Icon icon="solar:users-group-rounded-bold" className="h-9 w-9" />
+              </div>
 
-            <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
-              파티 참여가 완료되었습니다
-            </h1>
+              <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
+                파티 참여가 완료되었습니다
+              </h1>
 
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
-              {memberDescription}
-            </p>
+              <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
+                {memberDescription}
+              </p>
             </div>
 
             <div className="mx-auto grid max-w-lg gap-3 px-6 py-6 text-left sm:grid-cols-2 sm:px-10">
@@ -673,19 +673,19 @@ export default function MyPartyDetailPage() {
     return (
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-3xl">
-          <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-            <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-6 py-10 sm:px-10">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-brand-main shadow-sm ring-1 ring-blue-100">
-              <Icon icon="solar:users-group-rounded-bold" className="h-9 w-9" />
-            </div>
+          <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+            <div className="border-b border-slate-100 px-6 py-10 sm:px-10">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
+                <Icon icon="solar:users-group-rounded-bold" className="h-9 w-9" />
+              </div>
 
-            <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
-              {waitingTitle}
-            </h1>
+              <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
+                {waitingTitle}
+              </h1>
 
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
-              {waitingDescription}
-            </p>
+              <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
+                {waitingDescription}
+              </p>
             </div>
 
             {isRecruitFull && (
@@ -745,8 +745,8 @@ export default function MyPartyDetailPage() {
           이전으로
         </button>
 
-        <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-          <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-6 py-7 sm:px-8">
+        <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+          <div className="px-6 py-7 sm:px-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-[13px] font-extrabold text-brand-main">

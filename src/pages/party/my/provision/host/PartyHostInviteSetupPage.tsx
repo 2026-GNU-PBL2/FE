@@ -317,12 +317,17 @@ export default function PartyHostInviteSetupPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-        <div className="mx-auto flex min-h-96 w-full max-w-2xl items-center justify-center rounded-3xl border border-slate-200 bg-white">
-          <Icon
-            icon="solar:refresh-circle-bold"
-            className="h-11 w-11 animate-spin text-blue-900"
-          />
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6">
+        <div className="mx-auto flex min-h-96 w-full max-w-2xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+          <div className="text-center">
+            <Icon
+              icon="solar:refresh-circle-bold"
+              className="mx-auto h-11 w-11 animate-spin text-brand-main"
+            />
+            <p className="mt-4 text-sm font-semibold text-slate-600">
+              초대 정보를 불러오는 중입니다
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -333,45 +338,43 @@ export default function PartyHostInviteSetupPage() {
   const ottInviteLink = getOttInviteLink(product.serviceName);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mx-auto w-full max-w-[760px]">
-        <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_24px_80px_-55px_rgba(15,23,42,0.35)]">
-          <div className="border-b border-slate-100 px-6 py-7 sm:px-8">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex min-w-0 items-start gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[24px] bg-slate-100 ring-1 ring-slate-200">
-                  {product.thumbnailUrl ? (
-                    <img
-                      src={product.thumbnailUrl}
-                      alt={product.serviceName}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <Icon
-                      icon="solar:play-circle-bold"
-                      className="h-8 w-8 text-slate-400"
-                    />
-                  )}
-                </div>
-
-                <div className="min-w-0">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700 ring-1 ring-sky-100">
-                    <Icon icon="solar:link-circle-bold" className="h-4 w-4" />
-                    초대 코드형
-                  </span>
-                  <h1 className="mt-3 truncate text-2xl font-extrabold text-slate-950 sm:text-[32px]">
-                    {product.serviceName}
-                  </h1>
-                  <p className="mt-2 max-w-xl text-sm font-semibold leading-6 text-slate-500">
-                    서비스 구독이 완료되었다면 파티원 이용 안내를
-                    활성화해주세요.
-                  </p>
-                </div>
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div className="mx-auto w-full max-w-3xl">
+        <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+          <div className="relative border-b border-slate-100 px-6 py-7 pr-24 sm:px-8">
+            <div className="flex min-w-0 items-start gap-4">
+              <div className="flex h-15 w-15 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-slate-50 ring-1 ring-slate-100">
+                {product.thumbnailUrl ? (
+                  <img
+                    src={product.thumbnailUrl}
+                    alt={product.serviceName}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Icon
+                    icon="solar:play-circle-bold"
+                    className="h-8 w-8 text-slate-400"
+                  />
+                )}
               </div>
 
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-blue-900 text-white shadow-[0_16px_35px_-24px_rgba(30,58,138,0.8)]">
-                <Icon icon="solar:mailbox-bold" className="h-8 w-8" />
+              <div className="min-w-0">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-brand-main ring-1 ring-blue-100">
+                  <Icon icon="solar:link-circle-bold" className="h-4 w-4" />
+                  초대 코드형
+                </span>
+                <h1 className="mt-3 truncate text-2xl font-extrabold text-slate-950 sm:text-[32px]">
+                  {product.serviceName}
+                </h1>
+                <p className="mt-2 max-w-xl text-sm font-semibold leading-6 text-slate-500">
+                  서비스 구독이 완료되었다면 파티원 이용 안내를
+                  활성화해주세요.
+                </p>
               </div>
+            </div>
+
+            <div className="absolute right-6 top-7 flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100 sm:right-8">
+              <Icon icon="solar:mailbox-bold" className="h-7 w-7" />
             </div>
           </div>
 
@@ -393,9 +396,9 @@ export default function PartyHostInviteSetupPage() {
               />
             </div>
 
-            <div className="mt-6 rounded-[28px] bg-[#F8FAFC] px-5 py-5 ring-1 ring-slate-200">
+            <div className="mt-6 rounded-[24px] bg-slate-50 p-5 ring-1 ring-slate-100">
               <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-900 ring-1 ring-slate-200">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main ring-1 ring-blue-100">
                   <Icon
                     icon="solar:checklist-minimalistic-bold"
                     className="h-6 w-6"
@@ -416,14 +419,14 @@ export default function PartyHostInviteSetupPage() {
             </div>
 
             {ottInviteLink && (
-              <section className="mt-6 rounded-[28px] border border-blue-100 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)]">
+              <section className="mt-6 rounded-[24px] bg-white px-5 py-5 ring-1 ring-slate-100">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex min-w-0 gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-900 ring-1 ring-blue-100">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
                       <Icon icon="solar:cart-large-2-bold" className="h-6 w-6" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-sky-600">
+                      <p className="text-xs font-bold text-brand-main">
                         OTT 바로가기
                       </p>
                       <h2 className="mt-1 text-lg font-extrabold text-slate-950">
@@ -444,7 +447,7 @@ export default function PartyHostInviteSetupPage() {
                     href={ottInviteLink.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-blue-900 px-4 text-sm font-bold text-white transition hover:bg-blue-950"
+                    className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-brand-main px-4 text-sm font-bold text-white shadow-md shadow-blue-900/15 transition hover:-translate-y-0.5 hover:bg-blue-800"
                   >
                     {ottInviteLink.buttonLabel}
                     <Icon
@@ -456,30 +459,34 @@ export default function PartyHostInviteSetupPage() {
               </section>
             )}
 
-            <section className="mt-6 rounded-[28px] border border-sky-100 bg-sky-50 px-5 py-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-sky-600 ring-1 ring-sky-100">
-                <Icon icon="solar:plain-2-bold" className="h-6 w-6" />
-              </div>
+            <section className="mt-6 rounded-[24px] bg-slate-50 px-5 py-5 ring-1 ring-slate-100">
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main ring-1 ring-blue-100">
+                  <Icon icon="solar:plain-2-bold" className="h-6 w-6" />
+                </div>
 
-              <h2 className="mt-4 text-xl font-extrabold text-slate-950">
-                초대 코드형 초대 방법
-              </h2>
-              <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
-                OTT 사이트에서 초대 메일을 보낸 뒤 이용 정보를 등록하면,
-                파티원은 안내 페이지에서 활성화를 완료합니다.
-              </p>
+                <div className="min-w-0">
+                  <h2 className="text-xl font-extrabold text-slate-950">
+                    초대 코드형 초대 방법
+                  </h2>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                    OTT 사이트에서 초대 메일을 보낸 뒤 이용 정보를 등록하면,
+                    파티원은 안내 페이지에서 활성화를 완료합니다.
+                  </p>
+                </div>
+              </div>
 
               <div className="mt-5 space-y-3">
                 {inviteSteps.map((step, index) => (
                   <article
                     key={step.title}
-                    className="flex gap-4 rounded-3xl bg-white px-4 py-4 ring-1 ring-sky-100"
+                    className="flex gap-4 rounded-2xl bg-white px-4 py-4 ring-1 ring-slate-100"
                   >
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-blue-900 ring-1 ring-sky-100">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-brand-main ring-1 ring-slate-100">
                       <Icon icon={step.icon} className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-sky-600">
+                      <p className="text-xs font-bold text-slate-400">
                         STEP {index + 1}
                       </p>
                       <h3 className="mt-1 text-sm font-extrabold text-slate-950">
@@ -494,10 +501,10 @@ export default function PartyHostInviteSetupPage() {
               </div>
             </section>
 
-            <section className="mt-6 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)]">
+            <section className="mt-6 rounded-[24px] bg-white px-5 py-5 ring-1 ring-slate-100">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold text-sky-600">MEMBERS</p>
+                  <p className="text-xs font-bold text-brand-main">MEMBERS</p>
                   <h2 className="mt-1 text-lg font-extrabold text-slate-950">
                     OTT 초대에 사용할 이메일
                   </h2>
@@ -536,7 +543,7 @@ export default function PartyHostInviteSetupPage() {
               type="button"
               onClick={handleNext}
               disabled={isSubmitting}
-              className="mt-7 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-blue-900 text-base font-bold text-white transition hover:bg-blue-950 disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="mt-7 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-brand-main text-base font-bold text-white shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5 hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none disabled:hover:translate-y-0"
             >
               {isSubmitting ? "등록 중" : "초대 완료 후 이용 정보 확인"}
               <Icon icon="solar:alt-arrow-right-linear" className="h-5 w-5" />
@@ -558,9 +565,9 @@ function InfoTile({
   value: string;
 }) {
   return (
-    <div className="min-w-0 rounded-[22px] bg-[#F8FAFC] px-4 py-4 ring-1 ring-slate-100">
+    <div className="min-w-0 rounded-[22px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-900 ring-1 ring-slate-200">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main ring-1 ring-blue-100">
           <Icon icon={icon} className="h-5 w-5" />
         </div>
         <div className="min-w-0">
@@ -607,8 +614,8 @@ function MemberEmailItem({
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-[#F8FAFC] px-4 py-4 ring-1 ring-slate-100">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-900 ring-1 ring-slate-200">
+    <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main ring-1 ring-blue-100">
         <Icon icon="solar:letter-bold" className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
@@ -632,7 +639,7 @@ function MemberEmailItem({
         <button
           type="button"
           onClick={handleCopy}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-slate-500 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-blue-900"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-slate-500 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-brand-main"
           aria-label={`${member.nickname || `파티원 ${index + 1}`} 이메일 복사`}
         >
           <Icon icon="solar:copy-bold" className="h-5 w-5" />

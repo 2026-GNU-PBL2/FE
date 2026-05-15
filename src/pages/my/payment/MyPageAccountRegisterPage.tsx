@@ -10,16 +10,26 @@ type SettlementAccountType = "SETTLEMENT";
 type BankAccountResponse = {
   id: number;
   fintechUseNum: string | null;
+  fintech_use_num?: string | number | null;
   bankName: string | null;
+  bank_name?: string | null;
   accountAlias: string | null;
+  account_alias?: string | null;
   accountNumMasked: string | null;
+  account_num_masked?: string | null;
   accountType: string | null;
+  account_type?: string | null;
   isPrimary: boolean;
+  is_primary?: boolean;
   verificationStatus: string | null;
   bankCode?: string | null;
+  bank_code?: string | null;
   accountNumber?: string | null;
+  account_number?: string | null;
   accountHolderName?: string | null;
+  account_holder_name?: string | null;
   accountHolderBirthDate?: string | null;
+  account_holder_birth_date?: string | null;
 };
 
 type SaveSettlementAccountRequest = {
@@ -94,11 +104,43 @@ function formatBirthDate(value: string) {
 }
 
 function getAccountLabel(account: BankAccountResponse) {
-  const bankName = account.bankName || "은행 정보 없음";
-  const masked = account.accountNumMasked || "계좌번호 미확인";
-  const alias = account.accountAlias ? ` · ${account.accountAlias}` : "";
+  const bankName = account.bankName || account.bank_name || "은행 정보 없음";
+  const masked =
+    account.accountNumMasked || account.account_num_masked || "계좌번호 미확인";
+  const aliasValue = account.accountAlias || account.account_alias;
+  const alias = aliasValue ? ` · ${aliasValue}` : "";
 
   return `${bankName} · ${masked}${alias}`;
+}
+
+function getFintechUseNum(account?: BankAccountResponse | null) {
+  const value = account?.fintechUseNum ?? account?.fintech_use_num;
+
+  return value == null ? "" : String(value).trim();
+}
+
+function getBankCode(account?: BankAccountResponse | null) {
+  return (account?.bankCode ?? account?.bank_code ?? "").trim();
+}
+
+function getAccountNumber(account?: BankAccountResponse | null) {
+  return normalizeNumber(
+    account?.accountNumber ?? account?.account_number ?? "",
+  );
+}
+
+function getAccountHolderName(account?: BankAccountResponse | null) {
+  return (
+    account?.accountHolderName ??
+    account?.account_holder_name ??
+    ""
+  ).trim();
+}
+
+function getAccountHolderBirthDate(account?: BankAccountResponse | null) {
+  return formatBirthDate(
+    account?.accountHolderBirthDate ?? account?.account_holder_birth_date ?? "",
+  );
 }
 
 export default function MyPageAccountRegisterPage() {
@@ -109,7 +151,7 @@ export default function MyPageAccountRegisterPage() {
   const bankAuthMessage = searchParams.get("message");
 
   const [accounts, setAccounts] = useState<BankAccountResponse[]>([]);
-  const [selectedAccountId, setSelectedAccountId] = useState("");
+  const [selectedAccountIndex, setSelectedAccountIndex] = useState("");
   const [isAccountsLoading, setIsAccountsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -119,11 +161,10 @@ export default function MyPageAccountRegisterPage() {
   const [accountNumber, setAccountNumber] = useState("");
 
   const selectedAccount = useMemo(() => {
-    return (
-      accounts.find((account) => String(account.id) === selectedAccountId) ??
-      null
-    );
-  }, [accounts, selectedAccountId]);
+    if (selectedAccountIndex === "") return null;
+
+    return accounts[Number(selectedAccountIndex)] ?? null;
+  }, [accounts, selectedAccountIndex]);
 
   const selectedBankName = useMemo(() => {
     return bankOptions.find((bank) => bank.code === bankCode)?.label ?? "";
@@ -131,7 +172,7 @@ export default function MyPageAccountRegisterPage() {
 
   const isFormValid = useMemo(() => {
     return (
-      Boolean(selectedAccount?.fintechUseNum?.trim()) &&
+      getFintechUseNum(selectedAccount).length > 0 &&
       bankCode.trim().length > 0 &&
       accountHolderName.trim().length > 0 &&
       normalizeNumber(accountHolderBirthDate).length === 8 &&
@@ -177,29 +218,33 @@ export default function MyPageAccountRegisterPage() {
         >("/api/v1/bank/accounts");
 
         const payload = unwrapResponse<BankAccountResponse[]>(response.data);
-        const nextAccounts = Array.isArray(payload)
-          ? payload.filter((account) => Boolean(account.fintechUseNum?.trim()))
-          : [];
+        const nextAccounts = Array.isArray(payload) ? payload : [];
 
         setAccounts(nextAccounts);
 
-        const activeSettlementAccount = nextAccounts.find(
+        const activeSettlementAccountIndex = nextAccounts.findIndex(
           (account) =>
             account.accountType === "SETTLEMENT" && account.isPrimary === true,
         );
+        const firstSelectableAccountIndex =
+          activeSettlementAccountIndex >= 0
+            ? activeSettlementAccountIndex
+            : nextAccounts.length > 0
+              ? 0
+              : -1;
         const firstSelectableAccount =
-          activeSettlementAccount ?? nextAccounts[0] ?? null;
+          firstSelectableAccountIndex >= 0
+            ? nextAccounts[firstSelectableAccountIndex]
+            : null;
 
         if (firstSelectableAccount) {
-          setSelectedAccountId(String(firstSelectableAccount.id));
-          setBankCode(firstSelectableAccount.bankCode ?? "");
-          setAccountHolderName(firstSelectableAccount.accountHolderName ?? "");
+          setSelectedAccountIndex(String(firstSelectableAccountIndex));
+          setBankCode(getBankCode(firstSelectableAccount));
+          setAccountHolderName(getAccountHolderName(firstSelectableAccount));
           setAccountHolderBirthDate(
-            formatBirthDate(firstSelectableAccount.accountHolderBirthDate ?? ""),
+            getAccountHolderBirthDate(firstSelectableAccount),
           );
-          setAccountNumber(
-            normalizeNumber(firstSelectableAccount.accountNumber ?? ""),
-          );
+          setAccountNumber(getAccountNumber(firstSelectableAccount));
         }
       } catch (error) {
         console.error(error);
@@ -212,23 +257,23 @@ export default function MyPageAccountRegisterPage() {
     void fetchBankAccounts();
   }, []);
 
-  const handleSelectedAccountChange = (accountId: string) => {
-    setSelectedAccountId(accountId);
+  const handleSelectedAccountChange = (accountIndex: string) => {
+    setSelectedAccountIndex(accountIndex);
 
-    const account = accounts.find((item) => String(item.id) === accountId);
+    const account = accounts[Number(accountIndex)];
     if (!account) return;
 
-    setBankCode(account.bankCode ?? "");
-    setAccountHolderName(account.accountHolderName ?? "");
-    setAccountHolderBirthDate(
-      formatBirthDate(account.accountHolderBirthDate ?? ""),
-    );
-    setAccountNumber(normalizeNumber(account.accountNumber ?? ""));
+    setBankCode(getBankCode(account));
+    setAccountHolderName(getAccountHolderName(account));
+    setAccountHolderBirthDate(getAccountHolderBirthDate(account));
+    setAccountNumber(getAccountNumber(account));
   };
 
   const handleSubmit = async () => {
-    if (!selectedAccount?.fintechUseNum) {
-      toast.error("선택된 연결 계좌 정보가 없습니다.");
+    const fintechUseNum = getFintechUseNum(selectedAccount);
+
+    if (!fintechUseNum) {
+      toast.error("금융결제원 인증으로 연결된 계좌를 선택해주세요.");
       return;
     }
 
@@ -238,7 +283,7 @@ export default function MyPageAccountRegisterPage() {
     }
 
     const requestBody: SaveSettlementAccountRequest = {
-      fintechUseNum: selectedAccount.fintechUseNum.trim(),
+      fintechUseNum,
       bankCode,
       accountNumber: normalizeNumber(accountNumber),
       accountHolderName: accountHolderName.trim(),
@@ -275,173 +320,164 @@ export default function MyPageAccountRegisterPage() {
 
   return (
     <div className="min-h-[calc(100vh-160px)] bg-brand-bg px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
-      <section className="mx-auto w-full max-w-3xl rounded-[22px] border border-slate-200 bg-white p-4 shadow-[0_12px_36px_rgba(15,23,42,0.04)] sm:p-6">
-        <div className="flex items-center gap-2">
-          <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-900">
-            SETTLEMENT ACCOUNT
-          </div>
-          <div className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-500">
-            MY PAGE
-          </div>
-        </div>
-
-        <div className="mt-5">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-            정산 계좌를 설정해 주세요
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-slate-500">
-            인증된 연결 계좌 중 정산에 사용할 계좌를 선택하고 필요한 정보를
-            입력합니다.
-          </p>
-        </div>
-
-        <div className="mt-6 rounded-[22px] bg-slate-50 p-4 sm:p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-900 ring-1 ring-slate-200">
-              <Icon icon="solar:banknote-bold" className="h-5 w-5" />
+      <section className="mx-auto w-full max-w-2xl overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+        <div className="border-b border-slate-100 px-5 py-6 sm:px-6">
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">
+              SETTLEMENT ACCOUNT
             </div>
+            <div className="inline-flex items-center rounded-full bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700">
+              MY PAGE
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
+              정산 계좌를 설정해 주세요
+            </h1>
+            <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">
+              인증된 연결 계좌 중 정산에 사용할 계좌를 선택하고 필요한 정보를
+              입력합니다.
+            </p>
+          </div>
+        </div>
+
+        <div className="px-5 py-5 sm:px-6">
+          <div className="rounded-[22px] bg-slate-50 p-4 ring-1 ring-slate-100 sm:p-5">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-700 ring-1 ring-slate-100">
+                <Icon icon="solar:banknote-bold" className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-extrabold text-slate-950">
+                  정산계좌 설정 안내
+                </p>
+                <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
+                  선택한 계좌는 파티 운영 수익을 지급받는 대표 정산계좌로
+                  사용됩니다.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 space-y-5">
             <div>
-              <p className="text-sm font-bold text-slate-950">
-                정산계좌 설정 안내
-              </p>
-              <p className="mt-1 text-sm leading-6 text-slate-500">
-                선택한 계좌는 파티 운영 수익을 지급받는 대표 정산계좌로
-                사용됩니다.
-              </p>
+              <label className="mb-2 block text-sm font-bold text-slate-900">
+                연결 계좌
+              </label>
+              <select
+                value={selectedAccountIndex}
+                onChange={(event) =>
+                  handleSelectedAccountChange(event.target.value)
+                }
+                disabled={isAccountsLoading || accounts.length === 0}
+                className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+              >
+                <option value="">
+                  {isAccountsLoading
+                    ? "연결 계좌를 불러오는 중입니다"
+                    : "연결 계좌를 선택해주세요"}
+                </option>
+                {accounts.map((account, index) => (
+                  <option key={`${getFintechUseNum(account)}-${index}`} value={index}>
+                    {getAccountLabel(account)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-bold text-slate-900">
+                은행명
+              </label>
+              <select
+                value={bankCode}
+                onChange={(event) => setBankCode(event.target.value)}
+                className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              >
+                <option value="">은행을 선택해주세요</option>
+                {bankOptions.map((bank) => (
+                  <option key={bank.code} value={bank.code}>
+                    {bank.label} ({bank.code})
+                  </option>
+                ))}
+              </select>
+              {selectedBankName ? (
+                <p className="mt-2 text-xs text-slate-400">
+                  선택된 은행: {selectedBankName}
+                </p>
+              ) : null}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-bold text-slate-900">
+                예금주명
+              </label>
+              <input
+                type="text"
+                value={accountHolderName}
+                onChange={(event) => setAccountHolderName(event.target.value)}
+                placeholder="예금주명을 입력해주세요"
+                className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-bold text-slate-900">
+                생년월일
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={accountHolderBirthDate}
+                onChange={(event) =>
+                  setAccountHolderBirthDate(formatBirthDate(event.target.value))
+                }
+                placeholder="YYYY/MM/DD"
+                className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-bold text-slate-900">
+                계좌번호
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={accountNumber}
+                onChange={(event) =>
+                  setAccountNumber(normalizeNumber(event.target.value))
+                }
+                placeholder="숫자만 입력해주세요"
+                className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              />
             </div>
           </div>
-        </div>
 
-        <div className="mt-6 space-y-5">
-          <div>
-            <label className="mb-2 block text-sm font-bold text-slate-900">
-              연결 계좌
-            </label>
-            <select
-              value={selectedAccountId}
-              onChange={(event) =>
-                handleSelectedAccountChange(event.target.value)
-              }
-              disabled={isAccountsLoading || accounts.length === 0}
-              className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-blue-900 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={() => navigate("/mypage/money")}
+              className="inline-flex h-13 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
             >
-              <option value="">
-                {isAccountsLoading
-                  ? "연결 계좌를 불러오는 중입니다"
-                  : "연결 계좌를 선택해주세요"}
-              </option>
-              {accounts.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {getAccountLabel(account)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-bold text-slate-900">
-              핀테크 이용번호
-            </label>
-            <input
-              type="text"
-              value={selectedAccount?.fintechUseNum ?? ""}
-              readOnly
-              placeholder="연결 계좌를 선택해주세요"
-              className="h-14 w-full cursor-not-allowed rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-500 outline-none placeholder:text-slate-400"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-bold text-slate-900">
-              은행명
-            </label>
-            <select
-              value={bankCode}
-              onChange={(event) => setBankCode(event.target.value)}
-              className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-blue-900"
+              취소
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!isFormValid || isSaving || isAccountsLoading}
+              className={[
+                "inline-flex h-13 items-center justify-center gap-2 rounded-2xl px-6 text-sm font-bold transition sm:min-w-52",
+                !isFormValid || isSaving || isAccountsLoading
+                  ? "cursor-not-allowed bg-slate-200 text-slate-400"
+                  : "bg-slate-900 text-white hover:bg-slate-800",
+              ].join(" ")}
             >
-              <option value="">은행을 선택해주세요</option>
-              {bankOptions.map((bank) => (
-                <option key={bank.code} value={bank.code}>
-                  {bank.label} ({bank.code})
-                </option>
-              ))}
-            </select>
-            {selectedBankName ? (
-              <p className="mt-2 text-xs text-slate-400">
-                선택된 은행: {selectedBankName}
-              </p>
-            ) : null}
+              {isSaving ? "저장 중..." : "정산 계좌 저장하기"}
+              <Icon icon="solar:arrow-right-linear" className="h-4 w-4" />
+            </button>
           </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-bold text-slate-900">
-              예금주명
-            </label>
-            <input
-              type="text"
-              value={accountHolderName}
-              onChange={(event) => setAccountHolderName(event.target.value)}
-              placeholder="예금주명을 입력해주세요"
-              className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-900"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-bold text-slate-900">
-              생년월일
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={accountHolderBirthDate}
-              onChange={(event) =>
-                setAccountHolderBirthDate(formatBirthDate(event.target.value))
-              }
-              placeholder="YYYY/MM/DD"
-              className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-900"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-bold text-slate-900">
-              계좌번호
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={accountNumber}
-              onChange={(event) =>
-                setAccountNumber(normalizeNumber(event.target.value))
-              }
-              placeholder="숫자만 입력해주세요"
-              className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-900"
-            />
-          </div>
-        </div>
-
-        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={() => navigate("/mypage/money")}
-            className="inline-flex h-13 items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-          >
-            취소
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!isFormValid || isSaving || isAccountsLoading}
-            className={[
-              "inline-flex h-13 items-center justify-center gap-2 rounded-2xl px-6 text-sm font-bold transition sm:min-w-52",
-              !isFormValid || isSaving || isAccountsLoading
-                ? "cursor-not-allowed bg-slate-200 text-slate-400"
-                : "bg-blue-900 text-white shadow-[0_20px_46px_-24px_rgba(30,58,138,0.42)] hover:bg-blue-800",
-            ].join(" ")}
-          >
-            {isSaving ? "저장 중..." : "정산 계좌 저장하기"}
-            <Icon icon="solar:arrow-right-linear" className="h-4 w-4" />
-          </button>
         </div>
       </section>
     </div>

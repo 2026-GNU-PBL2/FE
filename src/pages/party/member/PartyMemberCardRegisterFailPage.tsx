@@ -10,58 +10,60 @@ export default function PartyMemberCardRegisterFailPage() {
     searchParams.get("message") ?? "카드 등록이 취소되었거나 실패했습니다.";
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-      <div className="mx-auto flex min-h-[calc(100vh-64px)] max-w-120 items-center justify-center">
-        <div className="w-full rounded-[32px] border border-slate-200 bg-white px-5 py-6 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.22)] sm:px-8 sm:py-8">
-          <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-full bg-rose-50 text-rose-500">
-            <Icon icon="solar:close-circle-bold" className="h-9 w-9" />
-          </div>
+    <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-80px)] w-full max-w-[520px] items-center justify-center">
+        <section className="w-full overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="px-6 py-10 sm:px-8">
+            <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-full bg-rose-50 text-rose-500 ring-1 ring-rose-100">
+              <Icon icon="solar:close-circle-bold" className="h-10 w-10" />
+            </div>
 
-          <div className="mt-6 text-center">
-            <p className="text-xs font-semibold tracking-[0.14em] text-rose-500">
-              BILLING FAILED
-            </p>
+            <div className="mt-6">
+              <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1.5 text-[11px] font-bold text-rose-600 ring-1 ring-rose-100">
+                <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                카드 등록
+              </div>
 
-            <h1 className="mt-3 text-[28px] font-semibold tracking-tight text-slate-950 sm:text-[32px]">
-              카드 등록에 실패했습니다
-            </h1>
+              <h1 className="mt-4 text-[26px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
+                카드 등록에 실패했습니다
+              </h1>
 
-            <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
-              {message}
-            </p>
-          </div>
-
-          <div className="mt-8 space-y-3 rounded-[28px] bg-slate-50 px-5 py-5">
-            <div className="rounded-2xl bg-white px-4 py-4">
-              <p className="text-xs font-semibold tracking-[0.12em] text-slate-400">
-                ERROR CODE
-              </p>
-              <p className="mt-2 text-sm font-semibold text-slate-900">
-                {code || "-"}
+              <p className="mt-3 text-sm font-semibold leading-7 text-slate-500 sm:text-base">
+                {message}
               </p>
             </div>
-          </div>
 
-          <div className="mt-8 space-y-3">
-            <Link
-              to={
-                productId
-                  ? `/party/create/${productId}/member/card-register`
-                  : "/party"
-              }
-              className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-[#1E3A8A] text-base font-semibold tracking-tight text-white shadow-[0_18px_36px_-20px_rgba(30,58,138,0.45)] transition-all duration-300 hover:bg-[#1A347B] hover:shadow-[0_22px_42px_-22px_rgba(30,58,138,0.52)]"
-            >
-              다시 등록하기
-            </Link>
+            {code ? (
+              <div className="mt-6 rounded-[24px] bg-slate-50 px-4 py-4 text-left ring-1 ring-slate-100">
+                <p className="text-xs font-bold text-slate-400">오류 코드</p>
+                <p className="mt-1 text-sm font-extrabold text-slate-900">
+                  {code}
+                </p>
+              </div>
+            ) : null}
 
-            <Link
-              to="/party"
-              className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm font-semibold tracking-tight text-slate-700 transition-all duration-300 hover:border-slate-300 hover:bg-slate-50"
-            >
-              파티 목록으로 이동
-            </Link>
+            <div className="mt-7 grid gap-3">
+              <Link
+                to={
+                  productId
+                    ? `/party/create/${productId}/member/card-register`
+                    : "/parties/member"
+                }
+                className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#14B8A6] text-[15px] font-bold text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488]"
+              >
+                다시 등록하기
+                <Icon icon="solar:alt-arrow-right-linear" className="h-5 w-5" />
+              </Link>
+
+              <Link
+                to="/parties/member"
+                className="inline-flex h-14 w-full items-center justify-center rounded-full bg-white text-[15px] font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
+              >
+                파티 목록으로 이동
+              </Link>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

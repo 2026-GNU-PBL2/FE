@@ -108,32 +108,28 @@ export default function MyPageLayout() {
   };
 
   return (
-    <div className="min-h-full bg-slate-50">
-      <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+    <div className="min-h-full bg-brand-bg">
+      <div className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="space-y-4 sm:space-y-5">
-          <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_16px_50px_rgba(15,23,42,0.05)] sm:rounded-[28px]">
-            <div className="relative overflow-hidden px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
-              <div className="absolute inset-x-0 top-0 h-20 bg-[linear-gradient(135deg,#eff6ff_0%,#ecfeff_45%,#f8fafc_100%)] sm:h-24" />
-              <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-sky-100/70 blur-2xl sm:h-32 sm:w-32" />
-              <div className="absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-teal-100/70 blur-2xl sm:h-24 sm:w-24" />
-
-              <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <section className="overflow-hidden rounded-[32px] bg-white shadow-sm ring-1 ring-slate-200">
+            <div className="px-5 py-6 sm:px-8">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#1E3A8A_0%,#2563EB_70%,#2DD4BF_140%)] text-white shadow-[0_10px_24px_rgba(37,99,235,0.22)] sm:h-14 sm:w-14">
+                  <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-700 ring-1 ring-rose-100">
                     <Icon
                       icon="solar:user-bold"
-                      className="h-6 w-6 sm:h-7 sm:w-7"
+                      className="h-7 w-7"
                     />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-[10px] font-semibold tracking-[0.2em] text-slate-400 sm:text-xs">
+                    <p className="text-[13px] font-extrabold text-rose-700">
                       MY PAGE
                     </p>
-                    <h1 className="mt-1 truncate text-xl font-bold text-slate-900 sm:text-2xl lg:text-[28px]">
+                    <h1 className="mt-2 truncate text-[28px] font-extrabold leading-tight tracking-tight text-slate-950">
                       {displayName}
                     </h1>
-                    <p className="mt-1 truncate text-sm text-slate-500">
+                    <p className="mt-2 truncate text-sm font-semibold leading-6 text-slate-500">
                       {displayEmail}
                     </p>
                   </div>
@@ -145,7 +141,7 @@ export default function MyPageLayout() {
 
           <div className="grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)] xl:gap-5">
             <aside className="hidden xl:sticky xl:top-24 xl:block xl:self-start">
-              <div className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_16px_50px_rgba(15,23,42,0.05)]">
+              <div className="rounded-[28px] bg-white p-4 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
                 <div className="flex items-center justify-between px-2 pb-3">
                   <div>
                     <p className="text-[11px] font-semibold tracking-[0.18em] text-slate-400">
@@ -191,10 +187,10 @@ export default function MyPageLayout() {
             </aside>
 
             <section className="min-w-0">
-              <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_16px_50px_rgba(15,23,42,0.05)] sm:rounded-[28px]">
+              <div className="overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
                 <div className="border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#dbeafe_0%,#ccfbf1_100%)] text-blue-800 sm:h-11 sm:w-11">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-100 sm:h-11 sm:w-11">
                       <Icon icon={currentMenu.icon} className="h-5 w-5" />
                     </div>
 
@@ -244,7 +240,7 @@ function DesktopMenuLink({ item }: { item: SidebarMenuItem }) {
         [
           "group flex items-center gap-3 rounded-[20px] px-3 py-3 transition-all",
           isActive
-            ? "bg-slate-900 text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]"
+            ? "bg-slate-100 text-slate-950 ring-1 ring-slate-200"
             : "text-slate-700 hover:bg-slate-50",
         ].join(" ")
       }
@@ -255,7 +251,7 @@ function DesktopMenuLink({ item }: { item: SidebarMenuItem }) {
             className={[
               "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition-all",
               isActive
-                ? "bg-white/15 text-white"
+                ? "bg-white text-slate-900 ring-1 ring-slate-200"
                 : "bg-slate-100 text-slate-700 group-hover:bg-slate-200",
             ].join(" ")}
           >
@@ -270,7 +266,7 @@ function DesktopMenuLink({ item }: { item: SidebarMenuItem }) {
             icon="solar:alt-arrow-right-linear"
             className={[
               "h-4 w-4 shrink-0 transition-all",
-              isActive ? "text-white/80" : "text-slate-400",
+              isActive ? "text-slate-500" : "text-slate-400",
             ].join(" ")}
           />
         </>
@@ -291,7 +287,7 @@ function MobileMenuTabs() {
               [
                 "inline-flex h-[52px] items-center gap-2.5 whitespace-nowrap rounded-2xl border px-4 text-sm font-bold transition-all",
                 isActive
-                  ? "border-slate-900 bg-slate-900 text-white"
+                  ? "border-slate-200 bg-white text-slate-950 shadow-sm"
                   : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100",
               ].join(" ")
             }

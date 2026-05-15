@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import { getApiErrorMessage } from "@/utils/api-error";
 
 type PartyJoinPreviewResponse = {
   productId: string;
@@ -175,7 +176,9 @@ export default function PartyMemberCreatePreviewPage() {
       });
     } catch (error) {
       console.error(error);
-      toast.error("파티 참여 신청 중 문제가 발생했습니다.");
+      toast.error(
+        getApiErrorMessage(error, "파티 참여 신청 중 문제가 발생했습니다."),
+      );
     } finally {
       setIsApplying(false);
     }

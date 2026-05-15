@@ -96,11 +96,19 @@ function unwrapResponse<T>(
   return value as T;
 }
 
+function normalizeLeaveStatus(status?: PartyLeaveReservationStatus | null) {
+  return String(status ?? "")
+    .trim()
+    .toUpperCase();
+}
+
 function getStatusLabel(status?: PartyLeaveReservationStatus | null) {
-  if (status === "LEAVE_RESERVED") return "해지 예약";
-  if (status === "ACTIVE") return "이용 중";
-  if (status === "LEFT") return "이용 종료";
-  if (status === "PENDING") return "예약 대기";
+  const normalizedStatus = normalizeLeaveStatus(status);
+
+  if (normalizedStatus === "LEAVE_RESERVED") return "해지 예약";
+  if (normalizedStatus === "ACTIVE") return "이용 중";
+  if (normalizedStatus === "LEFT") return "이용 종료";
+  if (normalizedStatus === "PENDING") return "예약 대기";
   return status || "-";
 }
 
@@ -111,18 +119,28 @@ function findMyLeaveReservation(
   if (!value) return null;
 
   if (!Array.isArray(value)) {
-    return value.status === "LEAVE_RESERVED" ? value : null;
+    return normalizeLeaveStatus(value.status) === "LEAVE_RESERVED"
+      ? value
+      : null;
   }
 
   const myReservation = value.find((reservation) => {
     if (currentUserId !== undefined && reservation.userId === currentUserId) {
-      return reservation.status === "LEAVE_RESERVED";
+      return normalizeLeaveStatus(reservation.status) === "LEAVE_RESERVED";
     }
 
-    return reservation.role === "MEMBER" && reservation.status === "LEAVE_RESERVED";
+    return (
+      reservation.role === "MEMBER" &&
+      normalizeLeaveStatus(reservation.status) === "LEAVE_RESERVED"
+    );
   });
 
   return myReservation ?? null;
+}
+
+function getFirstLeaveReservation(value: PartyLeaveReservationResponse | null) {
+  if (!value) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
 function getPaymentStatusLabel(status?: PaymentStatus | null) {
@@ -432,16 +450,16 @@ export default function PartyMemberSettingsPage() {
       setIsSubmitting(true);
 
       const response = await api.post(`/api/v1/party-leave/${partyId}/reserve`);
-      const data = unwrapResponse<PartyLeaveReserveResponse>(response.data);
+      const data = unwrapResponse<PartyLeaveReservationResponse>(
+        response.data,
+      );
+      const reservedReservation = getFirstLeaveReservation(data);
 
-      if (!data) {
-        toast.error("해지 예약 결과를 확인할 수 없습니다.");
-        return;
-      }
-
-      setLeaveReservation(data);
+      await fetchSettings(false);
       setIsLeaveConfirmOpen(false);
-      toast.success(data.message || "파티 탈퇴가 예약되었습니다.");
+      toast.success(
+        reservedReservation?.message || "파티 탈퇴가 예약되었습니다.",
+      );
     } catch (error) {
       if (!isExpectedClientError(error)) {
         console.error(error);
@@ -455,7 +473,11 @@ export default function PartyMemberSettingsPage() {
   };
 
   const handleCancelLeave = async () => {
-    if (!partyId || isSubmitting || leaveReservation?.status !== "LEAVE_RESERVED") {
+    if (
+      !partyId ||
+      isSubmitting ||
+      normalizeLeaveStatus(leaveReservation?.status) !== "LEAVE_RESERVED"
+    ) {
       return;
     }
 
@@ -464,7 +486,7 @@ export default function PartyMemberSettingsPage() {
 
       await api.delete(`/api/v1/party-leave/${partyId}/reserve`);
 
-      setLeaveReservation(null);
+      await fetchSettings(false);
       setIsLeaveCancelConfirmOpen(false);
       toast.success("파티 해지가 취소되었습니다.");
     } catch (error) {
@@ -479,16 +501,17 @@ export default function PartyMemberSettingsPage() {
     }
   };
 
-  const isLeaveReserved = leaveReservation?.status === "LEAVE_RESERVED";
+  const isLeaveReserved =
+    normalizeLeaveStatus(leaveReservation?.status) === "LEAVE_RESERVED";
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] px-4 py-10 sm:px-6">
-        <div className="mx-auto flex min-h-96 w-full max-w-[720px] items-center justify-center rounded-[28px] border border-slate-200 bg-white">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
           <div className="text-center">
             <Icon
               icon="solar:refresh-circle-bold"
-              className="mx-auto h-11 w-11 animate-spin text-blue-900"
+              className="mx-auto h-11 w-11 animate-spin text-brand-main"
             />
             <p className="mt-4 text-sm font-semibold text-slate-600">
               파티원 설정을 불러오는 중입니다
@@ -500,8 +523,8 @@ export default function PartyMemberSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mx-auto w-full max-w-[720px]">
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div className="mx-auto w-full max-w-3xl">
         <header className="flex items-center justify-between gap-3">
           <button
             type="button"
@@ -519,7 +542,7 @@ export default function PartyMemberSettingsPage() {
           </span>
         </header>
 
-        <section className="mt-5 rounded-[24px] border border-slate-200 bg-white px-5 py-5 shadow-[0_16px_48px_-40px_rgba(15,23,42,0.28)] sm:px-6">
+        <section className="mt-5 rounded-[32px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="text-xs font-bold text-[#14B8A6]">
@@ -558,89 +581,13 @@ export default function PartyMemberSettingsPage() {
 
         <PaymentHistorySection payments={paymentHistory} partyId={partyId} />
 
-        {isLeaveReserved && leaveReservation && (
-          <section className="mt-5 rounded-[28px] border border-amber-100 bg-amber-50 px-5 py-5 sm:px-6">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-amber-700 ring-1 ring-amber-100">
-                <Icon icon="solar:user-cross-bold" className="h-5 w-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-lg font-extrabold text-slate-950">
-                  내 해지 예약 상태
-                </h2>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
-                  {getStatusLabel(leaveReservation.status)} · 예약 시각{" "}
-                  {formatDateTime(leaveReservation.leaveReservedAt)}
-                </p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        <section
-          className={`mt-5 rounded-[24px] border bg-white px-4 py-4 shadow-[0_14px_46px_-42px_rgba(15,23,42,0.24)] sm:px-5 ${
-            isLeaveReserved ? "border-teal-100" : "border-rose-100"
-          }`}
-        >
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1 ${
-                isLeaveReserved
-                  ? "bg-teal-50 text-teal-700 ring-teal-100"
-                  : "bg-rose-50 text-rose-600 ring-rose-100"
-              }`}
-            >
-              <Icon
-                icon={
-                  isLeaveReserved
-                    ? "solar:refresh-bold"
-                    : "solar:logout-3-bold"
-                }
-                className="h-5 w-5"
-              />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-base font-semibold text-slate-950">
-                {isLeaveReserved ? "파티 해지 취소" : "파티 해지하기"}
-              </h2>
-              <p className="mt-1 text-sm font-normal leading-6 text-slate-500">
-                {isLeaveReserved
-                  ? "등록한 해지를 취소하고 기존 이용 상태로 되돌립니다."
-                  : "다음 결제일에 탈퇴가 반영됩니다."}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                isLeaveReserved
-                  ? setIsLeaveCancelConfirmOpen(true)
-                  : setIsLeaveConfirmOpen(true)
-              }
-              disabled={isSubmitting}
-              className={`flex h-10 w-full shrink-0 items-center justify-center gap-1.5 rounded-2xl px-3 text-xs font-semibold ring-1 transition disabled:cursor-not-allowed sm:w-auto ${
-                isLeaveReserved
-                  ? "bg-teal-50 text-teal-700 ring-teal-100 hover:bg-teal-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
-                  : "bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
-              }`}
-            >
-              <Icon
-                icon={
-                  isSubmitting
-                    ? "solar:refresh-circle-bold"
-                    : isLeaveReserved
-                      ? "solar:refresh-bold"
-                      : "solar:logout-3-bold"
-                }
-                className={`h-4 w-4 ${isSubmitting ? "animate-spin" : ""}`}
-              />
-              {isSubmitting
-                ? "처리 중"
-                : isLeaveReserved
-                  ? "해지 취소"
-                  : "해지"}
-            </button>
-          </div>
-        </section>
+        <LeaveActionCard
+          isLeaveReserved={isLeaveReserved}
+          leaveReservation={leaveReservation}
+          isSubmitting={isSubmitting}
+          onReserve={() => setIsLeaveConfirmOpen(true)}
+          onCancelReserve={() => setIsLeaveCancelConfirmOpen(true)}
+        />
       </div>
       {isLeaveConfirmOpen && (
         <LeaveReserveConfirmModal
@@ -671,10 +618,105 @@ export default function PartyMemberSettingsPage() {
 
 function MetricTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-2xl bg-[#F8FAFC] px-3 py-4 text-center ring-1 ring-slate-100">
+    <div className="min-w-0 rounded-2xl bg-slate-50 px-3 py-4 text-center ring-1 ring-slate-100">
       <p className="text-[11px] font-semibold text-slate-400">{label}</p>
       <p className="mt-1 truncate text-sm font-bold text-slate-900">{value}</p>
     </div>
+  );
+}
+
+function LeaveActionCard({
+  isLeaveReserved,
+  leaveReservation,
+  isSubmitting,
+  onReserve,
+  onCancelReserve,
+}: {
+  isLeaveReserved: boolean;
+  leaveReservation: PartyLeaveReserveResponse | null;
+  isSubmitting: boolean;
+  onReserve: () => void;
+  onCancelReserve: () => void;
+}) {
+  if (isLeaveReserved && leaveReservation) {
+    return (
+      <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-teal-100 sm:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 ring-1 ring-teal-100">
+            <Icon icon="solar:refresh-bold" className="h-5 w-5" />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-lg font-extrabold text-slate-950">
+                해지 예약 현황
+              </h2>
+              <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700 ring-1 ring-teal-100">
+                {getStatusLabel(leaveReservation.status)}
+              </span>
+            </div>
+
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+              예약 시각 {formatDateTime(leaveReservation.leaveReservedAt)}
+            </p>
+            <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
+              해지 예약을 취소하면 기존 이용 상태로 되돌아갑니다.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onCancelReserve}
+            disabled={isSubmitting}
+            className="flex h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-full bg-teal-50 px-4 text-sm font-bold text-teal-700 ring-1 ring-teal-100 transition hover:bg-teal-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200 sm:w-auto"
+          >
+            <Icon
+              icon={
+                isSubmitting ? "solar:refresh-circle-bold" : "solar:refresh-bold"
+              }
+              className={`h-4 w-4 ${isSubmitting ? "animate-spin" : ""}`}
+            />
+            {isSubmitting ? "처리 중" : "해지 취소"}
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mt-5 rounded-[24px] bg-white px-4 py-4 shadow-xl shadow-slate-900/5 ring-1 ring-rose-100 sm:px-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-100">
+          <Icon icon="solar:logout-3-bold" className="h-5 w-5" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base font-semibold text-slate-950">
+            파티 해지하기
+          </h2>
+          <p className="mt-1 text-sm font-normal leading-6 text-slate-500">
+            즉시 탈퇴되지는 않으며, 다음 결제일에 탈퇴가 반영됩니다.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onReserve}
+          disabled={isSubmitting}
+          className="flex h-10 w-full shrink-0 items-center justify-center gap-1.5 rounded-2xl bg-rose-50 px-3 text-xs font-semibold text-rose-600 ring-1 ring-rose-100 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200 sm:w-auto"
+        >
+          <Icon
+            icon={
+              isSubmitting
+                ? "solar:refresh-circle-bold"
+                : "solar:logout-3-bold"
+            }
+            className={`h-4 w-4 ${isSubmitting ? "animate-spin" : ""}`}
+          />
+          {isSubmitting ? "처리 중" : "해지"}
+        </button>
+      </div>
+    </section>
   );
 }
 
@@ -717,7 +759,7 @@ function LeaveReserveConfirmModal({
       role="presentation"
     >
       <section
-        className="w-full max-w-[420px] rounded-[28px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] sm:px-6"
+        className="w-full max-w-[420px] rounded-[28px] bg-white px-5 py-5 shadow-2xl shadow-slate-900/20 sm:px-6"
         onMouseDown={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -747,7 +789,7 @@ function LeaveReserveConfirmModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex h-11 items-center justify-center rounded-2xl bg-[#F8FAFC] text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+            className="flex h-11 items-center justify-center rounded-2xl bg-slate-50 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
           >
             취소
           </button>
@@ -791,7 +833,7 @@ function BillingMethodCard({
     .join("  ");
 
   return (
-    <section className="mt-5 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)]">
+    <section className="mt-5 overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
       <div className="px-5 py-5 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
@@ -816,7 +858,7 @@ function BillingMethodCard({
       </div>
 
       {hasBillingKey ? (
-        <div className="border-t border-slate-100 bg-[#F8FAFC] px-5 py-5 sm:px-6">
+        <div className="border-t border-slate-100 bg-slate-50 px-5 py-5 sm:px-6">
           <div className="rounded-[24px] bg-white px-5 py-5 ring-1 ring-slate-200">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAFBF5] text-[#0F766E] ring-1 ring-[#BDEFE4]">
@@ -853,7 +895,7 @@ function BillingMethodCard({
           </div>
         </div>
       ) : (
-        <div className="border-t border-slate-100 bg-[#F8FAFC] px-5 py-5 sm:px-6">
+        <div className="border-t border-slate-100 bg-slate-50 px-5 py-5 sm:px-6">
           <div className="rounded-[24px] bg-white px-5 py-6 text-center ring-1 ring-slate-200">
             <Icon
               icon="solar:card-bold"
@@ -881,7 +923,7 @@ function PaymentHistorySection({
     : payments;
 
   return (
-    <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
+    <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold text-[#14B8A6]">PAYMENTS</p>
@@ -890,7 +932,7 @@ function PaymentHistorySection({
             현재 파티에 해당하는 최근 결제내역입니다.
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-[#F8FAFC] px-3 py-1.5 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
+        <span className="shrink-0 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
           {visiblePayments.length}건
         </span>
       </div>
@@ -906,7 +948,7 @@ function PaymentHistorySection({
             ))}
           </div>
         ) : (
-          <div className="bg-[#F8FAFC] px-5 py-8 text-center">
+          <div className="bg-slate-50 px-5 py-8 text-center">
             <Icon
               icon="solar:bill-list-bold"
               className="mx-auto h-10 w-10 text-slate-300"
@@ -930,7 +972,7 @@ function PaymentHistoryItemCard({ payment }: { payment: PaymentHistoryItem }) {
   return (
     <article className="bg-white px-4 py-4">
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F8FAFC] text-[#1E3A8A] ring-1 ring-slate-100">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-brand-main ring-1 ring-slate-100">
           <Icon icon="solar:bill-check-bold" className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">

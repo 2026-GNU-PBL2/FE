@@ -332,7 +332,7 @@ export default function PartyProvisionDashboardPage() {
   const provisionTone = getStatusTone(provision.provisionStatus);
   return (
     <div className="min-h-screen bg-brand-bg px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="mx-auto w-full max-w-3xl">
         <header className="flex items-center justify-between gap-3">
           <button
             onClick={() => navigate("/myparty")}
@@ -360,24 +360,26 @@ export default function PartyProvisionDashboardPage() {
           </div>
         </header>
 
-        <section className="mt-5 overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-          <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-5 py-6 sm:px-8">
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[13px] font-extrabold text-brand-main">HOST PARTY</p>
-              <h1 className="mt-2 truncate text-[28px] font-extrabold tracking-tight text-slate-950">
-                {partySettings?.ottServiceName || "파티 정보"}
-              </h1>
-              <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
-                {partySettings?.partyCreatedAt
-                  ? `${formatDate(partySettings.partyCreatedAt)} 생성`
-                  : "운영 중인 파티"}
-              </p>
+        <section className="mt-5 overflow-hidden rounded-[32px] bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="px-5 py-6 sm:px-8">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-[13px] font-extrabold text-brand-main">
+                  HOST PARTY
+                </p>
+                <h1 className="mt-2 truncate text-[28px] font-extrabold tracking-tight text-slate-950">
+                  {partySettings?.ottServiceName || "파티 정보"}
+                </h1>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+                  {partySettings?.partyCreatedAt
+                    ? `${formatDate(partySettings.partyCreatedAt)} 생성`
+                    : "운영 중인 파티"}
+                </p>
+              </div>
+              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
+                <Icon icon="solar:crown-star-bold" className="h-6 w-6" />
+              </div>
             </div>
-            <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main shadow-sm ring-1 ring-blue-100">
-              <Icon icon="solar:crown-star-bold" className="h-6 w-6" />
-            </div>
-          </div>
           </div>
         </section>
 

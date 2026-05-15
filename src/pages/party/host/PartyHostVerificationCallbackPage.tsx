@@ -25,25 +25,45 @@ export default function PartyHostVerificationCallbackPage() {
       return;
     }
 
-    navigate("/parties", { replace: true });
+    navigate("/", { replace: true });
   }, [navigate, searchParams]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F2F4F7] px-4">
-      <div className="w-full max-w-[480px] rounded-[32px] bg-white px-6 py-10 text-center shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)] sm:px-8">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#EEF4FF] text-[#1E3A8A]">
-          <Icon icon="solar:refresh-circle-bold" className="h-8 w-8" />
-        </div>
+    <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-80px)] w-full max-w-[520px] items-center justify-center">
+        <section className="w-full overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="px-6 py-10 sm:px-8">
+            <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-full bg-blue-50 text-brand-main ring-1 ring-blue-100">
+              <Icon
+                icon="solar:refresh-circle-bold"
+                className="h-10 w-10 animate-spin"
+              />
+            </div>
 
-        <h1 className="mt-5 text-[24px] font-semibold tracking-tight text-slate-950">
-          인증 결과를 확인하고 있어요
-        </h1>
+            <div className="mt-6">
+              <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-600 ring-1 ring-slate-100">
+                계좌 인증
+              </div>
 
-        <p className="mt-3 text-[15px] leading-7 text-slate-500">
-          잠시만 기다려 주세요.
-          <br />
-          인증 완료 여부를 확인한 뒤 자동으로 이동합니다.
-        </p>
+              <h1 className="mt-4 text-[26px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
+                인증 결과를 확인하고 있어요
+              </h1>
+
+              <p className="mt-3 text-sm font-semibold leading-7 text-slate-500 sm:text-base">
+                인증 완료 여부를 확인한 뒤 자동으로 이동합니다.
+              </p>
+            </div>
+
+            <div className="mt-7 rounded-[24px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
+              <div className="mx-auto h-2 max-w-40 overflow-hidden rounded-full bg-white">
+                <div className="h-full w-2/3 animate-pulse rounded-full bg-brand-main" />
+              </div>
+              <p className="mt-3 text-xs font-bold text-slate-400">
+                잠시만 기다려 주세요
+              </p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

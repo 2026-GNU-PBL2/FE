@@ -216,12 +216,12 @@ function getNotificationTargetPath(notification: NotificationItem) {
         : "/mypage/payment-method";
 
     case "PAYMENT_SUCCEEDED":
-      return "/mypage/payment-history";
+      return "/mypage/payment-method";
 
     case "SETTLEMENT_COMPLETED":
       return notification.partyId
         ? `/myparty/${notification.partyId}/provision/settings`
-        : "/mypage/payment-history";
+        : "/mypage/payment-method";
 
     case "PARTY_TERMINATED":
     case "HOST_PROVISION_TIMEOUT_TERMINATED":
@@ -234,6 +234,17 @@ function getNotificationTargetPath(notification: NotificationItem) {
   }
 }
 
+function SummaryTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-slate-50 px-3 py-3 text-center ring-1 ring-slate-100">
+      <p className="text-[11px] font-bold text-slate-400">{label}</p>
+      <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
+        {value}
+      </p>
+    </div>
+  );
+}
+
 export default function NotificationPage() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -242,6 +253,10 @@ export default function NotificationPage() {
   const [readingIds, setReadingIds] = useState<Set<number>>(new Set());
 
   const hasNotifications = notifications.length > 0;
+  const totalCount = notifications.length;
+  const readCount = notifications.filter(
+    (notification) => !isUnread(notification),
+  ).length;
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -335,35 +350,32 @@ export default function NotificationPage() {
   }, [loadNotifications]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-4 py-10 sm:px-6">
-      <div className="mx-auto w-full max-w-[760px] space-y-5">
-        <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_24px_80px_-55px_rgba(15,23,42,0.35)]">
-          <div className="relative px-6 py-7 sm:px-8 sm:py-8">
-            <div className="absolute right-6 top-6 hidden h-24 w-24 rounded-[32px] bg-[#38BDF8]/10 sm:block" />
-            <div className="absolute right-12 top-12 hidden h-14 w-14 rounded-3xl bg-[#2DD4BF]/15 sm:block" />
-
-            <div className="relative flex items-start justify-between gap-4">
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div className="mx-auto w-full max-w-3xl space-y-5">
+        <section className="overflow-hidden rounded-[32px] bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="px-5 py-6 sm:px-8">
+            <div className="flex items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-[#1E3A8A] text-white shadow-[0_16px_35px_-25px_rgba(30,58,138,0.8)]">
-                  <Icon icon="solar:bell-bing-bold" className="h-8 w-8" />
+                <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
+                  <Icon icon="solar:bell-bing-bold" className="h-7 w-7" />
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-[#38BDF8]">
-                    Notification
+                  <p className="text-[13px] font-extrabold text-amber-700">
+                    NOTIFICATION
                   </p>
-                  <h1 className="mt-2 text-2xl font-extrabold leading-tight text-slate-950 sm:text-3xl">
+                  <h1 className="mt-2 text-[28px] font-extrabold leading-tight tracking-tight text-slate-950">
                     알림
                   </h1>
-                  <p className="mt-3 max-w-[500px] text-sm leading-6 text-slate-500">
+                  <p className="mt-2 max-w-[500px] text-sm font-semibold leading-6 text-slate-500">
                     파티 매칭, 이용 정보, 결제와 정산 상태를 확인합니다.
                   </p>
                 </div>
               </div>
 
-              <div className="relative shrink-0 rounded-3xl bg-[#F8FAFC] px-4 py-3 text-right ring-1 ring-slate-200">
+              <div className="shrink-0 rounded-2xl bg-slate-50 px-4 py-3 text-right ring-1 ring-slate-100">
                 <p className="text-xs font-bold text-slate-400">읽지 않음</p>
-                <p className="mt-1 text-2xl font-extrabold text-[#1E3A8A]">
+                <p className="mt-1 text-2xl font-extrabold text-slate-950">
                   {unreadCount}
                   <span className="ml-1 text-sm font-bold text-slate-400">
                     개
@@ -371,11 +383,15 @@ export default function NotificationPage() {
                 </p>
               </div>
             </div>
-
+            <div className="mt-6 grid grid-cols-3 gap-2">
+              <SummaryTile label="전체" value={`${totalCount}개`} />
+              <SummaryTile label="읽지 않음" value={`${unreadCount}개`} />
+              <SummaryTile label="읽음" value={`${readCount}개`} />
+            </div>
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_70px_-55px_rgba(15,23,42,0.35)]">
+        <section className="overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
           {isLoading ? (
             <div className="space-y-3 p-4">
               {Array.from({ length: 5 }).map((_, index) => (
@@ -424,12 +440,12 @@ export default function NotificationPage() {
                     key={notification.id}
                     type="button"
                     onClick={() => handleNotificationClick(notification)}
-                    className={`relative w-full p-5 text-left transition hover:bg-[#F8FAFC] ${
-                      unread ? "bg-[#F7FBFF]" : "bg-white"
+                    className={`relative w-full px-5 py-5 text-left transition hover:bg-slate-50 ${
+                      unread ? "bg-amber-50/35" : "bg-white"
                     }`}
                   >
                     {unread && (
-                      <span className="absolute left-0 top-0 h-full w-1 bg-[#38BDF8]" />
+                      <span className="absolute left-0 top-0 h-full w-1 bg-amber-400" />
                     )}
                     <div className="flex gap-3 sm:gap-4">
                       <div
@@ -448,7 +464,7 @@ export default function NotificationPage() {
                             </span>
 
                             {unread && (
-                              <span className="h-2 w-2 shrink-0 rounded-full bg-[#38BDF8]" />
+                              <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400" />
                             )}
                           </div>
 
@@ -457,7 +473,7 @@ export default function NotificationPage() {
                           </span>
                         </div>
 
-                        <div className="mt-3 flex items-start justify-between gap-3">
+                        <div className="mt-3">
                           <div className="min-w-0">
                             <h3
                               className={`line-clamp-1 text-base font-bold ${
@@ -471,31 +487,24 @@ export default function NotificationPage() {
                               {content}
                             </p>
                           </div>
-
-                          <Icon
-                            icon="solar:alt-arrow-right-linear"
-                            className="mt-1 h-5 w-5 shrink-0 text-slate-300"
-                          />
                         </div>
 
-                        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
                           <span className="inline-flex items-center gap-1">
                             <Icon
-                              icon="solar:clock-circle-linear"
+                              icon="solar:calendar-mark-linear"
                               className="h-4 w-4"
                             />
                             {formatDateTime(notification.createdAt)}
                           </span>
 
-                          {notification.partyId !== null && (
-                            <span className="inline-flex items-center gap-1">
-                              <Icon
-                                icon="solar:hashtag-square-linear"
-                                className="h-4 w-4"
-                              />
-                              파티 #{notification.partyId}
-                            </span>
-                          )}
+                          <span className="inline-flex items-center gap-1 font-bold text-slate-500">
+                            확인하기
+                            <Icon
+                              icon="solar:alt-arrow-right-linear"
+                              className="h-4 w-4"
+                            />
+                          </span>
                         </div>
                       </div>
                     </div>

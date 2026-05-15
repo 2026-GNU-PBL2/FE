@@ -198,7 +198,7 @@ function getWithdrawStatusClassName(status: WithdrawStatus) {
     case "REQUESTED":
       return "bg-sky-50 text-sky-700";
     case "COMPLETED":
-      return "bg-teal-50 text-teal-700";
+      return "bg-emerald-50 text-emerald-700";
     case "REJECTED":
       return "bg-rose-50 text-rose-700";
     default:
@@ -209,7 +209,7 @@ function getWithdrawStatusClassName(status: WithdrawStatus) {
 function getSettlementStatusClassName(status: SettlementStatus) {
   switch (status) {
     case "ACCRUED":
-      return "bg-teal-50 text-teal-700";
+      return "bg-emerald-50 text-emerald-700";
     default:
       return "bg-slate-100 text-slate-600";
   }
@@ -234,7 +234,7 @@ function getVerificationStatusClassName(status: string | null | undefined) {
   switch (status) {
     case "VERIFIED":
     case "APPROVED":
-      return "bg-teal-50 text-teal-700 ring-teal-100";
+      return "bg-emerald-50 text-emerald-700 ring-emerald-100";
     case "PENDING":
       return "bg-amber-50 text-amber-700 ring-amber-100";
     case "FAILED":
@@ -560,15 +560,15 @@ export default function MoneyManagePage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-4">
-      <section className="rounded-[22px] border border-slate-200 bg-white p-4 shadow-[0_12px_36px_rgba(15,23,42,0.04)] sm:p-5">
+      <section className="rounded-[22px] bg-white ring-1 ring-slate-100 p-4 shadow-xl shadow-slate-900/5 sm:p-5">
         <div className="space-y-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-900 ring-1 ring-blue-100">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-100">
                 <Icon icon="solar:wallet-money-bold" className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-blue-900">정산 포인트</p>
+                <p className="text-xs font-bold text-slate-700">정산 포인트</p>
                 <p className="mt-1 text-sm text-slate-500">환급 가능 포인트</p>
               </div>
             </div>
@@ -602,10 +602,10 @@ export default function MoneyManagePage() {
         </div>
       </section>
 
-      <section className="rounded-[22px] border border-slate-200 bg-white p-4 shadow-[0_12px_36px_rgba(15,23,42,0.04)] sm:p-5">
+      <section className="rounded-[22px] bg-white ring-1 ring-slate-100 p-4 shadow-xl shadow-slate-900/5 sm:p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold text-blue-900">환급</p>
+            <p className="text-xs font-bold text-slate-700">환급</p>
             <h2 className="mt-1 text-base font-bold text-slate-950">
               환급 요청
             </h2>
@@ -614,16 +614,16 @@ export default function MoneyManagePage() {
             </p>
           </div>
 
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-50 text-blue-900">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-50 text-slate-700">
             <Icon icon="solar:card-send-bold" className="h-5 w-5" />
           </div>
         </div>
 
         <div className="mt-5">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+          <div className="rounded-2xl bg-slate-50 ring-1 ring-slate-100 p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-900 ring-1 ring-slate-200">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-700 ring-1 ring-slate-200">
                   <Icon icon="solar:banknote-bold" className="h-5 w-5" />
                 </div>
 
@@ -675,7 +675,7 @@ export default function MoneyManagePage() {
                   type="button"
                   onClick={handleAuthorizeSettlementAccount}
                   disabled={isBankAuthLoading}
-                  className="inline-flex h-8 items-center justify-center rounded-xl bg-blue-900 px-3 text-xs font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+                  className="inline-flex h-8 items-center justify-center rounded-xl bg-slate-900 px-3 text-xs font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
                 >
                   {isBankAuthLoading
                     ? "인증 요청 중"
@@ -689,7 +689,7 @@ export default function MoneyManagePage() {
                     type="button"
                     onClick={() => setIsReleaseConfirmOpen(true)}
                     disabled={isSettlementReleaseLoading}
-                    className="inline-flex h-8 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                    className="inline-flex h-8 items-center justify-center rounded-xl bg-white ring-1 ring-slate-100 px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                   >
                     해제
                   </button>
@@ -708,7 +708,7 @@ export default function MoneyManagePage() {
               요청 금액
             </label>
 
-            <div className="mt-3 flex h-12 items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 transition focus-within:border-blue-900 focus-within:bg-white">
+            <div className="mt-3 flex h-12 items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 transition focus-within:border-slate-400 focus-within:bg-white">
               <input
                 id="withdrawAmount"
                 value={withdrawAmount}
@@ -727,7 +727,7 @@ export default function MoneyManagePage() {
             type="button"
             onClick={handleSubmitWithdraw}
             disabled={!canSubmitWithdraw}
-            className="inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-2xl bg-blue-900 px-4 text-sm font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+            className="inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
           >
             <Icon
               icon={
@@ -747,11 +747,11 @@ export default function MoneyManagePage() {
         </div>
       </section>
 
-      <section className="min-w-0 overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_12px_36px_rgba(15,23,42,0.04)]">
+      <section className="min-w-0 overflow-hidden rounded-[22px] bg-white ring-1 ring-slate-100 shadow-xl shadow-slate-900/5">
         <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-bold text-blue-900">내역</p>
+              <p className="text-xs font-bold text-slate-700">내역</p>
               <h2 className="mt-1 text-base font-bold text-slate-950">
                 정산 및 환급
               </h2>
@@ -767,7 +767,7 @@ export default function MoneyManagePage() {
                 className={[
                   "h-9 rounded-xl px-4 text-sm font-bold transition md:min-w-20",
                   activeTab === "settlements"
-                    ? "bg-white text-blue-900 shadow-sm shadow-slate-200"
+                    ? "bg-white text-slate-700 shadow-sm shadow-slate-200"
                     : "text-slate-500",
                 ].join(" ")}
               >
@@ -779,7 +779,7 @@ export default function MoneyManagePage() {
                 className={[
                   "h-9 rounded-xl px-4 text-sm font-bold transition md:min-w-20",
                   activeTab === "withdraws"
-                    ? "bg-white text-blue-900 shadow-sm shadow-slate-200"
+                    ? "bg-white text-slate-700 shadow-sm shadow-slate-200"
                     : "text-slate-500",
                 ].join(" ")}
               >
@@ -835,13 +835,13 @@ function SimpleStatCard({
   const isTeal = tone === "teal";
 
   return (
-    <div className="flex items-center gap-3 rounded-[22px] border border-slate-200 bg-white p-4 shadow-[0_12px_36px_rgba(15,23,42,0.04)] sm:p-5">
+    <div className="flex items-center gap-3 rounded-[22px] bg-white ring-1 ring-slate-100 p-4 shadow-xl shadow-slate-900/5 sm:p-5">
       <div
         className={[
           "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1",
           isTeal
-            ? "bg-teal-50 text-teal-700 ring-teal-100"
-            : "bg-blue-50 text-blue-900 ring-blue-100",
+            ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
+            : "bg-slate-50 text-slate-700 ring-slate-100",
         ].join(" ")}
       >
         <Icon icon={icon} className="h-5 w-5" />
@@ -872,7 +872,7 @@ function NoticeRow({
       className={[
         "min-w-0 rounded-2xl border px-4 py-3",
         isBlue
-          ? "border-blue-100 bg-blue-50/70"
+          ? "border-slate-100 bg-slate-50"
           : "border-slate-200 bg-slate-50",
       ].join(" ")}
     >
@@ -880,7 +880,7 @@ function NoticeRow({
         <p
           className={[
             "text-xs font-semibold",
-            isBlue ? "text-blue-900" : "text-slate-500",
+            isBlue ? "text-slate-700" : "text-slate-500",
           ].join(" ")}
         >
           {label}
@@ -997,7 +997,7 @@ function SettlementHistoryList({
             className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white px-3.5 py-3.5 transition hover:border-slate-200 hover:bg-slate-50 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="flex min-w-0 items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-700 ring-1 ring-teal-100">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
                 <Icon icon="solar:wallet-money-bold" className="h-4 w-4" />
               </div>
 
@@ -1029,7 +1029,7 @@ function SettlementHistoryList({
             </div>
 
             <div className="pl-13 text-left sm:pl-0 sm:text-right">
-              <p className="text-base font-bold text-teal-700">
+              <p className="text-base font-bold text-emerald-700">
                 +{formatCurrency(item.totalAmount)}
               </p>
               <p className="mt-1 text-xs text-slate-400">
@@ -1085,7 +1085,7 @@ function WithdrawRequestList({
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-start gap-3">
-                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-900 ring-1 ring-blue-100">
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-100">
                   <Icon icon="solar:card-send-bold" className="h-4 w-4" />
                 </div>
 
