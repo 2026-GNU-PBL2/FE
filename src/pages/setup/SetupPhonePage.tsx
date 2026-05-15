@@ -198,9 +198,11 @@ export default function SetupPhonePage() {
           <span className="text-brand-main">휴대폰 인증</span>을 진행해 주세요
         </>
       }
-      description={<>인증이 완료되면 마지막 보안 설정 단계로 넘어갑니다.</>}
+      description={
+        <>본인 확인에 사용할 휴대폰 번호를 인증해 주세요.</>
+      }
       rightContent={
-        <div className="space-y-6">
+        <div className="space-y-5">
           <div className="space-y-2">
             <div>
               <p className="text-sm font-bold text-slate-900">휴대폰 번호</p>
@@ -258,7 +260,7 @@ export default function SetupPhonePage() {
                 }
                 className="shrink-0 whitespace-nowrap rounded-xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isSendingCode ? "발송 중" : isCodeSent ? "재전송" : "인증요청"}
+                {isSendingCode ? "발송 중" : isCodeSent ? "재전송" : "인증 요청"}
               </button>
             </div>
 
@@ -266,7 +268,7 @@ export default function SetupPhonePage() {
               <p className="text-sm font-medium text-rose-500">{phoneError}</p>
             ) : isCodeSent ? (
               <p className="text-sm font-medium text-teal-600">
-                인증번호가 발송되었습니다.
+                인증번호를 보냈습니다.
               </p>
             ) : null}
           </div>
@@ -341,7 +343,7 @@ export default function SetupPhonePage() {
             <div className="flex items-center justify-between gap-3">
               {codeError ? (
                 <p className="text-sm font-medium text-rose-500">{codeError}</p>
-              ) : (
+              ) : isCodeSent ? (
                 <p
                   className={[
                     "text-sm",
@@ -354,11 +356,13 @@ export default function SetupPhonePage() {
                 >
                   {isVerified
                     ? "인증이 완료되었습니다."
-                    : isCodeSent
-                      ? secondsLeft > 0
-                        ? `남은 시간 ${timeText}`
-                        : "인증 시간이 만료되었습니다."
-                      : "먼저 인증번호를 요청해 주세요."}
+                    : secondsLeft > 0
+                      ? `남은 시간 ${timeText}`
+                      : "인증 시간이 만료되었습니다."}
+                </p>
+              ) : (
+                <p className="text-sm text-slate-500">
+                  인증번호 요청 후 입력할 수 있습니다.
                 </p>
               )}
 
@@ -370,9 +374,9 @@ export default function SetupPhonePage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+          <div className="rounded-2xl bg-slate-50 px-5 py-4">
             <p className="text-sm leading-6 text-slate-600">
-              인증된 번호는 본인 확인과 결제, 정산 관련 주요 안내에 사용됩니다.
+              인증된 번호는 본인 확인과 결제, 정산 안내에 사용됩니다.
             </p>
           </div>
 

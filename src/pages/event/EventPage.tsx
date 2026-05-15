@@ -75,125 +75,188 @@ function getStatusCount(status: EventStatus) {
 export default function EventPage() {
   const ongoingCount = getStatusCount("진행중");
   const upcomingCount = getStatusCount("예정");
+  const urgentCount = getStatusCount("종료임박");
+  const featuredEvent = events[0];
+  const remainingEvents = events.slice(1);
 
   return (
     <div className="min-h-full bg-brand-bg">
-      <section className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-        <header className="rounded-[32px] bg-white px-5 py-6 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-7 sm:py-8">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <section className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <header className="overflow-hidden rounded-[32px] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.06)] ring-1 ring-slate-100">
+          <div className="grid gap-6 px-5 py-6 sm:px-7 sm:py-8 lg:grid-cols-[1fr_360px] lg:items-center">
             <div className="min-w-0">
-              <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-100">
+              <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-main ring-1 ring-blue-100">
                 <Icon
-                  icon="solar:gift-bold"
-                  className="h-4 w-4 text-brand-main"
+                  icon="solar:gift-bold-duotone"
+                  className="h-4 w-4"
                 />
                 Submate 혜택
               </div>
 
-              <h1 className="mt-4 text-[30px] font-extrabold tracking-tight text-slate-950 sm:text-[40px]">
-                이벤트
+              <h1 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-4xl">
+                받을 수 있는 혜택을
+                <br />
+                모아봤어요
               </h1>
 
-              <p className="mt-3 max-w-xl text-[15px] font-semibold leading-7 text-slate-500">
-                파티 참여와 운영에 필요한 혜택을 한곳에서 확인해보세요.
+              <p className="mt-3 max-w-xl text-sm font-semibold leading-7 text-slate-500 sm:text-base">
+                첫 참여, 초대, 정산 완료까지 지금 받을 수 있는 리워드를
+                확인해 보세요.
               </p>
             </div>
 
-            <div className="grid min-w-0 grid-cols-2 gap-2 sm:min-w-[260px]">
-              <div className="rounded-[22px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
-                <p className="text-xs font-bold text-slate-500">진행 중</p>
-                <p className="mt-1 text-2xl font-extrabold text-slate-950">
-                  {ongoingCount}
-                  <span className="ml-0.5 text-sm font-bold text-slate-500">
-                    건
-                  </span>
-                </p>
-              </div>
-
-              <div className="rounded-[22px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
-                <p className="text-xs font-bold text-slate-500">예정</p>
-                <p className="mt-1 text-2xl font-extrabold text-slate-950">
-                  {upcomingCount}
-                  <span className="ml-0.5 text-sm font-bold text-slate-500">
-                    건
-                  </span>
-                </p>
+            <div className="rounded-[28px] bg-slate-50 p-2.5 ring-1 ring-slate-100">
+              <div className="grid grid-cols-3 gap-2">
+                <EventCount label="진행 중" count={ongoingCount} />
+                <EventCount label="예정" count={upcomingCount} />
+                <EventCount label="종료임박" count={urgentCount} />
               </div>
             </div>
           </div>
         </header>
 
-        <div className="mt-5 grid gap-4">
-          {events.map((event) => (
-            <article
-              key={event.id}
-              className="group overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:shadow-slate-900/10"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)]">
-                <Link
-                  to={`/event/${event.id}`}
-                  className="block min-h-0 overflow-hidden bg-slate-100"
-                >
-                  <div className="relative aspect-16/9 w-full overflow-hidden md:h-full md:aspect-auto">
+        <section className="mt-6">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-extrabold text-brand-main">
+                추천 이벤트
+              </p>
+              <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950">
+                놓치기 쉬운 혜택
+              </h2>
+            </div>
+          </div>
+
+          <article className="group overflow-hidden rounded-[32px] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-[0_18px_48px_rgba(15,23,42,0.09)]">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.95fr]">
+              <Link
+                to={`/event/${featuredEvent.id}`}
+                className="relative block overflow-hidden bg-slate-100"
+              >
+                <div className="aspect-[16/9] lg:h-full lg:aspect-auto">
+                  <img
+                    src={featuredEvent.image}
+                    alt={featuredEvent.title}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.025]"
+                  />
+                </div>
+              </Link>
+
+              <EventContent event={featuredEvent} featured />
+            </div>
+          </article>
+        </section>
+
+        <section className="mt-7">
+          <div className="mb-4">
+            <p className="text-xs font-extrabold text-slate-400">전체 혜택</p>
+            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950">
+              진행 중인 이벤트
+            </h2>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {remainingEvents.map((event) => (
+              <article
+                key={event.id}
+                className="group overflow-hidden rounded-[28px] bg-white shadow-[0_12px_34px_rgba(15,23,42,0.05)] ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-[0_16px_42px_rgba(15,23,42,0.08)]"
+              >
+                <Link to={`/event/${event.id}`} className="block bg-slate-100">
+                  <div className="aspect-[16/9] overflow-hidden">
                     <img
                       src={event.image}
                       alt={event.title}
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]"
                     />
                   </div>
                 </Link>
 
-                <div className="min-w-0 px-5 py-5 sm:px-6">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${getStatusClassName(
-                        event.status,
-                      )}`}
-                    >
-                      {event.status}
-                    </span>
-
-                    <span className="text-xs font-bold text-slate-400">
-                      {event.period}
-                    </span>
-                  </div>
-
-                  <Link to={`/event/${event.id}`} className="block">
-                    <h2 className="mt-3 text-xl font-extrabold leading-snug tracking-tight text-slate-950 transition group-hover:text-brand-main sm:text-2xl">
-                      {event.title}
-                    </h2>
-                  </Link>
-
-                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
-                    {event.description}
-                  </p>
-
-                  <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-2 text-sm font-semibold text-teal-700">
-                      <Icon
-                        icon="solar:wallet-money-bold"
-                        className="h-4 w-4"
-                      />
-                      {event.reward}
-                    </div>
-
-                    <Link
-                      to={`/event/${event.id}`}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-slate-900 px-4 text-sm font-bold text-white transition hover:bg-slate-800"
-                    >
-                      자세히 보기
-                      <Icon
-                        icon="solar:alt-arrow-right-linear"
-                        className="h-4 w-4"
-                      />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+                <EventContent event={event} compact />
+              </article>
+            ))}
+          </div>
+        </section>
       </section>
+    </div>
+  );
+}
+
+function EventCount({ label, count }: { label: string; count: number }) {
+  return (
+    <div className="rounded-[20px] bg-white px-3 py-3 text-center ring-1 ring-slate-100">
+      <p className="text-[11px] font-bold text-slate-400">{label}</p>
+      <p className="mt-1 text-2xl font-extrabold text-slate-950">
+        {count}
+        <span className="ml-0.5 text-xs font-bold text-slate-400">건</span>
+      </p>
+    </div>
+  );
+}
+
+function EventContent({
+  event,
+  featured = false,
+  compact = false,
+}: {
+  event: EventItem;
+  featured?: boolean;
+  compact?: boolean;
+}) {
+  return (
+    <div className={compact ? "px-4 py-4" : "px-5 py-6 sm:px-6 lg:p-7"}>
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className={`inline-flex rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${getStatusClassName(
+            event.status,
+          )}`}
+        >
+          {event.status}
+        </span>
+
+        <span className="text-xs font-bold text-slate-400">{event.period}</span>
+      </div>
+
+      <Link to={`/event/${event.id}`} className="block">
+        <h2
+          className={[
+            "mt-3 font-extrabold leading-snug tracking-tight text-slate-950 transition group-hover:text-brand-main",
+            featured ? "text-2xl sm:text-3xl" : "text-lg",
+          ].join(" ")}
+        >
+          {event.title}
+        </h2>
+      </Link>
+
+      <p
+        className={[
+          "mt-2 font-semibold text-slate-500",
+          compact ? "line-clamp-3 text-sm leading-6" : "text-sm leading-7",
+        ].join(" ")}
+      >
+        {event.description}
+      </p>
+
+      <div
+        className={[
+          "mt-5 flex gap-3",
+          compact
+            ? "flex-col"
+            : "flex-col sm:flex-row sm:items-center sm:justify-between",
+        ].join(" ")}
+      >
+        <div className="inline-flex w-fit items-center gap-2 rounded-full bg-teal-50 px-3 py-2 text-sm font-bold text-teal-700 ring-1 ring-teal-100">
+          <Icon icon="solar:wallet-money-bold-duotone" className="h-4 w-4" />
+          {event.reward}
+        </div>
+
+        <Link
+          to={`/event/${event.id}`}
+          className="inline-flex h-10 w-fit items-center justify-center gap-2 rounded-full bg-blue-50 px-4 text-sm font-extrabold text-brand-main ring-1 ring-blue-100 transition hover:bg-blue-100 active:scale-95"
+        >
+          자세히 보기
+          <Icon icon="solar:alt-arrow-right-linear" className="h-4 w-4" />
+        </Link>
+      </div>
     </div>
   );
 }

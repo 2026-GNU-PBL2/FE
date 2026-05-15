@@ -72,6 +72,24 @@ const roleCards = [
   },
 ];
 
+const highlightStats = [
+  {
+    label: "역할",
+    value: "파티장 / 파티원",
+    icon: "solar:users-group-rounded-bold-duotone",
+  },
+  {
+    label: "결제",
+    value: "자동결제",
+    icon: "solar:card-bold-duotone",
+  },
+  {
+    label: "정산",
+    value: "플랫폼 관리",
+    icon: "solar:wallet-money-bold-duotone",
+  },
+];
+
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 28 },
   visible: {
@@ -124,13 +142,13 @@ function SectionHeader({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="inline-flex w-fit items-center gap-2 rounded-full border border-sky-100 bg-white px-3 py-1.5 text-xs font-semibold text-brand-main shadow-sm">
-        <span className="h-2 w-2 rounded-full bg-brand-accent" />
+      <div className="inline-flex w-fit items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-main ring-1 ring-blue-100">
+        <span className="h-1.5 w-1.5 rounded-full bg-brand-main" />
         {eyebrow}
       </div>
 
       <div>
-        <h2 className="text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
+        <h2 className="text-2xl font-extrabold leading-tight text-slate-950 sm:text-3xl">
           {title}
         </h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
@@ -141,25 +159,13 @@ function SectionHeader({
   );
 }
 
-function GlassOrb({ className }: { className: string }) {
-  return (
-    <div
-      className={`absolute rounded-full blur-3xl ${className}`}
-      aria-hidden="true"
-    />
-  );
-}
-
 export default function AboutPage() {
   return (
     <div className="min-h-full bg-brand-bg">
-      <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-        <MotionSection className="relative overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-[0_20px_70px_rgba(30,58,138,0.08)]">
-          <GlassOrb className="-left-10 top-5 h-48 w-48 bg-sky-200/50" />
-          <GlassOrb className="-bottom-15 -right-5 h-56 w-56 bg-teal-200/50" />
-
-          <div className="relative bg-linear-to-br from-blue-50 via-sky-50 to-teal-50 px-5 py-6 sm:px-7 sm:py-8 lg:px-10">
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+      <section className="mx-auto flex w-full max-w-5xl flex-col gap-7 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <MotionSection className="overflow-hidden rounded-[32px] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.06)] ring-1 ring-slate-100">
+          <div className="px-5 py-7 sm:px-8 sm:py-10 lg:px-10">
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
               <motion.div
                 variants={stagger}
                 initial="hidden"
@@ -168,7 +174,7 @@ export default function AboutPage() {
               >
                 <motion.div
                   variants={fadeUp}
-                  className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-white/90 px-3 py-1.5 text-xs font-semibold text-brand-main shadow-sm backdrop-blur"
+                  className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-main ring-1 ring-blue-100"
                 >
                   <Icon icon="solar:info-circle-bold" className="h-4 w-4" />
                   서비스 소개
@@ -176,16 +182,16 @@ export default function AboutPage() {
 
                 <motion.h1
                   variants={fadeUp}
-                  className="mt-4 text-3xl font-bold leading-tight text-slate-900 sm:text-4xl"
+                  className="mt-5 text-3xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-4xl"
                 >
-                  공동구독을 연결하는 데서 끝나지 않고
+                  공동구독 운영을
                   <br />
-                  운영과 정산까지 관리하는 플랫폼
+                  더 쉽게
                 </motion.h1>
 
                 <motion.p
                   variants={fadeUp}
-                  className="mt-4 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base"
+                  className="mt-5 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base"
                 >
                   Submate는 파티장을 운영자, 파티원을 자동결제 참여자로
                   분리하고, 결제일 기준의 동일한 이용 주기와 정산 흐름을
@@ -195,18 +201,47 @@ export default function AboutPage() {
 
                 <motion.div
                   variants={fadeUp}
-                  className="mt-5 flex flex-wrap gap-3"
+                  className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-3"
+                >
+                  {highlightStats.map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      animate={{ y: [0, index % 2 === 0 ? -3 : 3, 0] }}
+                      transition={{
+                        duration: 3.8 + index * 0.35,
+                        repeat: Infinity,
+                        ease: [0.42, 0, 0.58, 1],
+                      }}
+                      className="rounded-2xl bg-slate-50 px-3 py-3 ring-1 ring-slate-100"
+                    >
+                      <Icon
+                        icon={stat.icon}
+                        className="h-5 w-5 text-brand-main"
+                      />
+                      <p className="mt-2 text-[11px] font-bold text-slate-400">
+                        {stat.label}
+                      </p>
+                      <p className="mt-0.5 text-sm font-extrabold text-slate-950">
+                        {stat.value}
+                      </p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                <motion.div
+                  variants={fadeUp}
+                  className="mt-7 flex flex-wrap gap-3"
                 >
                   <Link
                     to="/"
-                    className="inline-flex items-center justify-center rounded-full bg-brand-main px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(30,58,138,0.2)] transition hover:-translate-y-0.5 hover:bg-blue-800"
+                    className="inline-flex h-11 items-center justify-center rounded-full bg-brand-main px-5 text-sm font-bold text-white shadow-sm shadow-blue-900/10 transition hover:bg-blue-800 active:scale-95"
                   >
                     홈으로 가기
                   </Link>
 
                   <Link
-                    to="/party"
-                    className="inline-flex items-center justify-center rounded-full border border-white/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-white"
+                    to="/myparty"
+                    className="inline-flex h-11 items-center justify-center rounded-full bg-slate-50 px-5 text-sm font-bold text-slate-700 ring-1 ring-slate-100 transition hover:bg-slate-100 active:scale-95"
                   >
                     나의 파티 보기
                   </Link>
@@ -221,27 +256,27 @@ export default function AboutPage() {
                   ease: [0.22, 1, 0.36, 1],
                   delay: 0.15,
                 }}
-                className="relative mx-auto w-full max-w-105"
+                className="relative mx-auto w-full max-w-[420px]"
               >
                 <motion.div
-                  animate={{ y: [0, -8, 0] }}
+                  animate={{ y: [0, -6, 0] }}
                   transition={{
-                    duration: 4.5,
+                    duration: 5,
                     repeat: Infinity,
                     ease: [0.42, 0, 0.58, 1],
                   }}
-                  className="rounded-3xl border border-white/80 bg-white/85 p-4 shadow-[0_20px_50px_rgba(30,58,138,0.12)] backdrop-blur"
+                  className="rounded-[28px] bg-slate-50 p-5 ring-1 ring-slate-100"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-semibold text-slate-500">
+                      <p className="text-xs font-bold text-slate-400">
                         핵심 운영 원리
                       </p>
-                      <p className="mt-2 text-lg font-bold text-slate-900">
+                      <p className="mt-2 text-lg font-extrabold text-slate-950">
                         월 이용권 + 자동결제 + 정산 중개
                       </p>
                     </div>
-                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-brand-main">
+                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-brand-main shadow-sm ring-1 ring-blue-100">
                       <Icon
                         icon="solar:wallet-money-bold"
                         className="h-5 w-5"
@@ -249,7 +284,7 @@ export default function AboutPage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-2xl bg-slate-50 p-3">
+                  <div className="mt-5 rounded-2xl bg-white p-4 ring-1 ring-slate-100">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-slate-500">
                         자동결제
@@ -272,7 +307,7 @@ export default function AboutPage() {
                       <span className="text-xs font-medium text-slate-500">
                         결원 처리
                       </span>
-                      <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
                         재모집
                       </span>
                     </div>
@@ -280,15 +315,15 @@ export default function AboutPage() {
                 </motion.div>
 
                 <motion.div
-                  animate={{ y: [0, 7, 0] }}
+                  animate={{ y: [0, 6, 0] }}
                   transition={{
-                    duration: 5.2,
+                    duration: 5.4,
                     repeat: Infinity,
                     ease: [0.42, 0, 0.58, 1],
                   }}
-                  className="absolute -left-4 top-12 rounded-2xl border border-white/80 bg-white/90 px-4 py-3 shadow-[0_16px_40px_rgba(30,58,138,0.12)] backdrop-blur"
+                  className="absolute -left-2 top-12 rounded-2xl bg-white px-4 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-100"
                 >
-                  <p className="text-[11px] font-medium text-slate-500">
+                  <p className="text-[11px] font-bold text-slate-400">
                     결제 성공
                   </p>
                   <div className="mt-1 flex items-center gap-2">
@@ -305,15 +340,15 @@ export default function AboutPage() {
                 </motion.div>
 
                 <motion.div
-                  animate={{ y: [0, -6, 0] }}
+                  animate={{ y: [0, -5, 0] }}
                   transition={{
                     duration: 4.8,
                     repeat: Infinity,
                     ease: [0.42, 0, 0.58, 1],
                   }}
-                  className="absolute -right-3 bottom-4 rounded-2xl border border-white/80 bg-white/90 px-4 py-3 shadow-[0_16px_40px_rgba(30,58,138,0.12)] backdrop-blur"
+                  className="absolute -right-2 bottom-4 rounded-2xl bg-white px-4 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-100"
                 >
-                  <p className="text-[11px] font-medium text-slate-500">
+                  <p className="text-[11px] font-bold text-slate-400">
                     정산 상태
                   </p>
                   <div className="mt-1 flex items-center gap-2">
@@ -330,10 +365,10 @@ export default function AboutPage() {
           </div>
         </MotionSection>
 
-        <MotionSection className="rounded-3xl border border-slate-200 bg-white px-5 py-5 shadow-[0_12px_40px_rgba(15,23,42,0.05)] sm:px-7 sm:py-6">
+        <MotionSection className="rounded-[32px] bg-white px-5 py-6 shadow-[0_14px_40px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 sm:px-8 sm:py-8">
           <SectionHeader
             eyebrow="왜 필요한가요"
-            title="공동구독은 있었지만 운영 시스템은 부족했습니다"
+            title="운영은 생각보다 번거롭습니다"
             description="사람을 모으는 것보다, 그 이후의 결제와 정산을 계속 관리하는 일이 더 어렵습니다."
           />
 
@@ -342,15 +377,15 @@ export default function AboutPage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.15 }}
-            className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3"
+            className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3"
           >
             {problemCards.map((card) => (
               <motion.article
                 key={card.title}
                 variants={fadeUp}
-                whileHover={{ y: -6, scale: 1.01 }}
+                whileHover={{ y: -6, scale: 1.015 }}
                 transition={{ duration: 0.2 }}
-                className="group rounded-3xl border border-slate-200 bg-slate-50 p-4 transition"
+                className="group rounded-[24px] bg-slate-50 p-5 ring-1 ring-slate-100 transition hover:bg-white hover:shadow-[0_10px_28px_rgba(15,23,42,0.05)]"
               >
                 <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-brand-main shadow-sm transition group-hover:scale-105">
                   <Icon icon={card.icon} className="h-5 w-5" />
@@ -366,26 +401,66 @@ export default function AboutPage() {
           </motion.div>
         </MotionSection>
 
-        <MotionSection className="rounded-3xl border border-slate-200 bg-white px-5 py-5 shadow-[0_12px_40px_rgba(15,23,42,0.05)] sm:px-7 sm:py-6">
+        <MotionSection className="rounded-[32px] bg-white px-5 py-6 shadow-[0_14px_40px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 sm:px-8 sm:py-8">
           <SectionHeader
             eyebrow="Submate의 방식"
-            title="공동구독을 운영 가능한 구조로 바꿉니다"
+            title="역할과 돈의 흐름을 나눕니다"
             description="파티장과 파티원의 역할을 명확히 나누고, 플랫폼이 결제와 정산 상태를 관리합니다."
           />
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={stagger}
+            className="mt-7 grid grid-cols-1 gap-3 rounded-[24px] bg-slate-50 p-3 ring-1 ring-slate-100 md:grid-cols-3"
+          >
+            {["파티 생성", "자동결제", "정산 관리"].map((step, index) => (
+              <motion.div
+                key={step}
+                variants={fadeUp}
+                whileHover={{ y: -4 }}
+                className="relative rounded-2xl bg-white px-4 py-4 ring-1 ring-slate-100"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.12, 1] }}
+                  transition={{
+                    duration: 2.4,
+                    repeat: Infinity,
+                    delay: index * 0.35,
+                    ease: [0.42, 0, 0.58, 1],
+                  }}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-sm font-extrabold text-brand-main"
+                >
+                  {index + 1}
+                </motion.div>
+                <p className="mt-3 text-sm font-extrabold text-slate-950">
+                  {step}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  {index === 0
+                    ? "파티 조건을 정합니다."
+                    : index === 1
+                      ? "참여자는 결제로 시작합니다."
+                      : "플랫폼이 흐름을 기록합니다."}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
 
           <motion.div
             variants={stagger}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.15 }}
-            className="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-3"
+            className="mt-7 grid grid-cols-1 gap-4 lg:grid-cols-3"
           >
             {solutionCards.map((card) => (
               <motion.article
                 key={card.step}
                 variants={fadeUp}
-                whileHover={{ y: -6 }}
-                className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-[0_18px_40px_rgba(30,58,138,0.08)]"
+                whileHover={{ y: -6, scale: 1.015 }}
+                className="rounded-[24px] bg-slate-50 p-6 ring-1 ring-slate-100 transition hover:bg-white hover:shadow-[0_10px_28px_rgba(15,23,42,0.05)]"
               >
                 <div className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-sm font-bold text-brand-main">
                   {card.step}
@@ -406,14 +481,14 @@ export default function AboutPage() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.15 }}
-          className="grid grid-cols-1 gap-6 lg:grid-cols-2"
+          className="grid grid-cols-1 gap-7 lg:grid-cols-2"
         >
           {roleCards.map((card) => (
             <motion.section
               key={card.role}
               variants={fadeUp}
-              whileHover={{ y: -6 }}
-              className="rounded-3xl border border-slate-200 bg-white px-5 py-5 shadow-[0_12px_40px_rgba(15,23,42,0.05)] transition hover:shadow-[0_18px_50px_rgba(30,58,138,0.08)] sm:px-7 sm:py-6"
+              whileHover={{ y: -6, scale: 1.01 }}
+              className="rounded-[32px] bg-white px-5 py-6 shadow-[0_14px_40px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 transition hover:shadow-[0_16px_44px_rgba(15,23,42,0.08)] sm:px-8 sm:py-8"
             >
               <div
                 className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ${card.badgeClassName}`}
@@ -446,22 +521,19 @@ export default function AboutPage() {
           ))}
         </motion.section>
 
-        <MotionSection className="relative overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-[0_20px_70px_rgba(30,58,138,0.08)]">
-          <GlassOrb className="left-10 top-8 h-40 w-40 bg-blue-200/40" />
-          <GlassOrb className="bottom-0 right-0 h-52 w-52 bg-teal-200/40" />
-
-          <div className="relative bg-linear-to-r from-blue-50 via-sky-50 to-teal-50 px-5 py-6 sm:px-7 sm:py-7">
+        <MotionSection className="overflow-hidden rounded-[32px] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.06)] ring-1 ring-slate-100">
+          <div className="px-5 py-7 sm:px-8 sm:py-8">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-xs font-semibold text-brand-main shadow-sm backdrop-blur">
+                <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-main ring-1 ring-blue-100">
                   <Icon icon="solar:rocket-2-bold" className="h-4 w-4" />한 줄
                   정리
                 </div>
 
-                <h2 className="mt-4 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
-                  Submate는 공동구독을 연결하는 서비스가 아니라,
+                <h2 className="mt-4 text-2xl font-extrabold leading-tight text-slate-950 sm:text-3xl">
+                  연결보다 중요한 건
                   <br />
-                  공동구독 운영 과정의 결제와 정산을 관리하는 플랫폼입니다
+                  운영과 정산입니다
                 </h2>
 
                 <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
@@ -472,15 +544,15 @@ export default function AboutPage() {
 
               <div className="flex shrink-0 flex-wrap gap-3">
                 <Link
-                  to="/"
-                  className="inline-flex items-center justify-center rounded-full bg-brand-main px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(30,58,138,0.2)] transition hover:-translate-y-0.5 hover:bg-blue-800"
+                  to="/parties"
+                  className="inline-flex h-11 items-center justify-center rounded-full bg-brand-main px-5 text-sm font-bold text-white shadow-sm shadow-blue-900/10 transition hover:bg-blue-800 active:scale-95"
                 >
                   파티 보러가기
                 </Link>
 
                 <Link
                   to="/event"
-                  className="inline-flex items-center justify-center rounded-full border border-white/80 bg-white/90 px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-white"
+                  className="inline-flex h-11 items-center justify-center rounded-full bg-slate-50 px-5 text-sm font-bold text-slate-700 ring-1 ring-slate-100 transition hover:bg-slate-100 active:scale-95"
                 >
                   이벤트 보기
                 </Link>

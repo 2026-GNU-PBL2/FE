@@ -208,23 +208,29 @@ export default function SetupSecurityPage() {
             : "확인을 위해 동일한 숫자 4자리를 다시 입력해 주세요."}
         </>
       }
+      rightCardClassName="relative mx-auto w-full max-w-[400px] rounded-[28px] border border-slate-100 bg-white p-4 shadow-[0_14px_36px_rgba(15,23,42,0.07)] sm:p-5"
       rightContent={
         <div className="space-y-5">
-          <div className="rounded-3xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
-            <div className="flex items-center justify-between">
+          <div className="space-y-4">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-slate-500">
+                <p className="text-xs font-bold text-brand-main">
                   {mode === "create" ? "1단계" : "2단계"}
                 </p>
-                <p className="mt-1 text-base font-bold text-slate-900">
+                <p className="mt-1 text-lg font-extrabold text-slate-900">
                   {mode === "create" ? "4자리 숫자 입력" : "비밀번호 다시 입력"}
+                </p>
+                <p className="mt-1.5 text-xs leading-5 text-slate-500">
+                  {mode === "create"
+                    ? "완료되면 확인 단계로 자동 이동합니다."
+                    : "입력한 번호가 일치하면 마지막 확인 화면으로 이동합니다."}
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex items-center gap-1 rounded-2xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95"
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-200 active:scale-95"
               >
                 <Icon
                   icon="solar:refresh-bold-duotone"
@@ -235,7 +241,7 @@ export default function SetupSecurityPage() {
               </button>
             </div>
 
-            <div className="mt-5">
+            <div>
               <PinDisplay
                 value={activePin}
                 visibleDigitIndex={visibleDigitIndex}
@@ -244,29 +250,22 @@ export default function SetupSecurityPage() {
               />
             </div>
 
-            <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
-              <p className="text-sm font-medium text-slate-600">
-                {mode === "create"
-                  ? "입력 후 자동으로 확인 단계로 넘어갑니다."
-                  : "입력 내용이 일치하면 가입 확인 단계로 이동합니다."}
-              </p>
-            </div>
-
             {errorMessage ? (
-              <p className="mt-4 text-sm font-semibold text-rose-500">
-                {errorMessage}
-              </p>
+              <div className="flex items-center gap-2 rounded-2xl bg-rose-50 px-3.5 py-2.5 text-xs font-bold text-rose-500">
+                <Icon icon="solar:danger-circle-bold" width="18" height="18" />
+                <p>{errorMessage}</p>
+              </div>
             ) : null}
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-3 shadow-sm">
-            <div className="grid grid-cols-3 gap-2.5">
+          <div className="rounded-3xl bg-slate-50 p-2">
+            <div className="grid grid-cols-3 gap-1.5">
               {keypad.map((item) => {
                 if (item.type === "empty") {
                   return (
                     <div
                       key={item.id}
-                      className="h-14 rounded-3xl bg-transparent"
+                      className="h-12 rounded-2xl bg-transparent sm:h-[52px]"
                       aria-hidden="true"
                     />
                   );
@@ -278,12 +277,12 @@ export default function SetupSecurityPage() {
                       key={item.id}
                       type="button"
                       onClick={handleDelete}
-                      className="inline-flex h-14 items-center justify-center rounded-3xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 active:scale-95"
+                      className="inline-flex h-12 items-center justify-center rounded-2xl bg-white text-slate-700 shadow-[0_1px_0_rgba(15,23,42,0.04)] ring-1 ring-slate-100 transition hover:bg-slate-100 active:scale-95 sm:h-[52px]"
                     >
                       <Icon
                         icon="solar:backspace-bold-duotone"
-                        width="22"
-                        height="22"
+                        width="20"
+                        height="20"
                       />
                     </button>
                   );
@@ -297,10 +296,10 @@ export default function SetupSecurityPage() {
                     type="button"
                     onClick={() => handleDigitPress(item.value, item.id)}
                     className={[
-                      "inline-flex h-14 items-center justify-center rounded-3xl border text-lg font-bold transition active:scale-95",
+                      "inline-flex h-12 items-center justify-center rounded-2xl text-lg font-extrabold transition active:scale-95 sm:h-[52px]",
                       isPressed
-                        ? "border-brand-main bg-brand-main text-white shadow-lg"
-                        : "border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
+                        ? "bg-brand-main text-white shadow-[0_8px_20px_rgba(30,58,138,0.18)]"
+                        : "bg-white text-slate-900 shadow-[0_1px_0_rgba(15,23,42,0.04)] ring-1 ring-slate-100 hover:bg-slate-100",
                     ].join(" ")}
                   >
                     {item.value}
@@ -310,11 +309,16 @@ export default function SetupSecurityPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-slate-50 px-4 py-4">
-            <p className="text-sm leading-6 text-slate-600">
-              간편 비밀번호는 로그인과 주요 인증에 사용됩니다.
-              <br />
-              생일, 연속된 숫자처럼 추측하기 쉬운 번호는 피하는 것이 좋습니다.
+          <div className="flex gap-2.5 rounded-2xl bg-blue-50 px-3.5 py-3 text-blue-900">
+            <Icon
+              icon="solar:shield-keyhole-bold-duotone"
+              width="20"
+              height="20"
+              className="mt-0.5 shrink-0"
+            />
+            <p className="text-xs leading-5">
+              로그인과 주요 인증에 사용돼요. 생일이나 연속된 숫자는 피하는
+              것이 좋습니다.
             </p>
           </div>
         </div>
@@ -338,7 +342,7 @@ function PinDisplay({
     <div
       key={shakeKey}
       className={[
-        "grid grid-cols-4 gap-2.5",
+        "grid grid-cols-4 gap-1.5",
         shakeKey > 0 ? "animate-[pin-shake_0.32s_ease-in-out]" : "",
       ].join(" ")}
     >
@@ -351,10 +355,10 @@ function PinDisplay({
           <div
             key={index}
             className={[
-              "flex h-14 items-center justify-center rounded-3xl border text-lg font-bold transition",
+              "flex h-11 items-center justify-center rounded-2xl text-base font-bold transition sm:h-12",
               filled
-                ? "border-brand-main bg-brand-main/5 text-brand-main"
-                : "border-slate-200 bg-slate-50 text-slate-300",
+                ? "bg-brand-main/10 text-brand-main ring-1 ring-brand-main/15"
+                : "bg-slate-50 text-slate-300 ring-1 ring-slate-100",
             ].join(" ")}
           >
             {filled ? (

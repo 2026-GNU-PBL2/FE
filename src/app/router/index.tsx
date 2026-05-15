@@ -18,6 +18,8 @@ import SetupCompletePage from "@/pages/setup/SetupCompletePage";
 import AboutPage from "@/pages/about/AboutPage";
 import EventPage from "@/pages/event/EventPage";
 import SupportPage from "@/pages/support/SupportPage";
+import TermsPage from "@/pages/legal/TermsPage";
+import PrivacyPage from "@/pages/legal/PrivacyPage";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 import SetupRoute from "./SetupRoute";
@@ -114,6 +116,8 @@ const router = createBrowserRouter([
           { path: "/about", element: <AboutPage /> },
           { path: "/event", element: <EventPage /> },
           { path: "/support", element: <SupportPage /> },
+          { path: "/terms", element: <TermsPage /> },
+          { path: "/privacy", element: <PrivacyPage /> },
           { path: "/parties", element: <PartyListPage /> },
           {
             path: "/parties/:type/:partyId",

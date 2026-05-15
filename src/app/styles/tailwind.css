@@ -43,6 +43,7 @@
 
   body {
     font-family: inherit;
+    background-color: var(--color-brand-bg);
   }
 
   html::-webkit-scrollbar,

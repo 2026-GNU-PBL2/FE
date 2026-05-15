@@ -28,40 +28,42 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white md:hidden">
-      <div className="mx-auto grid max-w-7xl grid-cols-4 px-2">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            onClick={(e) => handleRoute(e, item.requireAuth)}
-            className="flex flex-col items-center justify-center gap-1 px-2 py-3.5"
-          >
-            {({ isActive }) => (
-              <>
-                <span
-                  className={[
-                    "inline-flex h-11 w-11 items-center justify-center rounded-2xl transition",
-                    isActive
-                      ? "bg-slate-100 text-slate-900 ring-1 ring-slate-200"
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
-                  ].join(" ")}
-                >
-                  <Icon icon={item.icon} className="h-5 w-5" />
-                </span>
+    <nav className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(env(safe-area-inset-bottom)+12px)] md:hidden">
+      <div className="mx-auto max-w-md rounded-[28px] border border-slate-200/80 bg-white/95 px-2 py-2 shadow-[0_12px_36px_rgba(15,23,42,0.14)] backdrop-blur-xl">
+        <div className="grid grid-cols-4 gap-1">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={(e) => handleRoute(e, item.requireAuth)}
+              className="group flex min-w-0 flex-col items-center justify-center gap-1 rounded-3xl px-1.5 py-1.5 transition active:scale-95"
+            >
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={[
+                      "inline-flex h-10 w-10 items-center justify-center rounded-2xl transition",
+                      isActive
+                        ? "bg-blue-50 text-brand-main shadow-sm ring-1 ring-blue-100"
+                        : "text-slate-400 group-hover:bg-slate-50 group-hover:text-slate-700",
+                    ].join(" ")}
+                  >
+                    <Icon icon={item.icon} className="h-[21px] w-[21px]" />
+                  </span>
 
-                <span
-                  className={[
-                    "text-xs font-semibold",
-                    isActive ? "text-slate-900" : "text-slate-500",
-                  ].join(" ")}
-                >
-                  {item.label}
-                </span>
-              </>
-            )}
-          </NavLink>
-        ))}
+                  <span
+                    className={[
+                      "max-w-full truncate text-[11px] font-bold leading-4",
+                      isActive ? "text-slate-900" : "text-slate-400",
+                    ].join(" ")}
+                  >
+                    {item.label}
+                  </span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
       </div>
     </nav>
   );

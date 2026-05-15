@@ -2,8 +2,8 @@ import { Icon } from "@iconify/react";
 
 export default function Footer() {
   return (
-    <footer className="hidden md:block relative mx-auto w-full max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
-      <div className="border-t border-slate-200/70 pt-6">
+    <footer className="relative hidden w-full border-t border-slate-200/70 bg-white md:block">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-xs leading-relaxed text-slate-500">
             <div className="font-semibold text-slate-700">Submate</div>
