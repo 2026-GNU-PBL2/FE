@@ -209,7 +209,7 @@ export default function SetupProfilePage() {
         <>서브메이트 이메일과 닉네임은 다른 사용자와 겹칠 수 없습니다.</>
       }
       rightContent={
-        <div className="space-y-6">
+        <div className="space-y-5">
           <Field
             label="서브메이트 이메일"
             subLabel={`${SUBMATE_DOMAIN} 형식으로 생성됩니다`}
@@ -227,11 +227,11 @@ export default function SetupProfilePage() {
             suffix={SUBMATE_DOMAIN}
           />
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+          <div className="rounded-2xl bg-slate-50 px-5 py-4">
             <p className="text-xs font-semibold text-slate-500">
               생성될 서브메이트 이메일
             </p>
-            <p className="mt-2 break-all text-sm font-bold text-slate-900">
+            <p className="mt-1 break-all text-sm font-bold text-slate-900">
               {previewEmail}
             </p>
           </div>

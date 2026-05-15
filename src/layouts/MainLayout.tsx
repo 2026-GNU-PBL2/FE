@@ -5,9 +5,9 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 export default function MainLayout() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-brand-bg">
       <Navbar />
-      <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
+      <main className="flex-1 overflow-y-auto bg-brand-bg pb-20 md:pb-0">
         <Outlet />
       </main>
       <Footer />

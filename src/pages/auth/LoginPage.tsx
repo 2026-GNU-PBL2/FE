@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { Icon } from "@iconify/react";
 import { getSocialAuthorizeUrl, type LoginProvider } from "@/api/auth";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -95,35 +96,30 @@ export default function LoginPage() {
     <main className="relative min-h-screen overflow-hidden bg-brand-bg text-slate-900">
       <div className="pointer-events-none absolute inset-0">
         <div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-10"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(15,23,42,0.10) 1px, transparent 0)",
-            backgroundSize: "22px 22px",
+              "radial-gradient(circle at 1px 1px, rgba(15,23,42,0.08) 1px, transparent 0)",
+            backgroundSize: "24px 24px",
           }}
         />
-        <div className="absolute -top-32 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-brand-sub/25 blur-3xl" />
-        <div className="absolute -bottom-36 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-brand-accent/20 blur-3xl" />
-        <div className="absolute -left-28 top-28 h-96 w-96 rounded-full bg-brand-sub/10 blur-3xl" />
-        <div className="absolute -right-28 bottom-24 h-96 w-96 rounded-full bg-brand-accent/10 blur-3xl" />
-        <div className="absolute inset-0 bg-linear-to-b from-white/0 via-white/0 to-white/35" />
       </div>
 
-      <div className="relative mx-auto flex min-h-screen max-w-md items-center justify-center px-5 py-10">
+      <div className="relative mx-auto flex min-h-screen max-w-[400px] items-center justify-center px-5 py-8">
         <section className="w-full">
-          <div className="relative overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-black/5">
-            <div className="h-1.5 w-full bg-linear-to-r from-brand-main via-brand-sub to-brand-accent" />
+          <div className="relative overflow-hidden rounded-[28px] bg-white shadow-[0_14px_36px_rgba(15,23,42,0.07)] ring-1 ring-slate-100">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-linear-to-b from-blue-50/80 to-transparent" />
 
-            <div className="px-7 pt-10">
+            <div className="px-6 pt-8">
               <div className="flex flex-col items-center">
                 <Link
                   to="/"
                   aria-label="Submate 홈으로 이동"
                   className="group flex flex-col items-center rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-sub/25"
                 >
-                  <div className="relative mb-4">
-                    <div className="absolute inset-0 -z-10 rounded-2xl bg-linear-to-br from-brand-sub/35 to-brand-accent/25 blur-md transition group-hover:opacity-80" />
-                    <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-brand-main/10 transition group-hover:-translate-y-0.5 group-hover:shadow-md">
+                  <div className="relative mb-3">
+                    <div className="absolute inset-0 rounded-[24px] bg-brand-main/8 blur-xl transition group-hover:bg-brand-main/12" />
+                    <div className="relative grid h-15 w-15 place-items-center overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-brand-main/10 transition group-hover:-translate-y-0.5 group-hover:shadow-md">
                       <img
                         src="/images/logo-symbol.png"
                         alt="Submate Logo"
@@ -133,35 +129,26 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  <h1 className="text-center text-2xl font-semibold tracking-tight text-slate-900 transition group-hover:text-brand-main">
+                  <h1 className="text-center text-[22px] font-semibold tracking-tight text-slate-900 transition group-hover:text-brand-main">
                     <span className="text-brand-main">Sub</span>mate
                   </h1>
                 </Link>
 
-                <p className="mt-3 max-w-[28ch] text-center text-sm leading-relaxed text-slate-600">
-                  공동구독 파티 참여부터
+                <p className="mt-2.5 max-w-[28ch] text-center text-sm leading-relaxed text-slate-600">
+                  소셜 계정으로 간편하게
                   <br />
-                  결제와 정산까지 한 번에 관리하세요
+                  서브메이트를 시작하세요
                 </p>
 
-                <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-main/5 px-3 py-1 text-[11px] font-semibold text-brand-main ring-1 ring-brand-main/10">
-                    <span className="h-1.5 w-1.5 rounded-full bg-brand-main" />
-                    간편 로그인
-                  </span>
-
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-sub/10 px-3 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-brand-sub/15">
-                    <span className="h-1.5 w-1.5 rounded-full bg-brand-sub" />
-                    자동 정산
-                  </span>
-
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-accent/10 px-3 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-brand-accent/15">
-                    <span className="h-1.5 w-1.5 rounded-full bg-brand-accent" />
-                    파티 운영 관리
-                  </span>
+                <div className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-main ring-1 ring-blue-100">
+                  <Icon
+                    icon="solar:shield-check-bold-duotone"
+                    className="h-4 w-4"
+                  />
+                  안전한 소셜 로그인
                 </div>
 
-                <div className="mt-7 h-px w-full bg-linear-to-r from-transparent via-slate-200 to-transparent" />
+                <div className="mt-6 h-px w-full bg-slate-100" />
               </div>
 
               <p
@@ -175,13 +162,17 @@ export default function LoginPage() {
                 {errorMsg}
               </p>
 
-              <div className="mt-6 space-y-3 pb-8">
+              <div className="mt-5 space-y-2.5 pb-7">
+                <p className="pb-0.5 text-center text-xs font-bold text-slate-400">
+                  로그인 방법을 선택해 주세요
+                </p>
+
                 <button
                   type="button"
                   onClick={() => onLogin("kakao")}
                   disabled={isLoading}
                   aria-busy={loadingProvider === "kakao"}
-                  className="relative flex h-12 w-full items-center justify-center rounded-xl bg-[#FEE500] text-[15px] font-semibold text-[#1F1F1F] shadow-sm transition hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-sub/25 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="relative flex h-11 w-full items-center justify-center rounded-xl bg-[#FEE500] text-sm font-semibold text-[#1F1F1F] shadow-sm transition hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-sub/25 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <span className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-black/5" />
                   <div className="flex items-center gap-2">
@@ -208,7 +199,7 @@ export default function LoginPage() {
                   onClick={() => onLogin("naver")}
                   disabled={isLoading}
                   aria-busy={loadingProvider === "naver"}
-                  className="relative flex h-12 w-full items-center justify-center rounded-xl bg-[#03C75A] text-[15px] font-semibold text-white shadow-sm transition hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-accent/25 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="relative flex h-11 w-full items-center justify-center rounded-xl bg-[#03C75A] text-sm font-semibold text-white shadow-sm transition hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-accent/25 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <span className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-black/5" />
                   <div className="flex items-center gap-2">
@@ -235,7 +226,7 @@ export default function LoginPage() {
                   onClick={() => onLogin("google")}
                   disabled={isLoading}
                   aria-busy={loadingProvider === "google"}
-                  className="relative flex h-12 w-full items-center justify-center rounded-xl border border-slate-200 bg-white text-[15px] font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-sub/20 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="relative flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-sub/20 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <span className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-black/5 opacity-0 transition hover:opacity-100" />
                   <div className="flex items-center gap-2">
@@ -259,21 +250,19 @@ export default function LoginPage() {
 
                 <div className="pt-3">
                   <div className="flex items-center justify-center gap-2 text-[11px] font-medium text-slate-500">
-                    <span className="inline-grid h-5 w-5 place-items-center rounded-full bg-brand-main/5 ring-1 ring-brand-main/10">
-                      🔒
+                    <span className="inline-grid h-5 w-5 place-items-center rounded-full bg-brand-main/5 text-brand-main ring-1 ring-brand-main/10">
+                      <Icon icon="solar:lock-keyhole-bold-duotone" className="h-3.5 w-3.5" />
                     </span>
-                    <span>안전한 소셜 로그인</span>
-                    <span className="text-slate-300">•</span>
                     <span className="inline-flex items-center gap-1">
                       <span className="h-1.5 w-1.5 rounded-full bg-brand-sub" />
-                      <span>로그인 후 바로 이용 가능</span>
+                      <span>로그인 후 바로 이용할 수 있어요</span>
                     </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="border-t border-slate-100 px-7 py-5">
+            <div className="border-t border-slate-100 px-6 py-4">
               <p className="text-center text-xs leading-relaxed text-slate-500">
                 로그인하면{" "}
                 <Link

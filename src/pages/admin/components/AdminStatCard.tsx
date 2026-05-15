@@ -23,27 +23,25 @@ export default function AdminStatCard({
   tone = "blue",
 }: AdminStatCardProps) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm shadow-slate-900/5 transition hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/5">
-      <div className="flex items-center gap-3">
+    <div className="rounded-2xl bg-white px-4 py-4 ring-1 ring-slate-200 transition hover:bg-slate-50">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-xs font-bold text-slate-400">{label}</p>
+          <p className="mt-2 text-2xl font-extrabold tabular-nums text-slate-950">
+            {value}
+          </p>
+          <p className="mt-1 truncate text-xs font-medium text-slate-500">
+            {description}
+          </p>
+        </div>
+
         <div
           className={[
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1 ring-inset",
             toneClassMap[tone],
           ].join(" ")}
         >
-          <Icon icon={icon} className="h-4.5 w-4.5" />
-        </div>
-
-        <div className="min-w-0">
-          <p className="truncate text-[11px] font-semibold text-slate-500">
-            {label}
-          </p>
-          <p className="mt-0.5 text-xl font-bold text-slate-900">
-            {value}
-          </p>
-          <p className="mt-0.5 truncate text-[11px] text-slate-400">
-            {description}
-          </p>
+          <Icon icon={icon} className="h-5 w-5" />
         </div>
       </div>
     </div>

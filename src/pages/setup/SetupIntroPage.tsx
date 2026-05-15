@@ -75,6 +75,8 @@ export default function SetupIntroPage() {
   const displayProvider = resolveDisplayProvider(socialProvider ?? provider);
   const providerLabel = getProviderLabel(displayProvider);
   const providerMeta = getProviderMeta(displayProvider);
+  const connectedAccount =
+    socialEmail || user?.submateEmail || "소셜 계정으로 로그인됨";
 
   useEffect(() => {
     const resolvedProvider = resolveDisplayProvider(socialProvider ?? provider);
@@ -127,9 +129,15 @@ export default function SetupIntroPage() {
       rightContent={
         <div className="flex h-full flex-col justify-between">
           <div className="space-y-5">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-slate-50">
+            <div className="rounded-[28px] border border-slate-100 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div
+                    className={[
+                      "relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-[22px] bg-slate-50",
+                      providerMeta.badgeClassName,
+                    ].join(" ")}
+                  >
                   {providerMeta.imageSrc ? (
                     <img
                       src={providerMeta.imageSrc}
@@ -146,30 +154,40 @@ export default function SetupIntroPage() {
                       <Icon icon={providerMeta.icon} width="28" height="28" />
                     </div>
                   )}
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-500">
+                      연결된 계정
+                    </p>
+                    <p className="mt-1 text-base font-bold text-slate-900">
+                      {providerLabel} 계정으로 로그인됨
+                    </p>
+                    <p className="mt-1 break-all text-sm text-slate-600">
+                      {connectedAccount}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-slate-500">
-                    연결된 계정
-                  </p>
-                  <p className="mt-1 text-base font-bold text-slate-900">
-                    {providerLabel} 계정으로 로그인됨
-                  </p>
-                  <p className="mt-1 break-all text-sm text-slate-600">
-                    소셜 계정으로 간편하게 로그인 중입니다
-                  </p>
-                </div>
+                <span className="hidden shrink-0 rounded-full bg-teal-50 px-3.5 py-1.5 text-xs font-bold text-teal-600 sm:inline-flex">
+                  인증 완료
+                </span>
               </div>
             </div>
 
-            <div className="rounded-3xl bg-slate-50 p-6">
-              <p className="text-sm font-semibold text-slate-500">다음 단계</p>
+            <div className="rounded-[28px] bg-slate-50 p-6">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-slate-500">
+                  다음 단계
+                </p>
+                <p className="text-xs font-bold text-brand-main">약 3분 소요</p>
+              </div>
 
-              <div className="mt-4 space-y-4">
+              <div className="mt-4 space-y-3">
                 <SimpleStep
                   number="01"
                   title="Submate 계정 설정"
-                  desc="서비스에서 사용할 서브메이트 이메일과 닉네임을 정합니다"
+                  desc="서브메이트 이메일과 닉네임을 정합니다"
                 />
                 <SimpleStep
                   number="02"
@@ -185,11 +203,19 @@ export default function SetupIntroPage() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-brand-sub/20 bg-brand-sub/10 px-4 py-3">
-            <p className="text-sm font-semibold text-slate-800">
-              가입 후에는 파티 참여, 결제, 정산 내역 확인까지 바로 이용할 수
-              있습니다.
-            </p>
+          <div className="mt-6 rounded-[24px] border border-brand-sub/20 bg-brand-sub/10 px-4 py-3.5">
+            <div className="flex items-start gap-3">
+              <Icon
+                icon="solar:wallet-money-bold-duotone"
+                width="20"
+                height="20"
+                className="mt-0.5 shrink-0 text-brand-main"
+              />
+              <p className="text-sm font-semibold text-slate-800">
+                가입 후에는 파티 참여, 결제, 정산 내역 확인까지 바로 이용할 수
+                있습니다.
+              </p>
+            </div>
           </div>
         </div>
       }
@@ -207,8 +233,8 @@ function SimpleStep({
   desc: string;
 }) {
   return (
-    <div className="flex items-start gap-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-brand-main ring-1 ring-slate-200">
+    <div className="flex items-start gap-4 rounded-[22px] bg-white px-4 py-4 shadow-sm ring-1 ring-slate-100">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-sm font-bold text-brand-main ring-1 ring-slate-100">
         {number}
       </div>
 
