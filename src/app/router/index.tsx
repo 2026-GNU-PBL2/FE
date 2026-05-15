@@ -26,7 +26,6 @@ import ProfileManagePage from "@/pages/my/account/ProfileManagePage";
 import PaymentMethodManagePage from "@/pages/my/payment/PaymentMethodManagePage";
 import MoneyManagePage from "@/pages/my/payment/MoneyManagePage";
 import MyPageAccountRegisterPage from "@/pages/my/payment/MyPageAccountRegisterPage";
-import PaymentHistoryPage from "@/pages/my/payment/PaymentHistoryPage";
 import PartyHistoryPage from "@/pages/my/usage/PartyHistoryPage";
 import SettingsPage from "@/pages/my/account/SettingsPage";
 import Myparty from "@/pages/party/my/MyParty";
@@ -249,10 +248,6 @@ const router = createBrowserRouter([
                     element: <PaymentMethodManagePage />,
                   },
                   { path: "money", element: <MoneyManagePage /> },
-                  {
-                    path: "payment-history",
-                    element: <PaymentHistoryPage />,
-                  },
                   { path: "party-history", element: <PartyHistoryPage /> },
                   { path: "mailbox", element: <MailboxPage /> },
                   { path: "settings", element: <SettingsPage /> },

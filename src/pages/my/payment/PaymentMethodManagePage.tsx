@@ -120,7 +120,7 @@ function getPaymentStatusLabel(status?: PaymentStatus | null) {
 }
 
 function getPaymentStatusClassName(status?: PaymentStatus | null) {
-  if (status === "PAID") return "bg-teal-50 text-teal-700 ring-teal-100";
+  if (status === "PAID") return "bg-emerald-50 text-emerald-700 ring-emerald-100";
   if (status === "FAILED") return "bg-rose-50 text-rose-700 ring-rose-100";
   if (status === "CANCELLED")
     return "bg-slate-100 text-slate-600 ring-slate-200";
@@ -309,6 +309,11 @@ export default function PaymentMethodManagePage() {
   const handleChangeBillingMethod = async () => {
     if (isBillingChanging) return;
 
+    if (!billingMethod?.hasBillingKey) {
+      toast.info("등록된 카드가 있을 때만 변경할 수 있습니다.");
+      return;
+    }
+
     try {
       setIsBillingChanging(true);
 
@@ -364,10 +369,10 @@ export default function PaymentMethodManagePage() {
 
   if (isLoading) {
     return (
-      <div className="rounded-[24px] border border-slate-200 bg-white px-5 py-16 text-center">
+      <div className="rounded-[24px] bg-white ring-1 ring-slate-100 px-5 py-16 text-center">
         <Icon
           icon="solar:refresh-circle-bold"
-          className="mx-auto h-10 w-10 animate-spin text-blue-900"
+          className="mx-auto h-10 w-10 animate-spin text-slate-700"
         />
         <p className="mt-4 text-sm font-semibold text-slate-500">
           결제 정보를 불러오는 중입니다
@@ -427,13 +432,13 @@ function BillingMethodCard({
     .join("  ");
 
   return (
-    <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.04)]">
+    <section className="rounded-[24px] bg-white ring-1 ring-slate-100 p-5 shadow-xl shadow-slate-900/5">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 items-start gap-3">
           <div
             className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ring-1 ${
               hasBillingKey
-                ? "bg-blue-50 text-blue-900 ring-blue-100"
+                ? "bg-slate-50 text-slate-700 ring-slate-100"
                 : "bg-slate-50 text-slate-400 ring-slate-200"
             }`}
           >
@@ -441,30 +446,34 @@ function BillingMethodCard({
           </div>
 
           <div className="min-w-0">
-            <p className="text-xs font-bold text-blue-900">결제 관리</p>
+            <p className="text-xs font-bold text-slate-700">결제 관리</p>
             <h2 className="mt-1 text-base font-bold text-slate-950">
-              {hasBillingKey ? cardLabel || "등록 카드" : "등록된 카드 없음"}
+              {hasBillingKey ? cardLabel || "등록 카드" : "카드가 없습니다"}
             </h2>
             <p className="mt-1 text-sm leading-6 text-slate-500">
               {hasBillingKey
                 ? `등록일 ${formatDateTime(billingMethod?.issuedAt)}`
-                : "파티 자동결제에 사용할 카드를 등록해 주세요."}
+                : "파티 참여 과정에서 자동결제 카드를 등록하면 이곳에서 확인할 수 있습니다."}
             </p>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={onChange}
-          disabled={isChanging}
-          className="inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-blue-900 px-4 text-sm font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 md:w-auto"
-        >
-          <Icon
-            icon={isChanging ? "solar:refresh-circle-bold" : "solar:refresh-bold"}
-            className={`h-5 w-5 ${isChanging ? "animate-spin" : ""}`}
-          />
-          {isChanging ? "변경 중" : hasBillingKey ? "카드 변경" : "카드 등록"}
-        </button>
+        {hasBillingKey ? (
+          <button
+            type="button"
+            onClick={onChange}
+            disabled={isChanging}
+            className="inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 md:w-auto"
+          >
+            <Icon
+              icon={
+                isChanging ? "solar:refresh-circle-bold" : "solar:refresh-bold"
+              }
+              className={`h-5 w-5 ${isChanging ? "animate-spin" : ""}`}
+            />
+            {isChanging ? "변경 중" : "카드 변경"}
+          </button>
+        ) : null}
       </div>
     </section>
   );
@@ -480,8 +489,8 @@ function SummaryCard({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-[20px] border border-slate-200 bg-white px-4 py-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-blue-900 ring-1 ring-slate-200">
+    <div className="flex items-center gap-3 rounded-[20px] bg-white ring-1 ring-slate-100 px-4 py-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-200">
         <Icon icon={icon} className="h-5 w-5" />
       </div>
       <div className="min-w-0">
@@ -502,11 +511,11 @@ function PaymentHistorySection({
   partyMap: Map<number, PartyHistoryItem>;
 }) {
   return (
-    <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_12px_36px_rgba(15,23,42,0.04)]">
+    <section className="overflow-hidden rounded-[24px] bg-white ring-1 ring-slate-100 shadow-xl shadow-slate-900/5">
       <div className="border-b border-slate-100 px-5 py-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold text-blue-900">결제 내역</p>
+            <p className="text-xs font-bold text-slate-700">결제 내역</p>
             <h2 className="mt-1 text-base font-bold text-slate-950">
               파티별 결제 기록
             </h2>
@@ -563,7 +572,7 @@ function PaymentHistoryItemCard({
     <article className="rounded-2xl border border-slate-100 bg-white px-4 py-4 transition hover:border-slate-200 hover:bg-slate-50">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-900 ring-1 ring-blue-100">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-100">
             <Icon icon="solar:bill-check-bold" className="h-5 w-5" />
           </div>
 

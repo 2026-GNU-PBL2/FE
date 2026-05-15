@@ -57,15 +57,14 @@ function formatPrice(value?: number | null) {
   return `${value.toLocaleString("ko-KR")}원`;
 }
 
-function formatDate(value?: string | null) {
+function formatShortDate(value?: string | null) {
   if (!value) return "-";
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
 
   return new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
   }).format(date);
 }
@@ -89,15 +88,6 @@ function formatOperationStatus(value?: string) {
   return value || "-";
 }
 
-function formatVacancyType(value?: string) {
-  if (value === "NONE") return "결원 없음";
-  if (value === "SCHEDULED") return "결원 예정";
-  if (value === "VACANT") return "결원";
-  if (value === "HOST") return "파티장 결원";
-  if (value === "MEMBER") return "파티원 결원";
-  return value || "-";
-}
-
 export default function PartyVacancyDetailPage() {
   const navigate = useNavigate();
   const { type, partyId } = useParams<{
@@ -116,9 +106,7 @@ export default function PartyVacancyDetailPage() {
         text: "text-[#1E3A8A]",
         bg: "bg-[#1E3A8A]",
         lightBg: "bg-blue-50",
-        panelBg: "bg-[#F8FAFF]",
         ring: "ring-blue-100",
-        panelRing: "ring-blue-100",
         buttonHover: "hover:bg-blue-800",
         action: "파티장 참여하기",
         caption: "HOST VACANCY",
@@ -131,9 +119,7 @@ export default function PartyVacancyDetailPage() {
         text: "text-[#0F766E]",
         bg: "bg-[#14B8A6]",
         lightBg: "bg-[#ECFEF8]",
-        panelBg: "bg-[#F7FFFD]",
         ring: "ring-[#C9F7EA]",
-        panelRing: "ring-[#D9FBEF]",
         buttonHover: "hover:bg-[#0D9488]",
         action: "파티원 참여하기",
         caption: "MEMBER VACANCY",
@@ -231,17 +217,17 @@ export default function PartyVacancyDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F2F4F7] px-4 py-10">
-        <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-[520px] items-center justify-center">
-          <section className="w-full rounded-[28px] bg-white px-6 py-10 text-center shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)]">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+          <div className="text-center">
             <Icon
               icon="solar:refresh-circle-bold"
-              className={`mx-auto h-10 w-10 animate-spin ${pageTone.text}`}
+              className={`mx-auto h-11 w-11 animate-spin ${pageTone.text}`}
             />
-            <p className="mt-4 text-[16px] font-semibold text-slate-950">
+            <p className="mt-4 text-sm font-semibold text-slate-600">
               결원 파티 정보를 불러오는 중입니다
             </p>
-          </section>
+          </div>
         </div>
       </div>
     );
@@ -249,15 +235,15 @@ export default function PartyVacancyDetailPage() {
 
   if (!detail) {
     return (
-      <div className="min-h-screen bg-[#F2F4F7] px-4 py-10">
-        <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-[520px] items-center justify-center">
-          <section className="w-full rounded-[28px] bg-white px-6 py-10 text-center shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)]">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+          <section className="px-6 py-10 text-center">
             <div
-              className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${pageTone.lightBg} ${pageTone.text}`}
+              className={`mx-auto flex h-14 w-14 items-center justify-center rounded-3xl ${pageTone.lightBg} ${pageTone.text} ring-1 ${pageTone.ring}`}
             >
               <Icon icon="solar:info-circle-bold" className="h-7 w-7" />
             </div>
-            <h1 className="mt-5 text-[24px] font-semibold tracking-tight text-slate-950">
+            <h1 className="mt-5 text-2xl font-extrabold tracking-tight text-slate-950">
               파티 정보를 확인할 수 없습니다
             </h1>
             <p className="mt-3 text-sm leading-6 text-slate-500">
@@ -274,151 +260,203 @@ export default function PartyVacancyDetailPage() {
       label: "현재 인원",
       value: `${detail.currentMemberCount}/${detail.totalCapacity}명`,
     },
-    { label: "남은 자리", value: `${detail.remainingSeatCount}명` },
-    { label: "다음 결제일", value: formatDate(detail.nextPaymentDate) },
     { label: "운영 방식", value: formatOperationType(detail.operationType) },
     { label: "모집 상태", value: formatRecruitStatus(detail.recruitStatus) },
     {
       label: "운영 상태",
       value: formatOperationStatus(detail.operationStatus),
     },
-    { label: "결원 상태", value: formatVacancyType(detail.vacancyType) },
   ];
 
   return (
-    <div className="min-h-screen bg-[#F2F4F7] px-4 py-10 sm:px-6">
-      <main className="mx-auto w-full max-w-[640px]">
-        <div className="mb-8">
-          <div
-            className={`inline-flex items-center rounded-full px-3 py-1.5 text-[12px] font-semibold ${pageTone.lightBg} ${pageTone.text}`}
-          >
-            {pageTone.caption}
-          </div>
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <main className="mx-auto w-full max-w-3xl">
+        <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+          <div className="border-b border-slate-100 px-6 py-7 sm:px-8">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <div
+                  className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${pageTone.lightBg} ${pageTone.text} ring-1 ${pageTone.ring}`}
+                >
+                  <Icon
+                    icon="solar:users-group-rounded-bold"
+                    className="h-4 w-4"
+                  />
+                  {pageTone.caption}
+                </div>
 
-          <h1 className="mt-4 text-[30px] font-semibold leading-tight tracking-tight text-slate-950 sm:text-[36px]">
-            {pageTone.headline}
-          </h1>
+                <h1 className="mt-4 text-[28px] font-extrabold leading-tight tracking-tight text-slate-950 sm:text-[32px]">
+                  {pageTone.headline}
+                </h1>
 
-          <p className="mt-4 text-[15px] leading-7 text-slate-500">
-            {pageTone.description}
-          </p>
-        </div>
-
-        <section className="rounded-[32px] bg-white px-5 py-6 shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)] sm:px-6">
-          <div className="flex items-center gap-4">
-            <div
-              className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl ${pageTone.lightBg}`}
-            >
-              {detail.thumbnailUrl ? (
-                <img
-                  src={detail.thumbnailUrl}
-                  alt={detail.productName}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <Icon
-                  icon="solar:play-circle-bold"
-                  className={`h-7 w-7 ${pageTone.text}`}
-                />
-              )}
-            </div>
-
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-slate-400">선택한 파티</p>
-              <h2 className="mt-1 truncate text-lg font-semibold text-slate-950">
-                {detail.productName}
-              </h2>
-              <p className="mt-1 text-xs font-medium text-slate-400">
-                {detail.joinAvailable ? "참여 가능" : "참여 불가"}
-              </p>
-            </div>
-          </div>
-
-          <div
-            className={`mt-7 rounded-[28px] px-5 py-5 ring-1 ring-inset ${pageTone.panelBg} ${pageTone.panelRing}`}
-          >
-            <p className={`text-sm font-medium ${pageTone.text}`}>
-              월 결제 금액
-            </p>
-
-            <p className="mt-2 text-[34px] font-bold tracking-tight text-slate-950">
-              {formatPrice(detail.monthlyPaymentAmount)}
-            </p>
-          </div>
-
-          <div className="mt-6 divide-y divide-slate-100">
-            {infoRows.map((row) => (
-              <div
-                key={row.label}
-                className="flex items-center justify-between gap-4 py-4"
-              >
-                <p className="text-[15px] text-slate-500">{row.label}</p>
-                <p className="text-right text-[15px] font-semibold text-slate-950">
-                  {row.value}
+                <p className="mt-3 max-w-[560px] text-sm leading-6 text-slate-500">
+                  {pageTone.description}
                 </p>
               </div>
-            ))}
-          </div>
-        </section>
 
-        <section
-          className={`mt-4 rounded-[28px] px-5 py-5 ring-1 ring-inset ${
-            detail.joinAvailable
-              ? `${pageTone.panelBg} ${pageTone.panelRing}`
-              : "bg-white ring-slate-200"
-          }`}
-        >
-          <div className="flex gap-3">
-            <div
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                detail.joinAvailable
-                  ? `bg-white ${pageTone.text}`
-                  : "bg-slate-100 text-slate-400"
-              }`}
-            >
-              <Icon
-                icon={
+              <span
+                className={[
+                  "w-fit shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ring-1",
                   detail.joinAvailable
-                    ? "solar:info-circle-bold"
-                    : "solar:shield-warning-bold"
-                }
-                className="h-5 w-5"
+                    ? `${pageTone.lightBg} ${pageTone.text} ${pageTone.ring}`
+                    : "bg-slate-100 text-slate-500 ring-slate-200",
+                ].join(" ")}
+              >
+                {detail.joinAvailable ? "참여 가능" : "참여 불가"}
+              </span>
+            </div>
+          </div>
+
+          <div className="px-6 py-7 sm:px-8">
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-slate-50 ring-1 ring-slate-100">
+                {detail.thumbnailUrl ? (
+                  <img
+                    src={detail.thumbnailUrl}
+                    alt={detail.productName}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Icon
+                    icon="solar:play-circle-bold"
+                    className={`h-8 w-8 ${pageTone.text}`}
+                  />
+                )}
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-400">선택한 파티</p>
+                <h2 className="mt-1 truncate text-xl font-extrabold text-slate-950">
+                  {detail.productName}
+                </h2>
+                <p className="mt-1 text-sm font-semibold text-slate-500">
+                  {formatOperationType(detail.operationType)}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+              <SummaryCard
+                label="월 결제 금액"
+                value={formatPrice(detail.monthlyPaymentAmount)}
+                icon="solar:wallet-money-bold"
+                toneClassName={pageTone.text}
+              />
+              <SummaryCard
+                label="남은 자리"
+                value={`${detail.remainingSeatCount}명`}
+                icon="solar:user-plus-rounded-bold"
+                toneClassName={pageTone.text}
+              />
+              <SummaryCard
+                label="다음 결제일"
+                value={formatShortDate(detail.nextPaymentDate)}
+                icon="solar:calendar-bold"
+                toneClassName={pageTone.text}
               />
             </div>
 
-            <div>
-              <p className="text-sm font-semibold text-slate-950">
-                {detail.joinAvailable ? pageTone.noticeTitle : "참여 제한"}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                {detail.joinAvailable
-                  ? "상품 정보와 금액을 확인한 뒤 참여를 진행해 주세요."
-                  : "현재 상태에서는 이 결원 파티에 참여할 수 없습니다."}
-              </p>
+            <div className="mt-6 rounded-[24px] bg-slate-50 p-5 ring-1 ring-slate-100">
+              <div className="flex items-start gap-4">
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white ${pageTone.text} ring-1 ${pageTone.ring}`}
+                >
+                  <Icon icon="solar:info-circle-bold" className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-extrabold text-slate-950">
+                    {detail.joinAvailable ? pageTone.noticeTitle : "참여 제한"}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
+                    {detail.joinAvailable
+                      ? "상품 정보와 금액을 확인한 뒤 참여를 진행해 주세요."
+                      : "현재 상태에서는 이 결원 파티에 참여할 수 없습니다."}
+                  </p>
+                </div>
+              </div>
             </div>
+
+            <div className="mt-6 overflow-hidden rounded-[24px] bg-white ring-1 ring-slate-100">
+              <div className="border-b border-slate-100 px-5 py-4">
+                <p className="text-sm font-extrabold text-slate-950">
+                  상세 정보
+                </p>
+              </div>
+              <div className="divide-y divide-slate-100">
+                {infoRows.map((row) => (
+                  <div
+                    key={row.label}
+                    className="flex items-center justify-between gap-4 px-5 py-4"
+                  >
+                    <p className="text-sm font-semibold text-slate-500">
+                      {row.label}
+                    </p>
+                    <p className="text-right text-sm font-extrabold text-slate-950">
+                      {row.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleJoinVacancyParty}
+              disabled={!detail.joinAvailable || isJoining}
+              className={[
+                "mt-7 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full px-5 text-base font-bold text-white shadow-lg transition disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-white disabled:shadow-none disabled:hover:translate-y-0",
+                detail.joinAvailable && !isJoining
+                  ? `${pageTone.bg} ${pageTone.buttonHover} ${
+                      isHostRecruit
+                        ? "shadow-blue-900/20"
+                        : "shadow-teal-900/20"
+                    } hover:-translate-y-0.5`
+                  : "",
+              ].join(" ")}
+            >
+              {isJoining ? "참여 처리 중..." : pageTone.action}
+              <Icon
+                icon={
+                  isJoining
+                    ? "solar:refresh-circle-bold"
+                    : "solar:arrow-right-linear"
+                }
+                className={["h-5 w-5", isJoining ? "animate-spin" : ""].join(
+                  " ",
+                )}
+              />
+            </button>
           </div>
         </section>
-
-        <button
-          type="button"
-          onClick={handleJoinVacancyParty}
-          disabled={!detail.joinAvailable || isJoining}
-          className={[
-            "mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl px-5 text-[15px] font-semibold text-white shadow-[0_20px_46px_-24px_rgba(20,184,166,0.42)] transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none",
-            detail.joinAvailable && !isJoining
-              ? `${pageTone.bg} ${pageTone.buttonHover}`
-              : "",
-          ].join(" ")}
-        >
-          {isJoining ? "참여 처리 중..." : pageTone.action}
-          <Icon
-            icon={
-              isJoining ? "solar:refresh-circle-bold" : "solar:arrow-right-linear"
-            }
-            className={["h-5 w-5", isJoining ? "animate-spin" : ""].join(" ")}
-          />
-        </button>
       </main>
+    </div>
+  );
+}
+
+function SummaryCard({
+  label,
+  value,
+  icon,
+  toneClassName,
+}: {
+  label: string;
+  value: string;
+  icon: string;
+  toneClassName: string;
+}) {
+  return (
+    <div className="min-w-0 rounded-[20px] bg-slate-50 px-2.5 py-3 text-center ring-1 ring-slate-100 sm:rounded-[22px] sm:p-5 sm:text-left">
+      <div
+        className={`mx-auto flex h-8 w-8 items-center justify-center rounded-2xl bg-white ${toneClassName} ring-1 ring-slate-100 sm:mx-0 sm:h-10 sm:w-10`}
+      >
+        <Icon icon={icon} className="h-4 w-4 sm:h-5 sm:w-5" />
+      </div>
+      <p className="mt-2 text-[11px] font-bold leading-tight text-slate-400 sm:mt-4 sm:text-xs">
+        {label}
+      </p>
+      <p className="mt-1 truncate text-[13px] font-extrabold text-slate-950 sm:text-sm">
+        {value}
+      </p>
     </div>
   );
 }

@@ -265,87 +265,153 @@ export default function PartyMemberProvisionConfirmPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-        <div className="mx-auto flex min-h-96 w-full max-w-2xl items-center justify-center rounded-3xl border border-slate-200 bg-white">
-          <Icon
-            icon="solar:refresh-circle-bold"
-            className="h-11 w-11 animate-spin text-blue-900"
-          />
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+          <div className="text-center">
+            <Icon
+              icon="solar:refresh-circle-bold"
+              className="mx-auto h-11 w-11 animate-spin text-brand-main"
+            />
+            <p className="mt-4 text-sm font-semibold text-slate-600">
+              이용 확인 정보를 불러오는 중입니다
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-      <div className="mx-auto w-full max-w-2xl">
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 px-6 py-7 sm:px-8">
-            <p className="text-sm font-bold text-sky-600">
-              {guideContent.label}
-            </p>
-            <h1 className="mt-2 text-2xl font-extrabold text-slate-950">
-              {guideContent.title}
-            </h1>
-            <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">
-              {guideContent.description}
-            </p>
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div className="mx-auto flex min-h-[calc(100vh-96px)] w-full max-w-3xl items-center">
+        <section className="w-full overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+          <div className="px-5 py-7 sm:px-8 sm:py-8">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <div className="inline-flex max-w-full items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-100">
+                  <Icon
+                    icon="solar:verified-check-bold"
+                    className="h-4 w-4 shrink-0 text-[#14B8A6]"
+                  />
+                  <span className="truncate">{guideContent.label}</span>
+                </div>
+
+                <h1 className="mt-4 text-[28px] font-extrabold tracking-tight text-slate-950 sm:text-[34px]">
+                  {guideContent.title}
+                </h1>
+                <p className="mt-3 max-w-xl text-[15px] font-semibold leading-7 text-slate-500">
+                  {guideContent.description}
+                </p>
+              </div>
+
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-slate-50 text-[#0F766E] ring-1 ring-slate-100">
+                <Icon icon={guideContent.icon} className="h-8 w-8" />
+              </div>
+            </div>
           </div>
 
-          <div className="px-6 py-7 sm:px-8">
-            <div className="rounded-3xl bg-slate-50 px-5 py-5 ring-1 ring-slate-200">
+          <div className="px-5 py-5 sm:px-8 sm:py-7">
+            <div className="rounded-[28px] bg-slate-50 p-4 ring-1 ring-slate-100 sm:p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[13px] font-extrabold text-[#14B8A6]">
+                    READY CHECK
+                  </p>
+                  <h2 className="mt-1 text-xl font-extrabold tracking-tight text-slate-950">
+                    {guideContent.cardTitle}
+                  </h2>
+                </div>
+
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0F766E] ring-1 ring-teal-100">
+                  <Icon icon="solar:checklist-minimalistic-bold" className="h-6 w-6" />
+                </div>
+              </div>
+
+              <div className="mt-5 space-y-2">
+                {guideContent.checks.map((check) => (
+                  <div
+                    key={check}
+                    className="flex items-start gap-3 rounded-[20px] bg-white px-4 py-4 ring-1 ring-slate-100"
+                  >
+                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#14B8A6] text-white">
+                      <Icon icon="meteor-icons:check" className="h-3.5 w-3.5" />
+                    </div>
+                    <p className="text-sm font-semibold leading-6 text-slate-600">
+                      {check}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-[24px] bg-teal-50/80 px-4 py-4 ring-1 ring-teal-100 sm:px-5">
               <div className="flex items-start gap-3">
-                <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white ring-1 ring-slate-200 ${guideContent.toneClassName}`}
-                >
-                  <Icon icon={guideContent.icon} className="h-6 w-6" />
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#0F766E] ring-1 ring-teal-100">
+                  <Icon icon="solar:info-circle-bold" className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-sm font-extrabold text-slate-950">
-                    {guideContent.cardTitle}
+                    확인 후 대시보드로 이동합니다
                   </p>
-                  <div className="mt-3 space-y-2 text-sm font-semibold leading-6 text-slate-600">
-                    {guideContent.checks.map((check) => (
-                      <p key={check}>{check}</p>
-                    ))}
-                  </div>
+                  <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">
+                    대시보드에서 실제 이용 정보와 현재 파티 상태를 확인할 수
+                    있습니다.
+                  </p>
                 </div>
               </div>
             </div>
 
-            <button
-              onClick={() => setIsConfirmModalOpen(true)}
-              disabled={isSubmitting}
-              className="mt-7 flex h-14 w-full items-center justify-center rounded-2xl bg-blue-900 text-base font-bold text-white transition hover:bg-blue-950 disabled:cursor-not-allowed disabled:bg-slate-300"
-            >
-              확인했어요
-            </button>
+            <div className="mt-7 grid gap-3 sm:grid-cols-[1fr_1.5fr]">
+              <button
+                type="button"
+                onClick={() => navigate("/myparty")}
+                disabled={isSubmitting}
+                className="flex h-14 items-center justify-center gap-2 rounded-full bg-white text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md disabled:cursor-not-allowed disabled:text-slate-300"
+              >
+                <Icon icon="solar:list-bold" className="h-5 w-5" />
+                나의 파티
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsConfirmModalOpen(true)}
+                disabled={isSubmitting}
+                className="flex h-14 items-center justify-center gap-2 rounded-full bg-[#14B8A6] px-6 text-base font-bold text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none disabled:hover:translate-y-0"
+              >
+                확인했어요
+                <Icon icon="solar:alt-arrow-right-linear" className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </section>
       </div>
 
       {isConfirmModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
-          <div className="w-full max-w-sm rounded-3xl bg-white px-5 py-6 shadow-2xl">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-amber-50 text-amber-600">
-              <Icon icon="solar:shield-warning-bold" className="h-8 w-8" />
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 px-0 backdrop-blur-sm sm:items-center sm:px-4">
+          <div className="w-full max-w-[420px] rounded-t-[30px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] ring-1 ring-slate-100 sm:rounded-[30px] sm:px-6">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-100">
+                <Icon icon="solar:shield-warning-bold" className="h-7 w-7" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl font-extrabold tracking-tight text-slate-950">
+                  이용 준비를 완료했나요?
+                </h2>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+                  {isInviteProvision
+                    ? "OTT 계정 활성화와 계정 설정을 모두 완료한 뒤 확인해주세요."
+                    : "확인 후 대시보드에서 공유 계정 정보를 확인하고 이용을 시작할 수 있습니다."}
+                </p>
+              </div>
             </div>
 
-            <h2 className="mt-5 text-center text-xl font-extrabold text-slate-950">
-              정말 완료하셨나요?
-            </h2>
-            <p className="mt-3 text-center text-sm font-semibold leading-6 text-slate-500">
-              {isInviteProvision
-                ? "OTT 계정 활성화와 계정 설정을 모두 완료한 뒤 확인해주세요."
-                : "확인 후 대시보드에서 공유 계정 정보를 확인하고 이용을 시작할 수 있습니다."}
-            </p>
-
-            <div className="mt-6 grid grid-cols-2 gap-2">
+            <div className="mt-6 grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setIsConfirmModalOpen(false)}
                 disabled={isSubmitting}
-                className="flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-300"
+                className="flex h-12 items-center justify-center rounded-full bg-slate-50 text-sm font-bold text-slate-700 ring-1 ring-slate-100 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
               >
                 다시 확인
               </button>
@@ -353,9 +419,19 @@ export default function PartyMemberProvisionConfirmPage() {
                 type="button"
                 onClick={handleConfirm}
                 disabled={isSubmitting}
-                className="flex h-12 items-center justify-center rounded-2xl bg-blue-900 text-sm font-bold text-white transition hover:bg-blue-950 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="flex h-12 items-center justify-center gap-2 rounded-full bg-[#14B8A6] text-sm font-bold text-white shadow-lg shadow-teal-900/20 transition hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
               >
-                {isSubmitting ? "처리 중" : "완료했어요"}
+                {isSubmitting ? (
+                  <>
+                    <Icon
+                      icon="solar:refresh-circle-bold"
+                      className="h-4 w-4 animate-spin"
+                    />
+                    처리 중
+                  </>
+                ) : (
+                  "완료했어요"
+                )}
               </button>
             </div>
           </div>

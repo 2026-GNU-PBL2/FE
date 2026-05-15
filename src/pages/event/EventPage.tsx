@@ -58,14 +58,14 @@ const events: EventItem[] = [
 
 function getStatusClassName(status: EventStatus) {
   if (status === "진행중") {
-    return "bg-emerald-50 text-emerald-700";
+    return "bg-emerald-50 text-emerald-700 ring-emerald-100";
   }
 
   if (status === "예정") {
-    return "bg-sky-50 text-sky-700";
+    return "bg-sky-50 text-sky-700 ring-sky-100";
   }
 
-  return "bg-amber-50 text-amber-700";
+  return "bg-amber-50 text-amber-700 ring-amber-100";
 }
 
 function getStatusCount(status: EventStatus) {
@@ -74,42 +74,67 @@ function getStatusCount(status: EventStatus) {
 
 export default function EventPage() {
   const ongoingCount = getStatusCount("진행중");
+  const upcomingCount = getStatusCount("예정");
 
   return (
     <div className="min-h-full bg-brand-bg">
-      <section className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <div className="flex flex-col items-center text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-            이벤트
-          </h1>
+      <section className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+        <header className="rounded-[32px] bg-white px-5 py-6 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-7 sm:py-8">
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-100">
+                <Icon
+                  icon="solar:gift-bold"
+                  className="h-4 w-4 text-brand-main"
+                />
+                Submate 혜택
+              </div>
 
-          <p className="mt-2 text-sm text-slate-500">
-            Submate에서 진행 중인 혜택을 확인해보세요
-          </p>
-        </div>
+              <h1 className="mt-4 text-[30px] font-extrabold tracking-tight text-slate-950 sm:text-[40px]">
+                이벤트
+              </h1>
 
-        <div className="mt-7 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
-              <Icon icon="solar:gift-bold" className="h-4 w-4" />
-              이벤트 현황
+              <p className="mt-3 max-w-xl text-[15px] font-semibold leading-7 text-slate-500">
+                파티 참여와 운영에 필요한 혜택을 한곳에서 확인해보세요.
+              </p>
             </div>
 
-            <div className="text-sm font-semibold text-slate-800">
-              진행 중인 이벤트 {ongoingCount}건
+            <div className="grid min-w-0 grid-cols-2 gap-2 sm:min-w-[260px]">
+              <div className="rounded-[22px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
+                <p className="text-xs font-bold text-slate-500">진행 중</p>
+                <p className="mt-1 text-2xl font-extrabold text-slate-950">
+                  {ongoingCount}
+                  <span className="ml-0.5 text-sm font-bold text-slate-500">
+                    건
+                  </span>
+                </p>
+              </div>
+
+              <div className="rounded-[22px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
+                <p className="text-xs font-bold text-slate-500">예정</p>
+                <p className="mt-1 text-2xl font-extrabold text-slate-950">
+                  {upcomingCount}
+                  <span className="ml-0.5 text-sm font-bold text-slate-500">
+                    건
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </header>
 
-        <div className="mt-8 divide-y divide-slate-200">
+        <div className="mt-5 grid gap-4">
           {events.map((event) => (
-            <article key={event.id} className="group py-5 first:pt-0 last:pb-0">
-              <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[0.95fr_1.05fr] md:gap-6">
+            <article
+              key={event.id}
+              className="group overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:shadow-slate-900/10"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)]">
                 <Link
                   to={`/event/${event.id}`}
-                  className="block overflow-hidden rounded-2xl border border-slate-200 bg-slate-100"
+                  className="block min-h-0 overflow-hidden bg-slate-100"
                 >
-                  <div className="relative aspect-16/10 w-full overflow-hidden bg-linear-to-br from-slate-100 to-slate-200">
+                  <div className="relative aspect-16/9 w-full overflow-hidden md:h-full md:aspect-auto">
                     <img
                       src={event.image}
                       alt={event.title}
@@ -118,30 +143,32 @@ export default function EventPage() {
                   </div>
                 </Link>
 
-                <div className="px-0.5">
-                  <div
-                    className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold ${getStatusClassName(
-                      event.status,
-                    )}`}
-                  >
-                    {event.status}
+                <div className="min-w-0 px-5 py-5 sm:px-6">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${getStatusClassName(
+                        event.status,
+                      )}`}
+                    >
+                      {event.status}
+                    </span>
+
+                    <span className="text-xs font-bold text-slate-400">
+                      {event.period}
+                    </span>
                   </div>
 
                   <Link to={`/event/${event.id}`} className="block">
-                    <h2 className="mt-3 text-xl font-semibold leading-snug text-slate-900 transition group-hover:text-brand-main sm:text-2xl">
+                    <h2 className="mt-3 text-xl font-extrabold leading-snug tracking-tight text-slate-950 transition group-hover:text-brand-main sm:text-2xl">
                       {event.title}
                     </h2>
                   </Link>
 
-                  <p className="mt-3 text-sm font-medium text-slate-500">
-                    {event.period}
-                  </p>
-
-                  <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-[15px]">
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
                     {event.description}
                   </p>
 
-                  <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                  <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-2 text-sm font-semibold text-teal-700">
                       <Icon
                         icon="solar:wallet-money-bold"
@@ -152,7 +179,7 @@ export default function EventPage() {
 
                     <Link
                       to={`/event/${event.id}`}
-                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-slate-900 px-4 text-sm font-bold text-white transition hover:bg-slate-800"
                     >
                       자세히 보기
                       <Icon

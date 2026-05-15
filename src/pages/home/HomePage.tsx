@@ -60,7 +60,10 @@ function shouldUseNestedCircle(slug: OttSlug) {
     slug === "netflix" ||
     slug === "tving" ||
     slug === "disney-plus" ||
-    slug === "watcha"
+    slug === "watcha" ||
+    slug === "apple-tv" ||
+    slug === "wavve" ||
+    slug === "laftel"
   );
 }
 
@@ -75,7 +78,11 @@ function resolveOttSlugByServiceName(serviceName: string): OttSlug | null {
     return "youtube";
   }
 
-  if (normalized.includes("watcha") || normalized.includes("왓챠")) {
+  if (
+    normalized.includes("watcha") ||
+    normalized.includes("왓챠") ||
+    normalized.includes("와챠")
+  ) {
     return "watcha";
   }
 
@@ -89,7 +96,11 @@ function resolveOttSlugByServiceName(serviceName: string): OttSlug | null {
     return "apple-tv";
   }
 
-  if (normalized.includes("netflix") || normalized.includes("넷플릭스")) {
+  if (
+    normalized.includes("netflix") ||
+    normalized.includes("neflix") ||
+    normalized.includes("넷플릭스")
+  ) {
     return "netflix";
   }
 
@@ -204,6 +215,22 @@ function getProductImageClassName(serviceName: string) {
   return "h-6 w-6 object-contain";
 }
 
+function getProductLogoFillClassName(slug: OttSlug) {
+  if (slug === "watcha") {
+    return "h-full w-full scale-105 object-cover";
+  }
+
+  if (slug === "apple-tv") {
+    return "h-[82%] w-[82%] object-contain";
+  }
+
+  if (slug === "netflix" || slug === "wavve") {
+    return "h-full w-full scale-125 object-cover";
+  }
+
+  return "h-full w-full object-cover";
+}
+
 function renderOttLogo({
   image,
   alt,
@@ -225,8 +252,12 @@ function renderOttLogo({
           "inline-flex items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200",
         ].join(" ")}
       >
-        <div className="flex h-4/5 w-4/5 items-center justify-center overflow-hidden rounded-full">
-          <img src={image} alt={alt} className="h-full w-full object-contain" />
+        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+          <img
+            src={image}
+            alt={alt}
+            className={getProductLogoFillClassName(slug)}
+          />
         </div>
       </div>
     );

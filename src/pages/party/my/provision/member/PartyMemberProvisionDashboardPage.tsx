@@ -27,6 +27,7 @@ type MemberStatus =
 type PartyMemberProvisionMeResponse = {
   partyId?: number;
   productName?: string | null;
+  ottServiceName?: string | null;
   provisionType?: ProvisionType | null;
   provisionStatus?: ProvisionStatus | null;
   memberStatus?: MemberStatus | null;
@@ -54,6 +55,10 @@ type PartyMemberProvisionMeResponse = {
     memberStatus?: MemberStatus | null;
     provisionMessage?: string | null;
   } | null;
+};
+
+type PartySettingsResponse = {
+  ottServiceName?: string | null;
 };
 
 type ApiEnvelope<T> = {
@@ -168,6 +173,8 @@ export default function PartyMemberProvisionDashboardPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const [provisionMe, setProvisionMe] =
     useState<PartyMemberProvisionMeResponse | null>(null);
+  const [partySettings, setPartySettings] =
+    useState<PartySettingsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [sharedAccountPassword, setSharedAccountPassword] = useState<
     string | null
@@ -179,7 +186,11 @@ export default function PartyMemberProvisionDashboardPage() {
     const member = provisionMe?.member;
 
     return {
-      productName: provisionMe?.productName || "파티 이용 현황",
+      productName:
+        provisionMe?.productName ||
+        provisionMe?.ottServiceName ||
+        partySettings?.ottServiceName ||
+        "파티 정보",
       provisionType: provision?.provisionType ?? provisionMe?.provisionType,
       provisionStatus:
         provision?.provisionStatus ?? provisionMe?.provisionStatus,
@@ -207,7 +218,7 @@ export default function PartyMemberProvisionDashboardPage() {
       lastResetAt: provision?.lastResetAt ?? provisionMe?.lastResetAt,
       provisionMessage: member?.provisionMessage,
     };
-  }, [provisionMe]);
+  }, [partySettings, provisionMe]);
 
   useEffect(() => {
     if (!partyId || !provisionMe) return;
@@ -237,14 +248,28 @@ export default function PartyMemberProvisionDashboardPage() {
       try {
         setIsLoading(true);
 
-        const response = await api.get(
-          `/api/v1/parties/${partyId}/provision/me`,
-        );
-        const data = unwrapResponse<PartyMemberProvisionMeResponse>(
-          response.data,
-        );
-        console.log(data);
+        const [provisionResult, settingsResult] = await Promise.allSettled([
+          api.get(`/api/v1/parties/${partyId}/provision/me`),
+          api.get(`/api/v1/parties/${partyId}/settings`),
+        ]);
 
+        if (settingsResult.status === "fulfilled") {
+          const settingsData = unwrapResponse<PartySettingsResponse>(
+            settingsResult.value.data,
+          );
+          setPartySettings(settingsData);
+        } else {
+          setPartySettings(null);
+        }
+
+        if (provisionResult.status !== "fulfilled") {
+          toast.error("파티원 이용 현황을 불러오지 못했습니다.");
+          return;
+        }
+
+        const data = unwrapResponse<PartyMemberProvisionMeResponse>(
+          provisionResult.value.data,
+        );
         if (!data) {
           toast.error("파티원 이용 현황을 확인할 수 없습니다.");
           return;
@@ -289,12 +314,12 @@ export default function PartyMemberProvisionDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-3xl border border-slate-200 bg-white">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
           <div className="text-center">
             <Icon
               icon="solar:refresh-circle-bold"
-              className="mx-auto h-11 w-11 animate-spin text-blue-900"
+              className="mx-auto h-11 w-11 animate-spin text-brand-main"
             />
             <p className="mt-4 text-sm font-semibold text-slate-600">
               파티원 이용 현황을 불러오는 중입니다
@@ -307,8 +332,8 @@ export default function PartyMemberProvisionDashboardPage() {
 
   if (!provisionMe) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-        <div className="mx-auto w-full max-w-3xl rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-3xl rounded-[32px] bg-white px-6 py-12 text-center shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
           <Icon
             icon="solar:danger-circle-bold"
             className="mx-auto h-12 w-12 text-slate-300"
@@ -318,7 +343,7 @@ export default function PartyMemberProvisionDashboardPage() {
           </p>
           <button
             onClick={() => navigate("/myparty")}
-            className="mt-7 rounded-2xl bg-blue-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-950"
+            className="mt-7 rounded-full bg-brand-main px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5 hover:bg-blue-800"
           >
             나의 파티 목록으로 이동
           </button>
@@ -332,11 +357,11 @@ export default function PartyMemberProvisionDashboardPage() {
     !isConfirmedStatus(view.memberStatus)
   ) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
-        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-3xl border border-slate-200 bg-white">
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
           <Icon
             icon="solar:refresh-circle-bold"
-            className="h-11 w-11 animate-spin text-blue-900"
+            className="h-11 w-11 animate-spin text-brand-main"
           />
         </div>
       </div>
@@ -369,8 +394,8 @@ export default function PartyMemberProvisionDashboardPage() {
     },
   ].filter((item) => item.value !== "-");
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mx-auto w-full max-w-[760px]">
+    <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div className="mx-auto w-full max-w-3xl">
         <header className="flex items-center justify-between gap-3">
           <button
             onClick={() => navigate("/myparty")}
@@ -402,24 +427,28 @@ export default function PartyMemberProvisionDashboardPage() {
           </div>
         </header>
 
-        <section className="mt-5 rounded-[24px] border border-slate-200 bg-white px-5 py-5 shadow-[0_16px_48px_-40px_rgba(15,23,42,0.28)] sm:px-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-[#14B8A6]">MEMBER PARTY</p>
-              <h1 className="mt-1 truncate text-xl font-bold text-slate-950">
-                {view.productName}
-              </h1>
-              <p className="mt-1.5 text-sm font-normal leading-6 text-slate-500">
-                현재 이용 중인 파티입니다.
-              </p>
-            </div>
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EAFBF5] text-[#0F766E] ring-1 ring-[#BDEFE4]">
-              <Icon icon="solar:user-check-bold" className="h-5 w-5" />
+        <section className="mt-5 overflow-hidden rounded-[32px] bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="px-5 py-6 sm:px-8">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-[13px] font-extrabold text-[#14B8A6]">
+                  MEMBER PARTY
+                </p>
+                <h1 className="mt-2 truncate text-[28px] font-extrabold tracking-tight text-slate-950">
+                  {view.productName}
+                </h1>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+                  현재 이용 중인 파티입니다.
+                </p>
+              </div>
+              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-[#EAFBF5] text-[#0F766E] ring-1 ring-[#BDEFE4]">
+                <Icon icon="solar:user-check-bold" className="h-6 w-6" />
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="mt-5 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_56px_-46px_rgba(15,23,42,0.3)]">
+        <section className="mt-5 overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
           <div className="px-5 py-5 sm:px-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
@@ -458,7 +487,7 @@ export default function PartyMemberProvisionDashboardPage() {
         </section>
 
         {isInviteProvision ? (
-          <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
+          <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EAFBF5] text-[#0F766E] ring-1 ring-[#BDEFE4]">
                 <Icon icon="solar:check-circle-bold" className="h-6 w-6" />
@@ -475,7 +504,7 @@ export default function PartyMemberProvisionDashboardPage() {
                 <button
                   type="button"
                   onClick={() => navigate("/mypage/mailbox")}
-                  className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-[#1E3A8A] ring-1 ring-slate-200 transition hover:bg-slate-50"
+                  className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-full bg-white px-4 text-xs font-bold text-brand-main ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:bg-slate-50"
                 >
                   <Icon icon="solar:inbox-bold" className="h-4 w-4" />
                   메일함 확인
@@ -484,7 +513,7 @@ export default function PartyMemberProvisionDashboardPage() {
             </div>
           </section>
         ) : (
-          <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
+          <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-medium text-slate-400">ACCESS</p>
@@ -535,7 +564,7 @@ export default function PartyMemberProvisionDashboardPage() {
                 />
               )}
               {view.provisionGuide && (
-                <div className="rounded-2xl bg-[#F8FAFC] px-4 py-4 ring-1 ring-slate-100">
+                <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
                   <p className="text-xs font-medium text-slate-400">
                     이용 안내
                   </p>
@@ -545,7 +574,7 @@ export default function PartyMemberProvisionDashboardPage() {
                 </div>
               )}
               {shouldShowEmptyAccessState && (
-                <div className="rounded-2xl bg-[#F8FAFC] px-4 py-5 text-center ring-1 ring-slate-100">
+                <div className="rounded-2xl bg-slate-50 px-4 py-5 text-center ring-1 ring-slate-100">
                   <p className="text-sm font-normal text-slate-500">
                     표시할 이용 정보가 없습니다.
                   </p>
@@ -556,9 +585,9 @@ export default function PartyMemberProvisionDashboardPage() {
         )}
 
         {view.provisionMessage && (
-          <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
+          <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F8FAFC] text-[#1E3A8A] ring-1 ring-slate-100">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-brand-main ring-1 ring-slate-100">
                 <Icon icon="solar:info-circle-bold" className="h-5 w-5" />
               </div>
               <p className="text-sm font-normal leading-6 text-slate-600">
@@ -574,7 +603,7 @@ export default function PartyMemberProvisionDashboardPage() {
 
 function MetricTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-2xl bg-[#F8FAFC] px-3 py-4 text-center ring-1 ring-slate-100">
+    <div className="min-w-0 rounded-2xl bg-slate-50 px-3 py-4 text-center ring-1 ring-slate-100">
       <p className="text-[11px] font-medium text-slate-400">{label}</p>
       <p className="mt-1 truncate text-sm font-bold text-slate-900">{value}</p>
     </div>
@@ -593,8 +622,8 @@ function InfoRow({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-[#F8FAFC] px-4 py-4 ring-1 ring-slate-100">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#1E3A8A] ring-1 ring-slate-200">
+    <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main ring-1 ring-blue-100">
         <Icon icon={icon} className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
