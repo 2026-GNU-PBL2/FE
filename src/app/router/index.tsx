@@ -32,6 +32,7 @@ import PartyHistoryPage from "@/pages/my/usage/PartyHistoryPage";
 import SettingsPage from "@/pages/my/account/SettingsPage";
 import Myparty from "@/pages/party/my/MyParty";
 
+import LandingPage from "@/pages/landing/LandingPage";
 import AdminRoute from "./AdminRoute";
 import AdminPublicRoute from "./AdminPublicRoute";
 import AdminLayout from "@/pages/admin/layout/AdminLayout";
@@ -112,7 +113,8 @@ const router = createBrowserRouter([
       {
         element: <MainLayout />,
         children: [
-          { path: "/", element: <HomePage /> },
+          { path: "/", element: <LandingPage /> },
+          { path: "/home", element: <HomePage /> },
           { path: "/about", element: <AboutPage /> },
           { path: "/event", element: <EventPage /> },
           { path: "/support", element: <SupportPage /> },
