@@ -4,10 +4,42 @@
 @import "./globals.css";
 
 @theme {
-  --color-brand-main: #1e3a8a;
-  --color-brand-sub: #38bdf8;
-  --color-brand-accent: #2dd4bf;
-  --color-brand-bg: #f8fafc;
+  /* ── Apple 기본 팔레트 ── */
+  --color-midnight-graphite: #1d1d1f;
+  --color-deep-gray: #333333;
+  --color-charcoal-grey: #474747;
+  --color-medium-gray: #707070;
+  --color-light-gray: #858585;
+  --color-light-silver: #c7c7c7;
+  --color-border-silver: #d6d6d6;
+  --color-lightest-gray: #e2e2e5;
+  --color-canvas-white: #f5f5f7;
+  --color-pure-white: #ffffff;
+  --color-true-black: #000000;
+  --color-interactive-blue: #0071e3;
+  --color-action-blue: #0066cc;
+  --color-sky-blue-highlight: #2997ff;
+
+  /* ── Submate 브랜드 그라데이션 ── */
+  --color-brand-from: #4f46e5;
+  --color-brand-via: #6d28d9;
+  --color-brand-to: #0071e3;
+
+  /* ── 레거시 brand-* 호환 (기존 컴포넌트 점진 교체) ── */
+  --color-brand-main: #4f46e5;
+  --color-brand-sub: #6d28d9;
+  --color-brand-accent: #0071e3;
+  --color-brand-bg: #f5f5f7;
+
+  /* ── 시맨틱 별칭 (LandingPage 등) ── */
+  --color-snow: #ffffff;
+  --color-fog: #f5f5f7;
+  --color-ink: #1d1d1f;
+  --color-azure: #0071e3;
+  --color-cobalt-link: #0066cc;
+  --color-graphite: #707070;
+  --color-silver-mist: #d6d6d6;
+  --color-indigo-gradient: #4f46e5;
 }
 
 @layer base {
@@ -17,7 +49,6 @@
     height: 100%;
   }
 
-  /* ✅ 폰트는 html에 거는 게 제일 확실함 (모든 요소에 전파) */
   html {
     font-family:
       Pretendard,
@@ -35,15 +66,13 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-
-    /* ✅ 전역: 스크롤바 숨김 (스크롤은 유지) */
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
   body {
     font-family: inherit;
-    background-color: var(--color-brand-bg);
+    background-color: var(--color-canvas-white);
   }
 
   html::-webkit-scrollbar,
