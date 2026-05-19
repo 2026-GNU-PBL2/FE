@@ -3,8 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
-import { useAuthStore } from "@/stores/authStore";
-import { getAdultCheckKey } from "./provision/shared/provisionStorage";
 
 type PartyRole = "HOST" | "MEMBER" | string;
 type PartyHistoryStatus = "USING" | "SCHEDULED" | "ENDED" | string;
@@ -45,6 +43,15 @@ type PartyJoinCancelResponse = {
 
 type PartyMemberProvisionResponse = {
   memberStatus?: string | null;
+};
+
+type PartyProvisionResponse = {
+  provisionType?: string | null;
+  provisionStatus?: string | null;
+  sharedAccountEmail?: string | null;
+  members?: Array<{
+    memberStatus?: string | null;
+  }>;
 };
 
 type PartyUsagePeriodResponse = {
@@ -158,6 +165,19 @@ function canShowCancelJoinRequest(status: PartyJoinStatus) {
   return normalizedStatus === "WAITING";
 }
 
+function hasSharedAccountInfo(provision?: PartyProvisionResponse | null) {
+  return Boolean(provision?.sharedAccountEmail?.trim());
+}
+
+function needsProvisionReset(provision?: PartyProvisionResponse | null) {
+  return (
+    provision?.provisionStatus === "RESET_REQUIRED" ||
+    provision?.members?.some(
+      (member) => member.memberStatus === "RESET_REQUIRED",
+    ) === true
+  );
+}
+
 function formatDate(value: string | null) {
   if (!value) return "-";
 
@@ -223,7 +243,6 @@ function getProductIcon(productName: string) {
 
 export default function MyParty() {
   const navigate = useNavigate();
-  const userId = useAuthStore((state) => state.user?.id);
 
   const [parties, setParties] = useState<PartyHistoryItem[]>([]);
   const [usagePeriods, setUsagePeriods] = useState<
@@ -332,6 +351,11 @@ export default function MyParty() {
       return;
     }
 
+    if (party.status === "ENDED") {
+      navigate(`/myparty/${party.partyId}`, { state: detailState });
+      return;
+    }
+
     if (party.role !== "HOST") {
       try {
         const response = await api.get(
@@ -362,7 +386,7 @@ export default function MyParty() {
       const response = await api.get(
         `/api/v1/parties/${party.partyId}/provision`,
       );
-      const provision = unwrapResponse<{ provisionType?: string }>(
+      const provision = unwrapResponse<PartyProvisionResponse>(
         response.data,
       );
       const hasProvision = Boolean(provision);
@@ -376,30 +400,25 @@ export default function MyParty() {
         provision?.provisionType === "INVITE_CODE" ||
         provision?.provisionType === "INVITE_LINK"
       ) {
+        if (needsProvisionReset(provision)) {
+          navigate(`/myparty/${party.partyId}`, { state: detailState });
+          return;
+        }
+
         navigate(`/myparty/${party.partyId}/provision/dashboard`);
         return;
       }
 
-      const adultCheckDone =
-        userId != null
-          ? window.localStorage.getItem(
-              getAdultCheckKey(party.partyId, userId),
-            ) === "done"
-          : false;
-
-      if (adultCheckDone) {
-        navigate(`/myparty/${party.partyId}/provision/dashboard`);
+      if (
+        (provision?.provisionType === "ACCOUNT_SHARE" ||
+          provision?.provisionType === "SHARED_ACCOUNT") &&
+        !hasSharedAccountInfo(provision)
+      ) {
+        navigate(`/myparty/${party.partyId}`, { state: detailState });
         return;
       }
 
-      navigate(
-        `/myparty/${party.partyId}/provision/adult-check/${party.productId}`,
-        {
-          state: {
-            productName: party.productName,
-          },
-        },
-      );
+      navigate(`/myparty/${party.partyId}/provision/dashboard`);
     } catch (error) {
       const status = (error as { response?: { status?: number } }).response
         ?.status;
