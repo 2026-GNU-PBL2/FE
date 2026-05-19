@@ -1,10 +1,10 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import RouterRoot from "./RouterRoot";
-import HomePage from "@/pages/home/HomePage";
 import NotFoundPage from "@/pages/not-found/NotFoundPage";
 import MainLayout from "@/layouts/MainLayout";
 import PartyListPage from "@/pages/party/vacancy/PartyListPage";
 import PartyVacancyDetailPage from "@/pages/party/vacancy/PartyVacancyDetailPage";
+import PartyVacancyConfirmPage from "@/pages/party/vacancy/PartyVacancyConfirmPage";
 import PartyCreatePage from "@/pages/party/common/PartyCreatePage";
 import PartyRoleSelectPage from "@/pages/party/common/PartyRoleSelectPage";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -32,9 +32,9 @@ import PartyHistoryPage from "@/pages/my/usage/PartyHistoryPage";
 import SettingsPage from "@/pages/my/account/SettingsPage";
 import Myparty from "@/pages/party/my/MyParty";
 
-import LandingPage from "@/pages/landing/LandingPage";
 import AdminRoute from "./AdminRoute";
 import AdminPublicRoute from "./AdminPublicRoute";
+import RootRoute from "./RootRoute";
 import AdminLayout from "@/pages/admin/layout/AdminLayout";
 import AdminLoginPage from "@/pages/admin/login/AdminLoginPage";
 import AdminDashboardPage from "@/pages/admin/dashboard/AdminDashboardPage";
@@ -113,8 +113,8 @@ const router = createBrowserRouter([
       {
         element: <MainLayout />,
         children: [
-          { path: "/", element: <LandingPage /> },
-          { path: "/home", element: <HomePage /> },
+          { path: "/", element: <RootRoute /> },
+          { path: "/home", element: <Navigate to="/" replace /> },
           { path: "/about", element: <AboutPage /> },
           { path: "/event", element: <EventPage /> },
           { path: "/support", element: <SupportPage /> },
@@ -124,6 +124,10 @@ const router = createBrowserRouter([
           {
             path: "/parties/:type/:partyId",
             element: <PartyVacancyDetailPage />,
+          },
+          {
+            path: "/parties/:type/:partyId/confirm",
+            element: <PartyVacancyConfirmPage />,
           },
           { path: "/parties/:type", element: <PartyListPage /> },
           { path: "/myparty", element: <Myparty /> },

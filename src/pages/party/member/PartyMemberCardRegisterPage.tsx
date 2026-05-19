@@ -1,9 +1,10 @@
 import { Icon } from "@iconify/react";
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
 import { loadTossPaymentsScript } from "@/utils/loadTossPayments";
+import { getRedirectFromSearchParams } from "@/pages/party/vacancy/vacancyFlow";
 
 type BillingCustomerKeyResponse = {
   customerKey: string;
@@ -41,6 +42,8 @@ function getFailPath(productId: string) {
 
 export default function PartyMemberCardRegisterPage() {
   const { productId = "" } = useParams();
+  const [searchParams] = useSearchParams();
+  const redirectPath = getRedirectFromSearchParams(searchParams);
 
   const [loading, setLoading] = useState(true);
   const [requesting, setRequesting] = useState(false);
@@ -128,6 +131,11 @@ export default function PartyMemberCardRegisterPage() {
       );
 
       const failUrl = new URL(getFailPath(productId), window.location.origin);
+
+      if (redirectPath) {
+        successUrl.searchParams.set("redirect", redirectPath);
+        failUrl.searchParams.set("redirect", redirectPath);
+      }
 
       await payment.requestBillingAuth({
         method: "CARD",

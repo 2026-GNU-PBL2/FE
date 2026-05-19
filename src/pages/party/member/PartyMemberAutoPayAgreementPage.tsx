@@ -1,6 +1,10 @@
 import { Icon } from "@iconify/react";
 import { useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  getRedirectFromSearchParams,
+  withRedirect,
+} from "@/pages/party/vacancy/vacancyFlow";
 
 type AgreementSection = {
   id: string;
@@ -100,6 +104,8 @@ function LeftAgreementItem({
 export default function PartyMemberAutoPayAgreementPage() {
   const navigate = useNavigate();
   const { productId = "" } = useParams();
+  const [searchParams] = useSearchParams();
+  const redirectPath = getRedirectFromSearchParams(searchParams);
 
   const [openedSectionId, setOpenedSectionId] = useState<string | null>(null);
   const [agreedMap, setAgreedMap] = useState<Record<string, boolean>>({
@@ -133,7 +139,7 @@ export default function PartyMemberAutoPayAgreementPage() {
       return;
     }
 
-    navigate(getNextPath(productId));
+    navigate(withRedirect(getNextPath(productId), redirectPath));
   };
 
   return (

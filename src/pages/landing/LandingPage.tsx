@@ -1272,7 +1272,7 @@ export default function LandingPage() {
                       }`}
                     >
                       <Link
-                        to="/home"
+                        to="/log-in"
                         className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full bg-gradient-to-r from-[#0071e3] to-[#2997ff] px-8 py-4 text-[17px] font-bold tracking-[-0.02em] text-white shadow-[0_8px_32px_rgba(0,113,227,0.40)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_14px_48px_rgba(0,113,227,0.58)] active:scale-[0.98]"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-[#0066cc] to-[#0071e3] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
