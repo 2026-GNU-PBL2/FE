@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "@/stores/authStore";
 
 type LegalSection = {
   title: string;
@@ -23,6 +24,14 @@ export default function LegalDocumentPage({
   updatedDate,
   sections,
 }: LegalDocumentPageProps) {
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const authStatus = useAuthStore((state) => state.authStatus);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoggedIn =
+    Boolean(accessToken) && isAuthenticated && authStatus === "authenticated";
+  const returnPath = isLoggedIn ? "/" : "/log-in";
+  const returnLabel = isLoggedIn ? "홈으로 돌아가기" : "로그인으로 돌아가기";
+
   return (
     <div className="min-h-full bg-brand-bg">
       <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -52,10 +61,10 @@ export default function LegalDocumentPage({
             </div>
 
             <Link
-              to="/log-in"
+              to={returnPath}
               className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white transition hover:bg-slate-800 active:scale-95"
             >
-              로그인으로 돌아가기
+              {returnLabel}
             </Link>
           </aside>
 

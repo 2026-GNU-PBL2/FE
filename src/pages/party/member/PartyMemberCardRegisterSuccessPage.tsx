@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import { getRedirectFromSearchParams } from "@/pages/party/vacancy/vacancyFlow";
 
 type BillingAuthorizeRequest = {
   authKey: string;
@@ -114,8 +115,9 @@ export default function PartyMemberCardRegisterSuccessPage() {
   const loading = status === "loading";
   const authorized = status === "authorized";
   const duplicated = status === "duplicate";
+  const redirectPath = getRedirectFromSearchParams(searchParams);
   const memberCreatePreviewPath = productId
-    ? getMemberCreatePreviewPath(productId)
+    ? redirectPath || getMemberCreatePreviewPath(productId)
     : "/party";
 
   const rawAuthKey = useMemo(

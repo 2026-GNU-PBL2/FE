@@ -1,6 +1,10 @@
 import { Icon } from "@iconify/react";
 import { useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  getRedirectFromSearchParams,
+  withRedirect,
+} from "@/pages/party/vacancy/vacancyFlow";
 
 type AgreementKey =
   | "service"
@@ -247,6 +251,8 @@ function AgreementCard({
 export default function PartyMemberAgreementPage() {
   const navigate = useNavigate();
   const { productId = "" } = useParams();
+  const [searchParams] = useSearchParams();
+  const redirectPath = getRedirectFromSearchParams(searchParams);
 
   const [agreements, setAgreements] = useState<AgreementState>(
     initialAgreementState,
@@ -295,7 +301,7 @@ export default function PartyMemberAgreementPage() {
       return;
     }
 
-    navigate(getPaymentPath(productId));
+    navigate(withRedirect(getPaymentPath(productId), redirectPath));
   };
 
   return (

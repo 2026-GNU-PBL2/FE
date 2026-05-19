@@ -1,11 +1,16 @@
 import { Icon } from "@iconify/react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import {
+  getRedirectFromSearchParams,
+  withRedirect,
+} from "@/pages/party/vacancy/vacancyFlow";
 
 export default function PartyMemberCardRegisterFailPage() {
   const { productId = "" } = useParams();
   const [searchParams] = useSearchParams();
 
   const code = searchParams.get("code") ?? "";
+  const redirectPath = getRedirectFromSearchParams(searchParams);
   const message =
     searchParams.get("message") ?? "카드 등록이 취소되었거나 실패했습니다.";
 
@@ -46,8 +51,11 @@ export default function PartyMemberCardRegisterFailPage() {
               <Link
                 to={
                   productId
-                    ? `/party/create/${productId}/member/card-register`
-                    : "/parties/member"
+                    ? withRedirect(
+                        `/party/create/${productId}/member/card-register`,
+                        redirectPath,
+                      )
+                    : "/parties/members"
                 }
                 className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#14B8A6] text-[15px] font-bold text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488]"
               >
@@ -56,7 +64,7 @@ export default function PartyMemberCardRegisterFailPage() {
               </Link>
 
               <Link
-                to="/parties/member"
+                to="/parties/members"
                 className="inline-flex h-14 w-full items-center justify-center rounded-full bg-white text-[15px] font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
               >
                 파티 목록으로 이동

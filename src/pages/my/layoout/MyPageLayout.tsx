@@ -109,7 +109,7 @@ export default function MyPageLayout() {
 
   return (
     <div className="min-h-full bg-brand-bg">
-      <div className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full max-w-5xl px-4 pt-4 pb-28 sm:px-6 sm:pt-6 md:pb-6 lg:px-8 lg:pt-8 lg:pb-8">
         <div className="space-y-4 sm:space-y-5">
           <section className="overflow-hidden rounded-[32px] bg-white shadow-sm ring-1 ring-slate-200">
             <div className="px-5 py-6 sm:px-8">

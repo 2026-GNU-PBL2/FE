@@ -3,6 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import {
+  clearSavedVacancyRedirect,
+  getRedirectFromSearchParams,
+  getSavedVacancyRedirect,
+  withRedirect,
+} from "@/pages/party/vacancy/vacancyFlow";
 
 type SettlementAccountType = "SETTLEMENT" | "REFUND";
 
@@ -108,6 +114,9 @@ export default function PartyHostAccountRegisterPage() {
 
   const bankAuthSuccess = searchParams.get("bankAuthSuccess");
   const bankAuthMessage = searchParams.get("message");
+  const redirectPath =
+    getRedirectFromSearchParams(searchParams) ||
+    getSavedVacancyRedirect(productId);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isAccountsLoading, setIsAccountsLoading] = useState(false);
@@ -155,15 +164,19 @@ export default function PartyHostAccountRegisterPage() {
 
     if (bankAuthSuccess === "false") {
       toast.error(bankAuthMessage || "본인인증 또는 계좌연결에 실패했습니다.");
-      navigate(getAgreementPath(productId), { replace: true });
+      navigate(withRedirect(getAgreementPath(productId), redirectPath), {
+        replace: true,
+      });
       return;
     }
 
     if (bankAuthSuccess !== "true") {
       toast.error("계좌 인증 결과를 확인할 수 없습니다.");
-      navigate(getAgreementPath(productId), { replace: true });
+      navigate(withRedirect(getAgreementPath(productId), redirectPath), {
+        replace: true,
+      });
     }
-  }, [bankAuthMessage, bankAuthSuccess, navigate, productId]);
+  }, [bankAuthMessage, bankAuthSuccess, navigate, productId, redirectPath]);
 
   useEffect(() => {
     const fetchBankAccounts = async () => {
@@ -252,7 +265,10 @@ export default function PartyHostAccountRegisterPage() {
       }
 
       toast.success(payload?.message || "정산 계좌 등록이 완료되었습니다.");
-      navigate(getCreatePreviewPath(productId));
+      if (redirectPath) {
+        clearSavedVacancyRedirect(productId);
+      }
+      navigate(redirectPath || getCreatePreviewPath(productId));
     } catch (error) {
       console.error(error);
       toast.error("정산 계좌 등록 중 문제가 발생했습니다.");

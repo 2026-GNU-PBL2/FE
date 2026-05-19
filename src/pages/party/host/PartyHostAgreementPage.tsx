@@ -1,8 +1,12 @@
 import { Icon } from "@iconify/react";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import {
+  getRedirectFromSearchParams,
+  saveVacancyRedirect,
+} from "@/pages/party/vacancy/vacancyFlow";
 
 type AgreementKey =
   | "settlement"
@@ -300,6 +304,8 @@ function AgreementCard({
 export default function PartyHostAgreementPage() {
   const navigate = useNavigate();
   const { productId = "" } = useParams<{ productId: string }>();
+  const [searchParams] = useSearchParams();
+  const redirectPath = getRedirectFromSearchParams(searchParams);
 
   const [agreements, setAgreements] = useState<AgreementState>(
     initialAgreementState,
@@ -409,8 +415,14 @@ export default function PartyHostAgreementPage() {
         hasPrimarySettlementAccount || (await fetchHasPrimarySettlementAccount());
 
       if (hasAccount) {
-        navigate(`/party/create/${trimmedProductId}/host/create-preview`);
+        navigate(
+          redirectPath || `/party/create/${trimmedProductId}/host/create-preview`,
+        );
         return;
+      }
+
+      if (redirectPath) {
+        saveVacancyRedirect(trimmedProductId, redirectPath);
       }
 
       const response = await api.get<AuthorizeUrlResponse>(

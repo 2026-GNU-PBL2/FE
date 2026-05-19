@@ -615,7 +615,7 @@ export default function MyPartyDetailPage() {
 
   if (isMember) {
     return (
-      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+      <div className="flex min-h-[calc(100svh-9rem)] items-center bg-brand-bg px-4 py-8 sm:px-6 sm:py-10 md:min-h-[calc(100svh-4.25rem)] lg:px-8">
         <div className="mx-auto w-full max-w-3xl">
           <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
             <div className="border-b border-slate-100 px-6 py-10 sm:px-10">
@@ -671,7 +671,7 @@ export default function MyPartyDetailPage() {
 
   if (!isMember && (isWaitingRecruit || !provision)) {
     return (
-      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+      <div className="flex min-h-[calc(100svh-9rem)] items-center bg-brand-bg px-4 py-8 sm:px-6 sm:py-10 md:min-h-[calc(100svh-4.25rem)] lg:px-8">
         <div className="mx-auto w-full max-w-3xl">
           <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
             <div className="border-b border-slate-100 px-6 py-10 sm:px-10">

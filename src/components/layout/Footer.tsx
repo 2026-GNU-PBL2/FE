@@ -16,7 +16,7 @@ const supportLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative w-full border-t border-[#d6d6d6]/60 bg-[#f5f5f7]">
+    <footer className="relative hidden w-full border-t border-[#d6d6d6]/60 bg-[#f5f5f7] md:block">
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           {/* 브랜드 */}

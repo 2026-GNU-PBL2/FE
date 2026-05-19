@@ -4,7 +4,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
 import { getApiErrorMessage } from "@/utils/api-error";
-import { getVacancyConfirmPath, withRedirect } from "./vacancyFlow";
+import {
+  getVacancyConfirmPath,
+  type VacancyRouteType,
+  withRedirect,
+} from "./vacancyFlow";
 
 type PartyVacancyDetail = {
   partyId: number;
@@ -22,6 +26,14 @@ type PartyVacancyDetail = {
   operationStatus: string;
   vacancyType: string;
   joinAvailable: boolean;
+};
+
+type PartyVacancyJoinResponse = {
+  partyId: number;
+  productId: string;
+  productName: string;
+  joinedAt: string;
+  message: string;
 };
 
 type PrimaryBankAccountResponse = {
@@ -77,12 +89,6 @@ function formatOperationType(value?: string) {
   return value || "-";
 }
 
-function formatRecruitStatus(value?: string) {
-  if (value === "RECRUITING") return "모집중";
-  if (value === "CLOSED") return "모집 종료";
-  return value || "-";
-}
-
 async function hasPrimarySettlementAccount() {
   try {
     const response = await api.get<
@@ -109,22 +115,16 @@ async function hasBillingMethod() {
   }
 }
 
-function formatOperationStatus(value?: string) {
-  if (value === "WAITING_START") return "시작 대기";
-  if (value === "ACTIVE") return "운영중";
-  if (value === "ENDED") return "종료";
-  return value || "-";
-}
-
-export default function PartyVacancyDetailPage() {
+export default function PartyVacancyConfirmPage() {
   const navigate = useNavigate();
   const { type, partyId } = useParams<{
-    type: "hosts" | "members";
+    type: VacancyRouteType;
     partyId: string;
   }>();
+
   const [detail, setDetail] = useState<PartyVacancyDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isJoining, setIsJoining] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
 
   const isHostRecruit = type === "hosts";
   const isMemberRecruit = type === "members";
@@ -133,42 +133,34 @@ export default function PartyVacancyDetailPage() {
     ? {
         text: "text-[#1E3A8A]",
         bg: "bg-[#1E3A8A]",
+        hover: "hover:bg-blue-800",
         lightBg: "bg-blue-50",
         ring: "ring-blue-100",
-        buttonHover: "hover:bg-blue-800",
-        action: "파티장 참여하기",
-        caption: "HOST VACANCY",
-        headline: "파티장 참여 정보를 확인해 주세요",
-        description:
-          "파티장 참여 전 상품 정보, 다음 회차 기준 인원 현황, 월 결제 금액을 확인합니다.",
-        noticeTitle: "파티장 참여 안내",
+        title: "파티장 참여 최종 확인",
+        readyLabel: "정산 계좌 확인 완료",
+        readyDescription:
+          "등록된 대표 정산 계좌가 확인되었습니다. 결원 파티장 참여를 완료할 수 있습니다.",
+        action: "파티장 참여 완료하기",
       }
     : {
         text: "text-[#0F766E]",
         bg: "bg-[#14B8A6]",
+        hover: "hover:bg-[#0D9488]",
         lightBg: "bg-[#ECFEF8]",
         ring: "ring-[#C9F7EA]",
-        buttonHover: "hover:bg-[#0D9488]",
-        action: "파티원 참여하기",
-        caption: "MEMBER VACANCY",
-        headline: "파티원 참여 정보를 확인해 주세요",
-        description:
-          "파티원 참여 전 상품 정보, 다음 회차 기준 인원 현황, 월 결제 금액을 확인합니다.",
-        noticeTitle: "파티원 참여 안내",
+        title: "파티원 참여 최종 확인",
+        readyLabel: "결제 카드 확인 완료",
+        readyDescription:
+          "등록된 자동결제 카드가 확인되었습니다. 결원 파티원 참여를 완료할 수 있습니다.",
+        action: "파티원 참여 완료하기",
       };
 
   useEffect(() => {
     let mounted = true;
 
-    const fetchDetail = async () => {
-      if (!isHostRecruit && !isMemberRecruit) {
+    const fetchAndGuard = async () => {
+      if (!type || (!isHostRecruit && !isMemberRecruit) || !partyId) {
         navigate("/parties", { replace: true });
-        return;
-      }
-
-      if (!partyId) {
-        toast.error("파티 정보가 올바르지 않습니다.");
-        navigate(`/parties/${type}`, { replace: true });
         return;
       }
 
@@ -178,92 +170,111 @@ export default function PartyVacancyDetailPage() {
         const response = await api.get<
           PartyVacancyDetail | ApiEnvelope<PartyVacancyDetail>
         >(`/api/v1/party-vacancy/${type}/${partyId}`);
-
         const payload = unwrapResponse<PartyVacancyDetail>(response.data);
+
         if (!mounted) return;
 
         if (!payload) {
-          toast.error("결원 파티 상세 정보를 불러오지 못했습니다.");
+          toast.error("결원 파티 정보를 불러오지 못했습니다.");
           setDetail(null);
+          return;
+        }
+
+        const hasRequiredMethod = isHostRecruit
+          ? await hasPrimarySettlementAccount()
+          : await hasBillingMethod();
+
+        if (!mounted) return;
+
+        if (!hasRequiredMethod) {
+          const confirmPath = getVacancyConfirmPath(type, partyId);
+          toast.info(
+            isHostRecruit
+              ? "정산 계좌 등록 후 참여를 완료할 수 있습니다."
+              : "결제 카드 등록 후 참여를 완료할 수 있습니다.",
+          );
+
+          navigate(
+            isHostRecruit
+              ? withRedirect(
+                  `/party/create/${payload.productId}/host/agreement`,
+                  confirmPath,
+                )
+              : withRedirect(
+                  `/party/create/${payload.productId}/member/agreement`,
+                  confirmPath,
+                ),
+            { replace: true },
+          );
           return;
         }
 
         setDetail(payload);
       } catch (error) {
-        if (!mounted) return;
-
-        console.error("결원 파티 상세 조회 실패", error);
-        toast.error("결원 파티 상세 정보를 불러오지 못했습니다.");
-        setDetail(null);
+        console.error("결원 파티 확인 실패", error);
+        if (mounted) {
+          toast.error("결원 파티 정보를 불러오지 못했습니다.");
+          setDetail(null);
+        }
       } finally {
         if (mounted) setIsLoading(false);
       }
     };
 
-    void fetchDetail();
+    void fetchAndGuard();
 
     return () => {
       mounted = false;
     };
   }, [isHostRecruit, isMemberRecruit, navigate, partyId, type]);
 
-  const handleJoinVacancyParty = async () => {
-    if (!partyId || !detail?.joinAvailable || isJoining) return;
+  const handleApply = async () => {
+    if (!partyId || !detail?.joinAvailable || isApplying) return;
 
     try {
-      setIsJoining(true);
+      setIsApplying(true);
 
-      const confirmPath = getVacancyConfirmPath(
-        isHostRecruit ? "hosts" : "members",
-        partyId,
-      );
-      const hasRequiredMethod = isHostRecruit
-        ? await hasPrimarySettlementAccount()
-        : await hasBillingMethod();
+      const response = await api.post<
+        PartyVacancyJoinResponse | ApiEnvelope<PartyVacancyJoinResponse>
+      >(`/api/v1/party-vacancy/${partyId}/join`);
 
-      if (hasRequiredMethod) {
-        navigate(confirmPath);
-        return;
-      }
+      const payload = unwrapResponse<PartyVacancyJoinResponse>(response.data);
+      const nextPartyId = payload?.partyId ?? detail.partyId;
 
-      toast.info(
-        isHostRecruit
-          ? "정산 계좌 등록 후 참여를 완료할 수 있습니다."
-          : "결제 카드 등록 후 참여를 완료할 수 있습니다.",
-      );
-
-      navigate(
-        isHostRecruit
-          ? withRedirect(
-              `/party/create/${detail.productId}/host/agreement`,
-              confirmPath,
-            )
-          : withRedirect(
-              `/party/create/${detail.productId}/member/agreement`,
-              confirmPath,
-            ),
-      );
+      toast.success(payload?.message || "결원 파티 참여가 완료되었습니다.");
+      navigate(`/myparty/${nextPartyId}`, {
+        replace: true,
+        state: {
+          productId: payload?.productId ?? detail.productId,
+          productName: payload?.productName ?? detail.productName,
+          role: isHostRecruit ? "HOST" : "MEMBER",
+          status: "SCHEDULED",
+          startAt: detail.nextPaymentDate,
+          endAt: null,
+          operationType: detail.operationType,
+        },
+      });
     } catch (error) {
-      console.error("결원 파티 참여 조건 확인 실패", error);
+      console.error("결원 파티 참여 실패", error);
       toast.error(
-        getApiErrorMessage(error, "참여 조건 확인 중 문제가 발생했습니다."),
+        getApiErrorMessage(error, "결원 파티 참여 중 문제가 발생했습니다."),
       );
     } finally {
-      setIsJoining(false);
+      setIsApplying(false);
     }
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+        <div className="mx-auto flex min-h-96 w-full max-w-2xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
           <div className="text-center">
             <Icon
               icon="solar:refresh-circle-bold"
               className={`mx-auto h-11 w-11 animate-spin ${pageTone.text}`}
             />
             <p className="mt-4 text-sm font-semibold text-slate-600">
-              결원 파티 정보를 불러오는 중입니다
+              참여 조건을 확인하는 중입니다
             </p>
           </div>
         </div>
@@ -274,75 +285,39 @@ export default function PartyVacancyDetailPage() {
   if (!detail) {
     return (
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mx-auto flex min-h-96 w-full max-w-3xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+        <div className="mx-auto flex min-h-96 w-full max-w-2xl items-center justify-center rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
           <section className="px-6 py-10 text-center">
-            <div
-              className={`mx-auto flex h-14 w-14 items-center justify-center rounded-3xl ${pageTone.lightBg} ${pageTone.text} ring-1 ${pageTone.ring}`}
-            >
-              <Icon icon="solar:info-circle-bold" className="h-7 w-7" />
-            </div>
-            <h1 className="mt-5 text-2xl font-extrabold tracking-tight text-slate-950">
-              파티 정보를 확인할 수 없습니다
+            <Icon
+              icon="solar:info-circle-bold"
+              className={`mx-auto h-12 w-12 ${pageTone.text}`}
+            />
+            <h1 className="mt-5 text-2xl font-extrabold text-slate-950">
+              참여 정보를 확인할 수 없습니다
             </h1>
-            <p className="mt-3 text-sm leading-6 text-slate-500">
-              잠시 후 다시 시도해 주세요.
-            </p>
           </section>
         </div>
       </div>
     );
   }
 
-  const infoRows = [
-    {
-      label: "현재 인원",
-      value: `${detail.currentMemberCount}/${detail.totalCapacity}명`,
-    },
-    { label: "운영 방식", value: formatOperationType(detail.operationType) },
-    { label: "모집 상태", value: formatRecruitStatus(detail.recruitStatus) },
-    {
-      label: "운영 상태",
-      value: formatOperationStatus(detail.operationStatus),
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <main className="mx-auto w-full max-w-3xl">
         <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
           <div className="border-b border-slate-100 px-6 py-7 sm:px-8">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0">
-                <div
-                  className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${pageTone.lightBg} ${pageTone.text} ring-1 ${pageTone.ring}`}
-                >
-                  <Icon
-                    icon="solar:users-group-rounded-bold"
-                    className="h-4 w-4"
-                  />
-                  {pageTone.caption}
-                </div>
-
-                <h1 className="mt-4 text-[28px] font-extrabold leading-tight tracking-tight text-slate-950 sm:text-[32px]">
-                  {pageTone.headline}
-                </h1>
-
-                <p className="mt-3 max-w-[560px] text-sm leading-6 text-slate-500">
-                  {pageTone.description}
-                </p>
-              </div>
-
-              <span
-                className={[
-                  "w-fit shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ring-1",
-                  detail.joinAvailable
-                    ? `${pageTone.lightBg} ${pageTone.text} ${pageTone.ring}`
-                    : "bg-slate-100 text-slate-500 ring-slate-200",
-                ].join(" ")}
-              >
-                {detail.joinAvailable ? "참여 가능" : "참여 불가"}
-              </span>
+            <div
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${pageTone.lightBg} ${pageTone.text} ring-1 ${pageTone.ring}`}
+            >
+              <Icon icon="solar:shield-check-bold" className="h-4 w-4" />
+              참여 조건 확인
             </div>
+
+            <h1 className="mt-4 text-[28px] font-extrabold tracking-tight text-slate-950 sm:text-[32px]">
+              {pageTone.title}
+            </h1>
+            <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">
+              상품과 금액을 마지막으로 확인한 뒤 결원 참여를 완료합니다.
+            </p>
           </div>
 
           <div className="px-6 py-7 sm:px-8">
@@ -363,13 +338,38 @@ export default function PartyVacancyDetailPage() {
               </div>
 
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-400">선택한 파티</p>
+                <p className="text-xs font-bold text-slate-400">참여 파티</p>
                 <h2 className="mt-1 truncate text-xl font-extrabold text-slate-950">
                   {detail.productName}
                 </h2>
                 <p className="mt-1 text-sm font-semibold text-slate-500">
                   {formatOperationType(detail.operationType)}
                 </p>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-[24px] bg-slate-50 p-5 ring-1 ring-slate-100">
+              <div className="flex gap-4">
+                <div
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white ${pageTone.text} ring-1 ${pageTone.ring}`}
+                >
+                  <Icon
+                    icon={
+                      isHostRecruit
+                        ? "solar:wallet-money-bold"
+                        : "solar:card-bold"
+                    }
+                    className="h-5 w-5"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-extrabold text-slate-950">
+                    {pageTone.readyLabel}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
+                    {pageTone.readyDescription}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -394,72 +394,25 @@ export default function PartyVacancyDetailPage() {
               />
             </div>
 
-            <div className="mt-6 rounded-[24px] bg-slate-50 p-5 ring-1 ring-slate-100">
-              <div className="flex items-start gap-4">
-                <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white ${pageTone.text} ring-1 ${pageTone.ring}`}
-                >
-                  <Icon icon="solar:info-circle-bold" className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-extrabold text-slate-950">
-                    {detail.joinAvailable ? pageTone.noticeTitle : "참여 제한"}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
-                    {detail.joinAvailable
-                      ? "상품 정보와 금액을 확인한 뒤 참여를 진행해 주세요."
-                      : "현재 상태에서는 이 결원 파티에 참여할 수 없습니다."}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 overflow-hidden rounded-[24px] bg-white ring-1 ring-slate-100">
-              <div className="border-b border-slate-100 px-5 py-4">
-                <p className="text-sm font-extrabold text-slate-950">
-                  상세 정보
-                </p>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {infoRows.map((row) => (
-                  <div
-                    key={row.label}
-                    className="flex items-center justify-between gap-4 px-5 py-4"
-                  >
-                    <p className="text-sm font-semibold text-slate-500">
-                      {row.label}
-                    </p>
-                    <p className="text-right text-sm font-extrabold text-slate-950">
-                      {row.value}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             <button
               type="button"
-              onClick={handleJoinVacancyParty}
-              disabled={!detail.joinAvailable || isJoining}
+              onClick={handleApply}
+              disabled={!detail.joinAvailable || isApplying}
               className={[
                 "mt-7 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full px-5 text-base font-bold text-white shadow-lg transition disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-white disabled:shadow-none disabled:hover:translate-y-0",
-                detail.joinAvailable && !isJoining
-                  ? `${pageTone.bg} ${pageTone.buttonHover} ${
-                      isHostRecruit
-                        ? "shadow-blue-900/20"
-                        : "shadow-teal-900/20"
-                    } hover:-translate-y-0.5`
+                detail.joinAvailable && !isApplying
+                  ? `${pageTone.bg} ${pageTone.hover} hover:-translate-y-0.5`
                   : "",
               ].join(" ")}
             >
-              {isJoining ? "참여 조건 확인 중..." : pageTone.action}
+              {isApplying ? "참여 처리 중..." : pageTone.action}
               <Icon
                 icon={
-                  isJoining
+                  isApplying
                     ? "solar:refresh-circle-bold"
                     : "solar:arrow-right-linear"
                 }
-                className={["h-5 w-5", isJoining ? "animate-spin" : ""].join(
+                className={["h-5 w-5", isApplying ? "animate-spin" : ""].join(
                   " ",
                 )}
               />
