@@ -151,6 +151,27 @@ function isInviteProvisionType(type?: string | null) {
   return type === "INVITE_CODE" || type === "INVITE_LINK";
 }
 
+function isAccountShareProvisionType(type?: string | null) {
+  return type === "ACCOUNT_SHARE" || type === "SHARED_ACCOUNT";
+}
+
+function isProvisionSetupComplete(provision?: PartyProvisionResponse | null) {
+  if (!provision) return false;
+
+  if (
+    provision.provisionStatus === "RESET_REQUIRED" ||
+    provision.members.some((member) => member.memberStatus === "RESET_REQUIRED")
+  ) {
+    return false;
+  }
+
+  if (isAccountShareProvisionType(provision.provisionType)) {
+    return Boolean(provision.sharedAccountEmail?.trim());
+  }
+
+  return true;
+}
+
 function getStatusStyle(status: string) {
   if (status === "ACTIVE" || status === "COMPLETED") {
     return "bg-teal-50 text-teal-700 ring-teal-100";
@@ -217,6 +238,7 @@ export default function MyPartyDetailPage() {
   const isHost = partyMeta?.role === "HOST";
   const isMember = partyMeta?.role === "MEMBER";
   const isScheduledParty = partyMeta?.status === "SCHEDULED";
+  const isEndedParty = partyMeta?.status === "ENDED";
   const partyOperationType =
     partyMeta?.operationType ?? partyMeta?.provisionType;
   const isInviteProduct = isInviteProvisionType(partyOperationType);
@@ -225,7 +247,8 @@ export default function MyPartyDetailPage() {
     Boolean(partyId && partyMeta?.productId) &&
     isHost &&
     isRecruitFull &&
-    !isScheduledParty;
+    !isScheduledParty &&
+    !isEndedParty;
 
   const waitingTitle = isMember
     ? "이용 안내를 준비 중입니다"
@@ -300,6 +323,12 @@ export default function MyPartyDetailPage() {
         return;
       }
 
+      if (isEndedParty) {
+        setIsWaitingRecruit(true);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         setIsLoading(true);
         setIsWaitingRecruit(false);
@@ -328,7 +357,7 @@ export default function MyPartyDetailPage() {
               provisionResponse.data,
             );
 
-            setIsProvisionRegistered(Boolean(provisionData));
+            setIsProvisionRegistered(isProvisionSetupComplete(provisionData));
             setProvision(provisionData);
           } catch (provisionError) {
             const status = (
@@ -367,7 +396,13 @@ export default function MyPartyDetailPage() {
     };
 
     fetchProvision();
-  }, [isHost, isScheduledParty, partyId, partyMeta?.role]);
+  }, [
+    isEndedParty,
+    isHost,
+    isScheduledParty,
+    partyId,
+    partyMeta?.role,
+  ]);
 
   useEffect(() => {
     if (!partyId) return;
@@ -558,6 +593,54 @@ export default function MyPartyDetailPage() {
     );
   }
 
+  if (isEndedParty) {
+    return (
+      <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-3xl">
+          <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
+            <div className="border-b border-slate-100 px-6 py-10 sm:px-10">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100 text-slate-500 ring-1 ring-slate-200">
+                <Icon icon="solar:archive-bold" className="h-9 w-9" />
+              </div>
+
+              <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
+                종료된 파티입니다
+              </h1>
+
+              <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
+                이미 종료된 이용 내역입니다. 종료된 파티에서는 이용 정보를 새로
+                등록할 수 없습니다.
+              </p>
+            </div>
+
+            <div className="mx-auto grid max-w-lg gap-3 px-6 py-6 text-left sm:grid-cols-2 sm:px-10">
+              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
+                <p className="text-xs font-bold text-slate-400">상품</p>
+                <p className="mt-1 truncate text-sm font-extrabold text-slate-900">
+                  {partyMeta?.productName ?? "상품 정보 확인 중"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
+                <p className="text-xs font-bold text-slate-400">역할</p>
+                <p className="mt-1 text-sm font-extrabold text-slate-900">
+                  {isHost ? "파티장" : "파티원"}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate("/myparty")}
+              className="mb-6 inline-flex h-13 items-center justify-center rounded-full bg-slate-950 px-6 text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition hover:-translate-y-0.5"
+            >
+              나의 파티 목록으로 이동
+            </button>
+          </section>
+        </div>
+      </div>
+    );
+  }
+
   if (isScheduledParty) {
     return (
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
@@ -620,7 +703,10 @@ export default function MyPartyDetailPage() {
           <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
             <div className="border-b border-slate-100 px-6 py-10 sm:px-10">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-teal-50 text-[#0F766E] ring-1 ring-teal-100">
-                <Icon icon="solar:users-group-rounded-bold" className="h-9 w-9" />
+                <Icon
+                  icon="solar:users-group-rounded-bold"
+                  className="h-9 w-9"
+                />
               </div>
 
               <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
@@ -676,7 +762,10 @@ export default function MyPartyDetailPage() {
           <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
             <div className="border-b border-slate-100 px-6 py-10 sm:px-10">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
-                <Icon icon="solar:users-group-rounded-bold" className="h-9 w-9" />
+                <Icon
+                  icon="solar:users-group-rounded-bold"
+                  className="h-9 w-9"
+                />
               </div>
 
               <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
@@ -871,7 +960,9 @@ export default function MyPartyDetailPage() {
         {isHost && provision && (
           <section className="mt-8">
             <div>
-              <p className="text-[13px] font-extrabold text-brand-main">Members</p>
+              <p className="text-[13px] font-extrabold text-brand-main">
+                Members
+              </p>
               <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
                 파티원 이용 확인
               </h2>

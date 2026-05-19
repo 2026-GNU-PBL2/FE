@@ -1,0 +1,41 @@
+export type BankOption = {
+  label: string;
+  code: string;
+};
+
+export const bankOptions: BankOption[] = [
+  { label: "한국은행", code: "001" },
+  { label: "KDB산업은행", code: "002" },
+  { label: "IBK기업은행", code: "003" },
+  { label: "KB국민은행", code: "004" },
+  { label: "수협은행", code: "007" },
+  { label: "한국수출입은행", code: "008" },
+  { label: "NH농협은행", code: "011" },
+  { label: "지역농축협", code: "012" },
+  { label: "우리은행", code: "020" },
+  { label: "SC제일은행", code: "023" },
+  { label: "한국씨티은행", code: "027" },
+  { label: "iM뱅크", code: "031" },
+  { label: "부산은행", code: "032" },
+  { label: "광주은행", code: "034" },
+  { label: "제주은행", code: "035" },
+  { label: "전북은행", code: "037" },
+  { label: "경남은행", code: "039" },
+  { label: "새마을금고", code: "045" },
+  { label: "신협", code: "048" },
+  { label: "저축은행", code: "050" },
+  { label: "HSBC은행", code: "054" },
+  { label: "도이치은행", code: "055" },
+  { label: "JP모간체이스은행", code: "057" },
+  { label: "BOA은행", code: "060" },
+  { label: "BNP파리바은행", code: "061" },
+  { label: "중국공상은행", code: "062" },
+  { label: "산림조합", code: "064" },
+  { label: "중국건설은행", code: "067" },
+  { label: "우체국", code: "071" },
+  { label: "하나은행", code: "081" },
+  { label: "신한은행", code: "088" },
+  { label: "케이뱅크", code: "089" },
+  { label: "카카오뱅크", code: "090" },
+  { label: "토스뱅크", code: "092" },
+];

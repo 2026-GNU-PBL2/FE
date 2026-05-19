@@ -658,8 +658,8 @@ export default function HomePage() {
       : memberPreviewParties;
 
   return (
-    <div className="min-h-full bg-[#F8FAFC]">
-      <section className="bg-[#F8FAFC] px-4 pb-4 pt-5 sm:px-6 sm:pb-6 sm:pt-7 lg:px-8">
+    <div className="min-h-full bg-brand-bg">
+      <section className="bg-brand-bg px-4 pb-4 pt-5 sm:px-6 sm:pb-6 sm:pt-7 lg:px-8">
         <div className="mx-auto w-full max-w-6xl">
           <div className="relative overflow-hidden rounded-[24px] bg-blue-50 shadow-xl shadow-blue-900/8 ring-1 ring-blue-100 sm:rounded-[32px]">
             <div

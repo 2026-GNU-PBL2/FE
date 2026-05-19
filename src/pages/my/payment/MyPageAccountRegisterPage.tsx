@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import { bankOptions } from "@/constants/banks";
 import { getApiErrorMessage } from "@/utils/api-error";
 
 type SettlementAccountType = "SETTLEMENT";
@@ -51,26 +52,6 @@ type ApiEnvelope<T> = {
   result?: T;
   payload?: T;
 };
-
-const bankOptions = [
-  { label: "국민은행", code: "004" },
-  { label: "신한은행", code: "088" },
-  { label: "우리은행", code: "020" },
-  { label: "하나은행", code: "081" },
-  { label: "농협은행", code: "011" },
-  { label: "기업은행", code: "003" },
-  { label: "카카오뱅크", code: "090" },
-  { label: "토스뱅크", code: "092" },
-  { label: "케이뱅크", code: "089" },
-  { label: "SC제일은행", code: "023" },
-  { label: "부산은행", code: "032" },
-  { label: "대구은행", code: "031" },
-  { label: "광주은행", code: "034" },
-  { label: "전북은행", code: "037" },
-  { label: "경남은행", code: "039" },
-  { label: "수협은행", code: "007" },
-  { label: "우체국", code: "071" },
-];
 
 function unwrapResponse<T>(
   value: T | ApiEnvelope<T> | undefined | null,

@@ -1,14 +1,8 @@
 import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
 
-const serviceLinks = [
-  { label: "홈", to: "/" },
+const footerLinks = [
   { label: "서비스 소개", to: "/about" },
-  { label: "이벤트", to: "/event" },
-  { label: "파티 찾기", to: "/parties" },
-];
-
-const supportLinks = [
   { label: "고객센터", to: "/support" },
   { label: "이용약관", to: "/terms" },
   { label: "개인정보 처리방침", to: "/privacy" },
@@ -16,116 +10,78 @@ const supportLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative hidden w-full border-t border-[#d6d6d6]/60 bg-[#f5f5f7] md:block">
-      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-          {/* 브랜드 */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-[#d6d6d6]/60">
-                <img
-                  src="/images/logo-symbol.png"
-                  alt="Submate"
-                  className="h-5 w-5 object-contain"
-                />
+    <footer className="relative mx-auto hidden w-full max-w-7xl bg-brand-bg px-4 pb-8 pt-3 sm:px-6 lg:px-8 md:block">
+      <div className="border-t border-slate-200/70 pt-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-3xl text-xs leading-5 text-slate-500">
+            <Link to="/" className="inline-flex items-center gap-2">
+              <span className="text-sm font-extrabold tracking-tight text-slate-950">
+                <span className="text-brand-main">Sub</span>mate
               </span>
-              <span className="text-base font-extrabold tracking-tight text-[#1d1d1f]">
-                <span className="text-[#4f46e5]">Sub</span>mate
+              <span className="h-1 w-1 rounded-full bg-slate-300" />
+              <span className="font-semibold text-slate-400">
+                구독은 같이, 요금은 가볍게
               </span>
-            </div>
+            </Link>
 
-            <p className="text-xs leading-relaxed text-[#707070]">
-              OTT 구독료를 파티로 나눠 절약하는
-              <br />
-              스마트한 공동구독 플랫폼
+            <p className="mt-3">
+              대표자 김용환 · 사업자등록번호 000-00-00000 · 통신판매업
+              2026-경남-0000
             </p>
 
-            <div className="text-xs leading-relaxed text-[#858585]">
-              <div>대표자: 김용환 · 사업자등록번호: 000-00-00000</div>
-              <div>통신판매업: 2026-경남-0000</div>
-              <div className="mt-1">
-                주소: 경남 진주시 진주대로 501, ICT융합센터 601호관
-              </div>
-              <div>
-                고객센터:{" "}
-                <a
-                  href="mailto:hello@submate.app"
-                  className="font-semibold text-[#4f46e5] hover:underline"
-                >
-                  hello@submate.app
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* 서비스 링크 */}
-          <div>
-            <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#858585]">
-              서비스
-            </h3>
-            <ul className="flex flex-col gap-2">
-              {serviceLinks.map((link) => (
-                <li key={link.to}>
-                  <Link
-                    to={link.to}
-                    className="text-sm text-[#474747] transition hover:text-[#4f46e5]"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* 고객지원 링크 */}
-          <div>
-            <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#858585]">
-              고객지원
-            </h3>
-            <ul className="flex flex-col gap-2">
-              {supportLinks.map((link) => (
-                <li key={link.to}>
-                  <Link
-                    to={link.to}
-                    className="text-sm text-[#474747] transition hover:text-[#4f46e5]"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-5 flex items-center gap-2">
-              <a
-                href="#"
-                className="group inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-[#d6d6d6]/60 transition hover:shadow-md"
-                aria-label="GitHub"
-              >
-                <Icon
-                  icon="mdi:github"
-                  className="h-4 w-4 text-[#707070] transition group-hover:text-[#1d1d1f]"
-                />
-              </a>
-
+            <p className="mt-1">
+              주소 경남 진주시 진주대로 501, ICT융합센터 601호관 · 고객센터{" "}
               <a
                 href="mailto:hello@submate.app"
-                className="group inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-[#d6d6d6]/60 transition hover:shadow-md"
-                aria-label="Email"
+                className="font-bold text-slate-700 transition hover:text-brand-main"
               >
-                <Icon
-                  icon="solar:letter-linear"
-                  className="h-4 w-4 text-[#707070] transition group-hover:text-[#1d1d1f]"
-                />
+                hello@submate.app
               </a>
+            </p>
+          </div>
+
+          <div className="flex flex-col items-start gap-4 lg:items-end">
+            <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
+              {footerLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="text-xs font-bold text-slate-500 transition hover:text-brand-main"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-2 text-slate-400">
+              <a
+                href="mailto:hello@submate.app"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-blue-50 hover:text-brand-main"
+                aria-label="Email"
+                title="Email"
+              >
+                <Icon icon="solar:letter-linear" className="h-5 w-5" />
+              </a>
+
+              <Link
+                to="/support"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-blue-50 hover:text-brand-main"
+                aria-label="고객센터"
+                title="고객센터"
+              >
+                <Icon icon="solar:question-circle-linear" className="h-5 w-5" />
+              </Link>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 border-t border-[#d6d6d6]/60 pt-5">
-          <p className="text-center text-xs text-[#858585]">
-            © 2026{" "}
-            <span className="font-semibold text-[#4f46e5]">Submate</span>. All
-            rights reserved.
+        <div className="mt-5 flex items-center justify-between gap-4 text-xs font-semibold text-slate-400">
+          <p className="text-xs font-semibold text-slate-400">
+            © 2026 Submate. All rights reserved.
+          </p>
+
+          <p>
+            안전한 공동구독 관리를 위한 결제·정산 플랫폼
           </p>
         </div>
       </div>
