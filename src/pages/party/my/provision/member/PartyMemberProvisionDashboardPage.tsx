@@ -3,6 +3,15 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import {
+  createPartyMemberDevice,
+  getApiErrorMessage,
+  getSharedCredentials,
+  reportConcurrentIssue,
+  reportDeviceAlert,
+  type DeviceAlertReportResponse,
+  type PartyMemberDevice,
+} from "@/api/concurrent";
 
 type ProvisionType =
   | "INVITE_CODE"
@@ -67,10 +76,6 @@ type ApiEnvelope<T> = {
   payload?: T;
 };
 
-type SharedAccountPasswordResponse = {
-  sharedAccountPassword?: string | null;
-};
-
 const INVITE_CODE_PLACEHOLDER_VALUE = "https://submate.example/invite-code";
 
 function getVisibleInviteValue(value?: string | null) {
@@ -102,6 +107,15 @@ function getProvisionTypeLabel(type?: ProvisionType | null) {
 
 function isInviteProvisionType(type?: ProvisionType | null) {
   return type === "INVITE_CODE" || type === "INVITE_LINK";
+}
+
+function isAccountShareProvisionType(type?: ProvisionType | null) {
+  return (
+    type === "ACCOUNT_SHARE" ||
+    type === "SHARED_ACCOUNT" ||
+    type === "SHARED_CREDENTIAL" ||
+    type === "SHARED_CREDENTIALS"
+  );
 }
 
 function isConfirmedStatus(status?: MemberStatus | null) {
@@ -168,6 +182,19 @@ function getStatusTone(status?: string | null) {
   };
 }
 
+function formatDateTime(value?: string | null) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
 export default function PartyMemberProvisionDashboardPage() {
   const navigate = useNavigate();
   const { partyId } = useParams<{ partyId: string }>();
@@ -180,6 +207,23 @@ export default function PartyMemberProvisionDashboardPage() {
     string | null
   >(null);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+  const [isConcurrentIssueModalOpen, setIsConcurrentIssueModalOpen] =
+    useState(false);
+  const [isConcurrentIssueSubmitting, setIsConcurrentIssueSubmitting] =
+    useState(false);
+  const [isDeviceModalOpen, setIsDeviceModalOpen] = useState(false);
+  const [isDeviceSubmitting, setIsDeviceSubmitting] = useState(false);
+  const [registeredDevice, setRegisteredDevice] =
+    useState<PartyMemberDevice | null>(null);
+  const [deviceType, setDeviceType] = useState("PC");
+  const [deviceOs, setDeviceOs] = useState("");
+  const [deviceBrowser, setDeviceBrowser] = useState("");
+  const [isDeviceAlertModalOpen, setIsDeviceAlertModalOpen] = useState(false);
+  const [isDeviceAlertSubmitting, setIsDeviceAlertSubmitting] = useState(false);
+  const [detectedDevice, setDetectedDevice] = useState("");
+  const [detectedLocation, setDetectedLocation] = useState("");
+  const [deviceAlertResult, setDeviceAlertResult] =
+    useState<DeviceAlertReportResponse | null>(null);
 
   const view = useMemo(() => {
     const provision = provisionMe?.provision;
@@ -293,10 +337,7 @@ export default function PartyMemberProvisionDashboardPage() {
     try {
       setIsPasswordLoading(true);
 
-      const response = await api.post(
-        `/api/v1/parties/${partyId}/provision/me/password`,
-      );
-      const data = unwrapResponse<SharedAccountPasswordResponse>(response.data);
+      const data = await getSharedCredentials(partyId);
 
       if (!data?.sharedAccountPassword) {
         toast.error("비밀번호를 확인할 수 없습니다.");
@@ -306,7 +347,7 @@ export default function PartyMemberProvisionDashboardPage() {
       setSharedAccountPassword(data.sharedAccountPassword);
     } catch (error) {
       console.error(error);
-      toast.error("비밀번호를 불러오지 못했습니다.");
+      toast.error(getApiErrorMessage(error, "비밀번호를 불러오지 못했습니다."));
     } finally {
       setIsPasswordLoading(false);
     }
@@ -377,6 +418,9 @@ export default function PartyMemberProvisionDashboardPage() {
     view.memberStatus !== "WAITING",
   );
   const isInviteProvision = isInviteProvisionType(view.provisionType);
+  const isAccountShareProvision = isAccountShareProvisionType(
+    view.provisionType,
+  );
   const shouldShowEmptyAccessState =
     !view.sharedAccountEmail &&
     !view.maskedSharedAccountPassword &&
@@ -393,6 +437,81 @@ export default function PartyMemberProvisionDashboardPage() {
       value: getProvisionStatusLabel(view.provisionStatus),
     },
   ].filter((item) => item.value !== "-");
+
+  const handleSubmitConcurrentIssue = async () => {
+    if (!partyId || isConcurrentIssueSubmitting) return;
+
+    try {
+      setIsConcurrentIssueSubmitting(true);
+
+      const result = await reportConcurrentIssue(partyId);
+
+      toast.success(
+        result?.warningLevel === "SECOND"
+          ? "신고가 접수되어 파티 해체 예정 상태로 전환되었습니다."
+          : "신고가 접수되어 파티장에게 조치 알림이 발송되었습니다.",
+      );
+      setIsConcurrentIssueModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.error(getApiErrorMessage(error, "신고를 접수하지 못했습니다."));
+    } finally {
+      setIsConcurrentIssueSubmitting(false);
+    }
+  };
+
+  const handleCreateDevice = async () => {
+    if (!partyId || isDeviceSubmitting) return;
+
+    if (!deviceType.trim() || !deviceOs.trim()) {
+      toast.error("기기 종류와 OS를 입력해주세요.");
+      return;
+    }
+
+    try {
+      setIsDeviceSubmitting(true);
+      const result = await createPartyMemberDevice(partyId, {
+        deviceType: deviceType.trim(),
+        os: deviceOs.trim(),
+        browser: deviceBrowser.trim() || null,
+      });
+
+      if (result) setRegisteredDevice(result);
+      toast.success("내 기기를 등록했습니다.");
+      setIsDeviceModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.error(getApiErrorMessage(error, "기기를 등록하지 못했습니다."));
+    } finally {
+      setIsDeviceSubmitting(false);
+    }
+  };
+
+  const handleReportDeviceAlert = async () => {
+    if (!partyId || isDeviceAlertSubmitting) return;
+
+    if (!detectedDevice.trim() || !detectedLocation.trim()) {
+      toast.error("감지된 기기와 위치를 입력해주세요.");
+      return;
+    }
+
+    try {
+      setIsDeviceAlertSubmitting(true);
+      const result = await reportDeviceAlert(partyId, {
+        detectedDevice: detectedDevice.trim(),
+        detectedLocation: detectedLocation.trim(),
+      });
+
+      setDeviceAlertResult(result);
+      toast.success("전체 파티원에게 내 기기인지 확인 요청 알림이 발송되었습니다.");
+    } catch (error) {
+      console.error(error);
+      toast.error(getApiErrorMessage(error, "낯선 기기 신고에 실패했습니다."));
+    } finally {
+      setIsDeviceAlertSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <div className="mx-auto w-full max-w-3xl">
@@ -513,75 +632,93 @@ export default function PartyMemberProvisionDashboardPage() {
             </div>
           </section>
         ) : (
-          <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs font-medium text-slate-400">ACCESS</p>
-                <h2 className="mt-1 text-lg font-bold text-slate-950">
-                  이용 정보
-                </h2>
+          <>
+            <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-medium text-slate-400">ACCESS</p>
+                  <h2 className="mt-1 text-lg font-bold text-slate-950">
+                    이용 정보
+                  </h2>
+                </div>
+                <Icon
+                  icon="solar:lock-password-bold"
+                  className="h-6 w-6 text-slate-300"
+                />
               </div>
-              <Icon
-                icon="solar:lock-password-bold"
-                className="h-6 w-6 text-slate-300"
-              />
-            </div>
 
-            <div className="mt-5 space-y-3">
-              {view.sharedAccountEmail && (
-                <InfoRow
-                  icon="solar:user-id-bold"
-                  label="계정 아이디"
-                  value={view.sharedAccountEmail}
+              <div className="mt-5 space-y-3">
+                {view.sharedAccountEmail && (
+                  <InfoRow
+                    icon="solar:user-id-bold"
+                    label="계정 아이디"
+                    value={view.sharedAccountEmail}
+                  />
+                )}
+                {view.maskedSharedAccountPassword && (
+                  <InfoRow
+                    icon="solar:password-bold"
+                    label="계정 비밀번호"
+                    value={
+                      sharedAccountPassword ?? view.maskedSharedAccountPassword
+                    }
+                    action={
+                      !sharedAccountPassword && canRevealPassword ? (
+                        <button
+                          type="button"
+                          onClick={handleRevealPassword}
+                          disabled={isPasswordLoading}
+                          className="flex h-9 shrink-0 items-center justify-center rounded-xl bg-[#14B8A6] px-3 text-xs font-bold text-white transition hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-300"
+                        >
+                          {isPasswordLoading ? "조회 중" : "보기"}
+                        </button>
+                      ) : null
+                    }
+                  />
+                )}
+                {view.inviteValue && (
+                  <InfoRow
+                    icon="solar:link-circle-bold"
+                    label="초대 링크"
+                    value={view.inviteValue}
+                  />
+                )}
+                {view.provisionGuide && (
+                  <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
+                    <p className="text-xs font-medium text-slate-400">
+                      이용 안내
+                    </p>
+                    <p className="mt-2 text-sm font-normal leading-6 text-slate-600">
+                      {view.provisionGuide}
+                    </p>
+                  </div>
+                )}
+                {shouldShowEmptyAccessState && (
+                  <div className="rounded-2xl bg-slate-50 px-4 py-5 text-center ring-1 ring-slate-100">
+                    <p className="text-sm font-normal text-slate-500">
+                      표시할 이용 정보가 없습니다.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {isAccountShareProvision && (
+              <>
+                <MemberDeviceTools
+                  registeredDevice={registeredDevice}
+                  onAddDevice={() => setIsDeviceModalOpen(true)}
+                  onReportDevice={() => {
+                    setDeviceAlertResult(null);
+                    setIsDeviceAlertModalOpen(true);
+                  }}
                 />
-              )}
-              {view.maskedSharedAccountPassword && (
-                <InfoRow
-                  icon="solar:password-bold"
-                  label="계정 비밀번호"
-                  value={
-                    sharedAccountPassword ?? view.maskedSharedAccountPassword
-                  }
-                  action={
-                    !sharedAccountPassword && canRevealPassword ? (
-                      <button
-                        type="button"
-                        onClick={handleRevealPassword}
-                        disabled={isPasswordLoading}
-                        className="flex h-9 shrink-0 items-center justify-center rounded-xl bg-[#14B8A6] px-3 text-xs font-bold text-white transition hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-300"
-                      >
-                        {isPasswordLoading ? "조회 중" : "보기"}
-                      </button>
-                    ) : null
-                  }
+                <ConcurrentIssueReportCard
+                  onOpen={() => setIsConcurrentIssueModalOpen(true)}
                 />
-              )}
-              {view.inviteValue && (
-                <InfoRow
-                  icon="solar:link-circle-bold"
-                  label="초대 링크"
-                  value={view.inviteValue}
-                />
-              )}
-              {view.provisionGuide && (
-                <div className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
-                  <p className="text-xs font-medium text-slate-400">
-                    이용 안내
-                  </p>
-                  <p className="mt-2 text-sm font-normal leading-6 text-slate-600">
-                    {view.provisionGuide}
-                  </p>
-                </div>
-              )}
-              {shouldShowEmptyAccessState && (
-                <div className="rounded-2xl bg-slate-50 px-4 py-5 text-center ring-1 ring-slate-100">
-                  <p className="text-sm font-normal text-slate-500">
-                    표시할 이용 정보가 없습니다.
-                  </p>
-                </div>
-              )}
-            </div>
-          </section>
+              </>
+            )}
+          </>
         )}
 
         {view.provisionMessage && (
@@ -597,7 +734,416 @@ export default function PartyMemberProvisionDashboardPage() {
           </section>
         )}
       </div>
+      {isConcurrentIssueModalOpen && (
+        <ConcurrentIssueModal
+          isSubmitting={isConcurrentIssueSubmitting}
+          onClose={() => {
+            if (!isConcurrentIssueSubmitting) {
+              setIsConcurrentIssueModalOpen(false);
+            }
+          }}
+          onSubmit={handleSubmitConcurrentIssue}
+        />
+      )}
+      {isDeviceModalOpen && (
+        <DeviceRegisterModal
+          deviceType={deviceType}
+          os={deviceOs}
+          browser={deviceBrowser}
+          isSubmitting={isDeviceSubmitting}
+          onDeviceTypeChange={setDeviceType}
+          onOsChange={setDeviceOs}
+          onBrowserChange={setDeviceBrowser}
+          onClose={() => {
+            if (!isDeviceSubmitting) setIsDeviceModalOpen(false);
+          }}
+          onSubmit={handleCreateDevice}
+        />
+      )}
+      {isDeviceAlertModalOpen && (
+        <DeviceAlertReportModal
+          detectedDevice={detectedDevice}
+          detectedLocation={detectedLocation}
+          result={deviceAlertResult}
+          isSubmitting={isDeviceAlertSubmitting}
+          onDetectedDeviceChange={setDetectedDevice}
+          onDetectedLocationChange={setDetectedLocation}
+          onClose={() => {
+            if (!isDeviceAlertSubmitting) setIsDeviceAlertModalOpen(false);
+          }}
+          onSubmit={handleReportDeviceAlert}
+        />
+      )}
     </div>
+  );
+}
+
+function MemberDeviceTools({
+  registeredDevice,
+  onAddDevice,
+  onReportDevice,
+}: {
+  registeredDevice: PartyMemberDevice | null;
+  onAddDevice: () => void;
+  onReportDevice: () => void;
+}) {
+  return (
+    <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-[#14B8A6]">DEVICE</p>
+          <h2 className="mt-1 text-lg font-bold text-slate-950">
+            내 기기 관리
+          </h2>
+          <p className="mt-2 text-sm font-normal leading-6 text-slate-500">
+            자주 쓰는 기기를 미리 등록하면 새 기기 감지 알림에 더 빠르게
+            대응할 수 있어요.
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col gap-2 sm:w-40">
+          <button
+            type="button"
+            onClick={onAddDevice}
+            className="flex h-10 items-center justify-center rounded-full bg-[#1E3A8A] px-4 text-xs font-bold text-white transition hover:bg-blue-900"
+          >
+            기기 추가
+          </button>
+          <button
+            type="button"
+            onClick={onReportDevice}
+            className="flex h-10 items-center justify-center rounded-full bg-amber-50 px-4 text-xs font-bold text-amber-700 ring-1 ring-amber-100 transition hover:bg-amber-100"
+          >
+            낯선 기기 신고
+          </button>
+        </div>
+      </div>
+
+      {registeredDevice && (
+        <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
+          <p className="text-xs font-bold text-slate-400">최근 등록 기기</p>
+          <p className="mt-2 text-sm font-bold text-slate-900">
+            {registeredDevice.deviceType} · {registeredDevice.os}
+            {registeredDevice.browser ? ` · ${registeredDevice.browser}` : ""}
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ConcurrentIssueReportCard({ onOpen }: { onOpen: () => void }) {
+  return (
+    <section className="mt-5 rounded-[28px] bg-amber-50 px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-amber-100 sm:px-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-amber-600 ring-1 ring-amber-100">
+            <Icon icon="solar:danger-triangle-bold" className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-slate-950">
+              이용 중 문제가 생겼나요?
+            </h2>
+            <p className="mt-1 text-sm font-normal leading-6 text-slate-600">
+              동시접속 초과, 모르는 시청 기록, 비밀번호 오류를 신고할 수
+              있어요.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onOpen}
+          className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-amber-600 px-4 text-sm font-bold text-white shadow-sm shadow-amber-900/15 transition hover:bg-amber-700"
+        >
+          동시접속 초과 신고하기
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function ConcurrentIssueModal({
+  isSubmitting,
+  onClose,
+  onSubmit,
+}: {
+  isSubmitting: boolean;
+  onClose: () => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:py-8"
+      onMouseDown={() => {
+        if (!isSubmitting) onClose();
+      }}
+      role="presentation"
+    >
+      <section
+        className="w-full max-w-[480px] rounded-[28px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] ring-1 ring-slate-100 sm:px-6"
+        onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="member-concurrent-issue-title"
+      >
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
+            <Icon icon="solar:danger-triangle-bold" className="h-6 w-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-amber-700">문제 신고</p>
+            <h2
+              id="member-concurrent-issue-title"
+              className="mt-1 text-lg font-bold text-slate-950"
+            >
+              동시접속 문제를 신고할까요?
+            </h2>
+            <p className="mt-2 text-sm font-normal leading-6 text-slate-500">
+              파티 이용에 영향을 준 상황을 남겨주시면 확인 후 조치됩니다.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-2xl bg-amber-50 px-4 py-4 ring-1 ring-amber-100">
+          <p className="text-sm font-semibold leading-6 text-amber-800">
+            신고 유형은 동시접속 위반 의심으로 접수됩니다. 1차 신고 시 파티
+            전체에 경고가 발송되고, 2차 신고 시 해체 예정 상태로 전환됩니다.
+          </p>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center rounded-2xl bg-slate-50 text-sm font-bold text-slate-600 ring-1 ring-slate-100 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+          >
+            닫기
+          </button>
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center rounded-2xl bg-amber-600 text-sm font-bold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            {isSubmitting ? "접수 중" : "신고하기"}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function DeviceRegisterModal({
+  deviceType,
+  os,
+  browser,
+  isSubmitting,
+  onDeviceTypeChange,
+  onOsChange,
+  onBrowserChange,
+  onClose,
+  onSubmit,
+}: {
+  deviceType: string;
+  os: string;
+  browser: string;
+  isSubmitting: boolean;
+  onDeviceTypeChange: (value: string) => void;
+  onOsChange: (value: string) => void;
+  onBrowserChange: (value: string) => void;
+  onClose: () => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:py-8"
+      onMouseDown={() => {
+        if (!isSubmitting) onClose();
+      }}
+      role="presentation"
+    >
+      <section
+        className="w-full max-w-[460px] rounded-[28px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] ring-1 ring-slate-100 sm:px-6"
+        onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <h2 className="text-lg font-bold text-slate-950">내 기기 추가</h2>
+        <p className="mt-2 text-sm font-normal leading-6 text-slate-500">
+          파티에서 사용할 내 기기 정보를 등록합니다.
+        </p>
+
+        <div className="mt-5 space-y-3">
+          <DeviceInput
+            label="기기 종류"
+            value={deviceType}
+            placeholder="PC, MOBILE, TABLET"
+            onChange={onDeviceTypeChange}
+          />
+          <DeviceInput
+            label="OS"
+            value={os}
+            placeholder="Windows 11, iOS 18"
+            onChange={onOsChange}
+          />
+          <DeviceInput
+            label="브라우저"
+            value={browser}
+            placeholder="Chrome"
+            onChange={onBrowserChange}
+          />
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center rounded-2xl bg-slate-50 text-sm font-bold text-slate-600 ring-1 ring-slate-100 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+          >
+            닫기
+          </button>
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center rounded-2xl bg-[#1E3A8A] text-sm font-bold text-white transition hover:bg-blue-900 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            {isSubmitting ? "등록 중" : "등록하기"}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function DeviceAlertReportModal({
+  detectedDevice,
+  detectedLocation,
+  result,
+  isSubmitting,
+  onDetectedDeviceChange,
+  onDetectedLocationChange,
+  onClose,
+  onSubmit,
+}: {
+  detectedDevice: string;
+  detectedLocation: string;
+  result: DeviceAlertReportResponse | null;
+  isSubmitting: boolean;
+  onDetectedDeviceChange: (value: string) => void;
+  onDetectedLocationChange: (value: string) => void;
+  onClose: () => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:py-8"
+      onMouseDown={() => {
+        if (!isSubmitting) onClose();
+      }}
+      role="presentation"
+    >
+      <section
+        className="w-full max-w-[520px] rounded-[28px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] ring-1 ring-slate-100 sm:px-6"
+        onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <h2 className="text-lg font-bold text-slate-950">낯선 기기 신고</h2>
+        {result ? (
+          <div className="mt-5">
+            <div className="rounded-2xl bg-teal-50 px-4 py-4 ring-1 ring-teal-100">
+              <p className="text-sm font-bold text-teal-800">
+                전체 파티원에게 내 기기인지 확인 요청 알림이 발송되었습니다.
+              </p>
+              <p className="mt-2 text-sm font-semibold text-teal-700">
+                알림 {result.notifiedCount}명 · 응답 기한{" "}
+                {formatDateTime(result.expiresAt)}
+              </p>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              {result.registeredDevices.map((device, index) => (
+                <div
+                  key={`${device.userId}-${index}`}
+                  className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100"
+                >
+                  <p className="text-sm font-bold text-slate-900">
+                    user #{device.userId}
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    {device.deviceType} · {device.os}
+                    {device.browser ? ` · ${device.browser}` : ""}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="mt-5 space-y-3">
+            <DeviceInput
+              label="감지된 기기"
+              value={detectedDevice}
+              placeholder="Windows PC"
+              onChange={onDetectedDeviceChange}
+            />
+            <DeviceInput
+              label="감지 위치"
+              value={detectedLocation}
+              placeholder="부산"
+              onChange={onDetectedLocationChange}
+            />
+          </div>
+        )}
+
+        <div className="mt-6 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center rounded-2xl bg-slate-50 text-sm font-bold text-slate-600 ring-1 ring-slate-100 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+          >
+            닫기
+          </button>
+          {!result && (
+            <button
+              type="button"
+              onClick={onSubmit}
+              disabled={isSubmitting}
+              className="flex h-11 items-center justify-center rounded-2xl bg-amber-600 text-sm font-bold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
+              {isSubmitting ? "신고 중" : "신고하기"}
+            </button>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function DeviceInput({
+  label,
+  value,
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="text-sm font-bold text-slate-700">{label}</span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="mt-2 h-12 w-full rounded-2xl bg-slate-50 px-4 text-sm font-semibold text-slate-900 outline-none ring-1 ring-slate-100 transition focus:bg-white focus:ring-4 focus:ring-blue-100"
+      />
+    </label>
   );
 }
 

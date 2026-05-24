@@ -16,6 +16,8 @@ type PartyHistoryItem = {
   status: PartyHistoryStatus;
   startAt: string | null;
   endAt: string | null;
+  warningLevel?: null | 1;
+  dissolutionDate?: string | null;
 };
 
 type PartyJoinStatus = "WAITING" | "ACTIVE" | "CANCELED" | string;
@@ -854,7 +856,7 @@ function CancelJoinRequestModal({
 }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:items-center sm:py-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:py-8"
       onMouseDown={() => {
         if (!isSubmitting) {
           onClose();
@@ -950,11 +952,13 @@ function PartyListItem({
   onClick: () => void;
 }) {
   const roleStyle = getRoleStyle(party.role);
+  const hasConcurrentWarning = party.warningLevel === 1;
+  const hasDissolutionDate = Boolean(party.dissolutionDate);
 
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-4 px-5 py-5 text-left transition hover:bg-slate-50 sm:px-6"
+      className="flex w-full items-start gap-4 px-5 py-5 text-left transition hover:bg-slate-50 sm:px-6"
     >
       <div
         className={[
@@ -972,6 +976,21 @@ function PartyListItem({
       </div>
 
       <div className="min-w-0 flex-1">
+        {(hasConcurrentWarning || hasDissolutionDate) && (
+          <div className="mb-3 space-y-2">
+            {hasDissolutionDate && (
+              <p className="rounded-2xl bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-700 ring-1 ring-rose-100">
+                🚨 {formatDate(party.dissolutionDate ?? null)} 해체 예정
+              </p>
+            )}
+            {!hasDissolutionDate && hasConcurrentWarning && (
+              <p className="rounded-2xl bg-amber-50 px-3 py-2 text-xs font-extrabold text-amber-700 ring-1 ring-amber-100">
+                ⚠️ 동시접속 경고 처리 중
+              </p>
+            )}
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center gap-2.5">
           <p className="truncate text-base font-extrabold text-slate-800">
             {party.productName}

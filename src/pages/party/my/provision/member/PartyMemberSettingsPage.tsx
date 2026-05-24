@@ -750,7 +750,7 @@ function LeaveReserveConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:items-center sm:py-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:py-8"
       onMouseDown={() => {
         if (!isSubmitting) {
           onClose();

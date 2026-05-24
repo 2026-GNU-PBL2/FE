@@ -3,6 +3,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import {
+  getApiErrorMessage,
+  getConcurrentIssueHistory,
+  reportDeviceAlert,
+  resolveConcurrentIssue,
+  type ConcurrentIssueHistoryItem,
+  type DeviceAlertReportResponse,
+} from "@/api/concurrent";
 
 type ProvisionType = "INVITE_CODE" | "ACCOUNT_SHARE" | string;
 type ProvisionStatus =
@@ -95,9 +103,18 @@ function getMemberStatusLabel(status: MemberStatus) {
 }
 
 function getProvisionTypeLabel(type: ProvisionType) {
-  if (type === "INVITE_CODE") return "초대 코드";
-  if (type === "ACCOUNT_SHARE") return "공유 계정";
+  if (type === "INVITE_CODE" || type === "INVITE_LINK") return "초대 코드";
+  if (type === "ACCOUNT_SHARE" || type === "SHARED_ACCOUNT") return "공유 계정";
   return type;
+}
+
+function isAccountShareProvisionType(type?: ProvisionType | null) {
+  return (
+    type === "ACCOUNT_SHARE" ||
+    type === "SHARED_ACCOUNT" ||
+    type === "SHARED_CREDENTIAL" ||
+    type === "SHARED_CREDENTIALS"
+  );
 }
 
 function getStatusStyle(status: string) {
@@ -188,7 +205,19 @@ export default function PartyProvisionDashboardPage() {
   );
   const [partySettings, setPartySettings] =
     useState<PartySettingsResponse | null>(null);
+  const [issueHistory, setIssueHistory] = useState<
+    ConcurrentIssueHistoryItem[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [resolvingIncidentId, setResolvingIncidentId] = useState<number | null>(
+    null,
+  );
+  const [isDeviceAlertModalOpen, setIsDeviceAlertModalOpen] = useState(false);
+  const [isDeviceAlertSubmitting, setIsDeviceAlertSubmitting] = useState(false);
+  const [detectedDevice, setDetectedDevice] = useState("");
+  const [detectedLocation, setDetectedLocation] = useState("");
+  const [deviceAlertResult, setDeviceAlertResult] =
+    useState<DeviceAlertReportResponse | null>(null);
 
   const progressPercent = useMemo(() => {
     if (!provision || provision.totalMemberCount <= 0) return 0;
@@ -278,6 +307,16 @@ export default function PartyProvisionDashboardPage() {
         }
 
         setProvision(data);
+        if (isAccountShareProvisionType(data.provisionType)) {
+          try {
+            setIssueHistory(await getConcurrentIssueHistory(partyId));
+          } catch (historyError) {
+            console.error(historyError);
+            setIssueHistory([]);
+          }
+        } else {
+          setIssueHistory([]);
+        }
       } catch (error) {
         console.error(error);
         toast.error("파티 이용 현황을 불러오지 못했습니다.");
@@ -288,6 +327,47 @@ export default function PartyProvisionDashboardPage() {
 
     fetchProvision();
   }, [partyId]);
+
+  const handleResolveIssue = async (incidentId: number) => {
+    if (!partyId || resolvingIncidentId) return;
+
+    try {
+      setResolvingIncidentId(incidentId);
+      await resolveConcurrentIssue(partyId, { incidentId });
+      toast.success("조치 완료 처리되었습니다.");
+      setIssueHistory(await getConcurrentIssueHistory(partyId));
+    } catch (error) {
+      console.error(error);
+      toast.error(getApiErrorMessage(error, "조치 완료 처리에 실패했습니다."));
+    } finally {
+      setResolvingIncidentId(null);
+    }
+  };
+
+  const handleReportDeviceAlert = async () => {
+    if (!partyId || isDeviceAlertSubmitting) return;
+
+    if (!detectedDevice.trim() || !detectedLocation.trim()) {
+      toast.error("감지된 기기와 위치를 입력해주세요.");
+      return;
+    }
+
+    try {
+      setIsDeviceAlertSubmitting(true);
+      const result = await reportDeviceAlert(partyId, {
+        detectedDevice: detectedDevice.trim(),
+        detectedLocation: detectedLocation.trim(),
+      });
+
+      setDeviceAlertResult(result);
+      toast.success("전체 파티원에게 내 기기인지 확인 요청 알림이 발송되었습니다.");
+    } catch (error) {
+      console.error(error);
+      toast.error(getApiErrorMessage(error, "낯선 기기 신고에 실패했습니다."));
+    } finally {
+      setIsDeviceAlertSubmitting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -437,6 +517,18 @@ export default function PartyProvisionDashboardPage() {
 
         </section>
 
+        {isAccountShareProvisionType(provision.provisionType) && (
+          <HostConcurrentTools
+            issueHistory={issueHistory}
+            resolvingIncidentId={resolvingIncidentId}
+            onOpenDeviceAlert={() => {
+              setDeviceAlertResult(null);
+              setIsDeviceAlertModalOpen(true);
+            }}
+            onResolveIssue={handleResolveIssue}
+          />
+        )}
+
         <section className="mt-7">
           <div className="flex items-end justify-between gap-4">
             <div>
@@ -490,6 +582,20 @@ export default function PartyProvisionDashboardPage() {
           </div>
         </section>
       </div>
+      {isDeviceAlertModalOpen && (
+        <DeviceAlertReportModal
+          detectedDevice={detectedDevice}
+          detectedLocation={detectedLocation}
+          result={deviceAlertResult}
+          isSubmitting={isDeviceAlertSubmitting}
+          onDetectedDeviceChange={setDetectedDevice}
+          onDetectedLocationChange={setDetectedLocation}
+          onClose={() => {
+            if (!isDeviceAlertSubmitting) setIsDeviceAlertModalOpen(false);
+          }}
+          onSubmit={handleReportDeviceAlert}
+        />
+      )}
 
     </div>
   );
@@ -503,6 +609,249 @@ function MetricTile({ label, value }: { label: string; value: string }) {
         {value}
       </p>
     </div>
+  );
+}
+
+function HostConcurrentTools({
+  issueHistory,
+  resolvingIncidentId,
+  onOpenDeviceAlert,
+  onResolveIssue,
+}: {
+  issueHistory: ConcurrentIssueHistoryItem[];
+  resolvingIncidentId: number | null;
+  onOpenDeviceAlert: () => void;
+  onResolveIssue: (incidentId: number) => void;
+}) {
+  return (
+    <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-[13px] font-extrabold text-brand-main">
+            Concurrent
+          </p>
+          <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+            동시접속 관리
+          </h2>
+          <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+            낯선 기기 신고와 경고 이력을 관리합니다.
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col gap-2 sm:w-40">
+          <button
+            type="button"
+            onClick={onOpenDeviceAlert}
+            className="flex h-10 items-center justify-center rounded-full bg-amber-50 px-4 text-xs font-bold text-amber-700 ring-1 ring-amber-100 transition hover:bg-amber-100"
+          >
+            낯선 기기 신고
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-5 space-y-2">
+        {issueHistory.length > 0 ? (
+          issueHistory.map((issue) => (
+            <article
+              key={issue.incidentId}
+              className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-700 ring-1 ring-slate-200">
+                      {getIssueStatusLabel(issue.status)}
+                    </span>
+                    <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-100">
+                      {getDetectionSourceLabel(issue.detectionSource)}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+                    생성 {formatDateTime(issue.createdAt)} · 마감{" "}
+                    {formatDateTime(issue.hostDeadline)}
+                  </p>
+                  {(issue.firstWarnedAt || issue.resolvedAt) && (
+                    <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
+                      {issue.firstWarnedAt &&
+                        `1차 경고 ${formatDateTime(issue.firstWarnedAt)}`}
+                      {issue.firstWarnedAt && issue.resolvedAt ? " · " : ""}
+                      {issue.resolvedAt &&
+                        `해결 ${formatDateTime(issue.resolvedAt)}`}
+                    </p>
+                  )}
+                  {issue.dissolutionDate && (
+                    <p className="mt-1 text-sm font-bold text-rose-600">
+                      해체 예정일 {formatDate(issue.dissolutionDate)}
+                    </p>
+                  )}
+                </div>
+                {(issue.status === "OPEN" ||
+                  issue.status === "FIRST_WARNING_SENT") && (
+                  <button
+                    type="button"
+                    onClick={() => onResolveIssue(issue.incidentId)}
+                    disabled={resolvingIncidentId === issue.incidentId}
+                    className="flex h-10 shrink-0 items-center justify-center rounded-full bg-white px-4 text-xs font-bold text-brand-main ring-1 ring-blue-100 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:text-slate-400"
+                  >
+                    {resolvingIncidentId === issue.incidentId
+                      ? "처리 중"
+                      : "조치 완료"}
+                  </button>
+                )}
+              </div>
+            </article>
+          ))
+        ) : (
+          <div className="rounded-2xl bg-slate-50 px-4 py-6 text-center ring-1 ring-slate-100">
+            <p className="text-sm font-semibold text-slate-500">
+              표시할 경고 이력이 없습니다.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function getIssueStatusLabel(status: string) {
+  if (status === "OPEN") return "처리 대기";
+  if (status === "FIRST_WARNING_SENT") return "1차 경고";
+  if (status === "DISSOLUTION_SCHEDULED") return "해체 예정";
+  if (status === "RESOLVED") return "조치 완료";
+  if (status === "PARTY_DISSOLVED") return "해체 완료";
+  return status;
+}
+
+function getDetectionSourceLabel(source: string) {
+  if (source === "MEMBER_REPORT") return "멤버 신고";
+  return source;
+}
+
+function DeviceAlertReportModal({
+  detectedDevice,
+  detectedLocation,
+  result,
+  isSubmitting,
+  onDetectedDeviceChange,
+  onDetectedLocationChange,
+  onClose,
+  onSubmit,
+}: {
+  detectedDevice: string;
+  detectedLocation: string;
+  result: DeviceAlertReportResponse | null;
+  isSubmitting: boolean;
+  onDetectedDeviceChange: (value: string) => void;
+  onDetectedLocationChange: (value: string) => void;
+  onClose: () => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:py-8"
+      onMouseDown={() => {
+        if (!isSubmitting) onClose();
+      }}
+      role="presentation"
+    >
+      <section
+        className="w-full max-w-[520px] rounded-[28px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] ring-1 ring-slate-100 sm:px-6"
+        onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <h2 className="text-lg font-bold text-slate-950">낯선 기기 신고</h2>
+        {result ? (
+          <div className="mt-5">
+            <div className="rounded-2xl bg-teal-50 px-4 py-4 ring-1 ring-teal-100">
+              <p className="text-sm font-bold text-teal-800">
+                전체 파티원에게 내 기기인지 확인 요청 알림이 발송되었습니다.
+              </p>
+              <p className="mt-2 text-sm font-semibold text-teal-700">
+                알림 {result.notifiedCount}명 · 응답 기한{" "}
+                {formatDateTime(result.expiresAt)}
+              </p>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              {result.registeredDevices.map((device, index) => (
+                <div
+                  key={`${device.userId}-${index}`}
+                  className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100"
+                >
+                  <p className="text-sm font-bold text-slate-900">
+                    user #{device.userId}
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    {device.deviceType} · {device.os}
+                    {device.browser ? ` · ${device.browser}` : ""}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="mt-5 space-y-3">
+            <DeviceInput
+              label="감지된 기기"
+              value={detectedDevice}
+              placeholder="Windows PC"
+              onChange={onDetectedDeviceChange}
+            />
+            <DeviceInput
+              label="감지 위치"
+              value={detectedLocation}
+              placeholder="부산"
+              onChange={onDetectedLocationChange}
+            />
+          </div>
+        )}
+
+        <div className="mt-6 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center rounded-2xl bg-slate-50 text-sm font-bold text-slate-600 ring-1 ring-slate-100 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+          >
+            닫기
+          </button>
+          {!result && (
+            <button
+              type="button"
+              onClick={onSubmit}
+              disabled={isSubmitting}
+              className="flex h-11 items-center justify-center rounded-2xl bg-amber-600 text-sm font-bold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
+              {isSubmitting ? "신고 중" : "신고하기"}
+            </button>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function DeviceInput({
+  label,
+  value,
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="text-sm font-bold text-slate-700">{label}</span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="mt-2 h-12 w-full rounded-2xl bg-slate-50 px-4 text-sm font-semibold text-slate-900 outline-none ring-1 ring-slate-100 transition focus:bg-white focus:ring-4 focus:ring-blue-100"
+      />
+    </label>
   );
 }
 

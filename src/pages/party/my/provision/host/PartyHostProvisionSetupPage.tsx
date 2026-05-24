@@ -61,6 +61,94 @@ function getOperationTypeLabel(operationType?: ProductOperationType) {
 const ACCOUNT_SHARE_PROVISION_GUIDE =
   "공유 계정으로 로그인한 뒤 본인 프로필을 만들어 이용해주세요. 계정 정보가 변경되면 파티장이 새 정보를 다시 안내합니다.";
 
+type OttAccountLink = {
+  serviceNames: string[];
+  title: string;
+  description: string;
+  url: string;
+  buttonLabel: string;
+  note?: string;
+};
+
+const OTT_ACCOUNT_LINKS: OttAccountLink[] = [
+  {
+    serviceNames: ["넷플릭스", "netflix"],
+    title: "넷플릭스 계정 준비",
+    description: "파티에 사용할 넷플릭스 계정을 먼저 준비해주세요.",
+    url: "https://www.netflix.com/signup",
+    buttonLabel: "넷플릭스 바로가기",
+  },
+  {
+    serviceNames: ["디즈니플러스", "디즈니+", "disney", "disneyplus"],
+    title: "디즈니플러스 계정 준비",
+    description: "파티에 사용할 디즈니플러스 계정을 먼저 준비해주세요.",
+    url: "https://www.disneyplus.com",
+    buttonLabel: "디즈니플러스 바로가기",
+  },
+  {
+    serviceNames: ["유튜브", "youtube"],
+    title: "유튜브 Premium 계정 준비",
+    description: "파티에 사용할 유튜브 Premium 계정을 먼저 준비해주세요.",
+    url: "https://www.youtube.com/paid_memberships",
+    buttonLabel: "유튜브 바로가기",
+  },
+  {
+    serviceNames: ["애플티비", "애플tv", "apple", "appletv"],
+    title: "Apple TV+ 계정 준비",
+    description: "파티에 사용할 Apple TV+ 계정을 먼저 준비해주세요.",
+    url: "https://tv.apple.com",
+    buttonLabel: "Apple TV+ 바로가기",
+  },
+  {
+    serviceNames: ["티빙", "tving"],
+    title: "티빙 계정 준비",
+    description: "파티에 사용할 티빙 계정을 먼저 준비해주세요.",
+    url: "https://www.tving.com",
+    buttonLabel: "티빙 바로가기",
+  },
+  {
+    serviceNames: ["웨이브", "wavve", "wave"],
+    title: "웨이브 계정 준비",
+    description: "파티에 사용할 웨이브 계정을 먼저 준비해주세요.",
+    url: "https://www.wavve.com",
+    buttonLabel: "웨이브 바로가기",
+  },
+  {
+    serviceNames: ["왓챠", "watcha"],
+    title: "왓챠 계정 준비",
+    description: "파티에 사용할 왓챠 계정을 먼저 준비해주세요.",
+    url: "https://watcha.com",
+    buttonLabel: "왓챠 바로가기",
+  },
+  {
+    serviceNames: ["라프텔", "laftel"],
+    title: "라프텔 계정 준비",
+    description: "파티에 사용할 라프텔 계정을 먼저 준비해주세요.",
+    url: "https://laftel.net",
+    buttonLabel: "라프텔 바로가기",
+  },
+];
+
+function normalizeServiceName(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/\s/g, "")
+    .replace(/[+＋]/g, "plus")
+    .replace(/[^a-z0-9가-힣]/g, "");
+}
+
+function getOttAccountLink(serviceName: string) {
+  const normalizedServiceName = normalizeServiceName(serviceName);
+
+  return OTT_ACCOUNT_LINKS.find((link) =>
+    link.serviceNames.some((serviceNameCandidate) =>
+      normalizedServiceName.includes(
+        normalizeServiceName(serviceNameCandidate),
+      ),
+    ),
+  );
+}
+
 export default function PartyHostProvisionSetupPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -207,6 +295,8 @@ export default function PartyHostProvisionSetupPage() {
     return null;
   }
 
+  const ottAccountLink = getOttAccountLink(product.serviceName);
+
   return (
     <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <div className="mx-auto w-full max-w-3xl">
@@ -250,6 +340,50 @@ export default function PartyHostProvisionSetupPage() {
               onSubmit={handleSubmit}
               className="border-t border-slate-100 px-5 py-6 sm:px-8 sm:py-7"
             >
+              {ottAccountLink && (
+                <section className="mb-6 rounded-[24px] bg-white px-5 py-5 ring-1 ring-slate-100">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
+                        <Icon
+                          icon="solar:login-3-bold"
+                          className="h-6 w-6"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-brand-main">
+                          OTT 계정 준비
+                        </p>
+                        <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+                          {ottAccountLink.title}
+                        </h2>
+                        <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                          {ottAccountLink.description}
+                        </p>
+                        {ottAccountLink.note && (
+                          <p className="mt-2 text-xs font-semibold leading-5 text-amber-700">
+                            {ottAccountLink.note}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <a
+                      href={ottAccountLink.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-brand-main px-4 text-sm font-bold text-white shadow-md shadow-blue-900/15 transition hover:-translate-y-0.5 hover:bg-blue-800"
+                    >
+                      {ottAccountLink.buttonLabel}
+                      <Icon
+                        icon="solar:arrow-right-up-linear"
+                        className="h-5 w-5"
+                      />
+                    </a>
+                  </div>
+                </section>
+              )}
+
               <div className="mb-6 rounded-[24px] bg-blue-50 px-5 py-5 ring-1 ring-blue-100">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-main ring-1 ring-blue-100">
