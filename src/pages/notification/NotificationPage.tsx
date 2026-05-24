@@ -1,8 +1,10 @@
 import { Icon } from "@iconify/react";
+import type { MouseEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import { getApiErrorMessage, resolveConcurrentIssue } from "@/api/concurrent";
 
 type NotificationStatus = "UNREAD" | "READ" | string;
 
@@ -23,7 +25,41 @@ type NotificationType =
   | "HOST_PROVISION_TIMEOUT_TERMINATED"
   | "MEMBER_PROVISION_TIMEOUT_NOTICE"
   | "MEMBER_AUTO_REMATCH_STARTED"
+  | "CONCURRENT_WARNING_1"
+  | "LEADER_ACTION_REQUIRED_24H"
+  | "DEVICE_ALERT"
+  | "DEVICE_CHECK_REQUEST"
+  | "CREDENTIALS_UPDATED"
+  | "PARTY_DISSOLVING"
+  | "PARTY_DISSOLVED_FINAL"
   | string;
+
+type NotificationPayload = {
+  type?: NotificationType;
+  partyId?: string | number;
+  party_id?: string | number;
+  partyID?: string | number;
+  partyName?: string;
+  incidentId?: string;
+  alertId?: string | number;
+  deviceAlertId?: string | number;
+  device_alert_id?: string | number;
+  deviceAlertID?: string | number;
+  deviceDetectionAlertId?: string | number;
+  deviceDetectionId?: string | number;
+  targetId?: string | number;
+  target_id?: string | number;
+  referenceId?: string | number;
+  reference_id?: string | number;
+  dissolutionDate?: string;
+  faqUrl?: string;
+  ottProviderType?: string;
+  detectedDevice?: string;
+  detectedLocation?: string;
+  detectedAt?: string;
+  expiresAt?: string;
+  [key: string]: unknown;
+};
 
 type NotificationItem = {
   id: number;
@@ -36,6 +72,26 @@ type NotificationItem = {
   isRead: boolean;
   createdAt: string;
   readAt: string | null;
+  partyName?: string | null;
+  incidentId?: string | null;
+  alertId?: string | number | null;
+  deviceAlertId?: string | number | null;
+  device_alert_id?: string | number | null;
+  deviceAlertID?: string | number | null;
+  deviceDetectionAlertId?: string | number | null;
+  deviceDetectionId?: string | number | null;
+  targetId?: string | number | null;
+  target_id?: string | number | null;
+  referenceId?: string | number | null;
+  reference_id?: string | number | null;
+  dissolutionDate?: string | null;
+  faqUrl?: string | null;
+  ottProviderType?: string | null;
+  detectedDevice?: string | null;
+  detectedLocation?: string | null;
+  detectedAt?: string | null;
+  expiresAt?: string | null;
+  payload?: NotificationPayload | string | null;
 };
 
 type UnreadCountResponse = {
@@ -103,6 +159,140 @@ function formatRelativeTime(value: string | null | undefined) {
   return formatDateTime(value);
 }
 
+function getNotificationPayload(
+  notification: NotificationItem,
+): NotificationPayload {
+  if (!notification.payload) return {};
+
+  if (typeof notification.payload === "string") {
+    try {
+      const parsed = JSON.parse(notification.payload) as NotificationPayload;
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  return notification.payload;
+}
+
+function getNotificationPartyId(notification: NotificationItem) {
+  const payload = getNotificationPayload(notification);
+  return (
+    notification.partyId ??
+    payload.partyId ??
+    payload.party_id ??
+    payload.partyID ??
+    null
+  );
+}
+
+function getNotificationField<K extends keyof NotificationPayload>(
+  notification: NotificationItem,
+  key: K,
+): NotificationPayload[K] | undefined {
+  const topLevelValue = notification[key as keyof NotificationItem];
+
+  if (topLevelValue !== undefined && topLevelValue !== null) {
+    return topLevelValue as NotificationPayload[K];
+  }
+
+  return getNotificationPayload(notification)[key];
+}
+
+function stringifyRouteValue(value: unknown) {
+  if (value === undefined || value === null || value === "") return null;
+  return String(value);
+}
+
+function findRouteValueByKeys(value: unknown, keys: string[]): string | null {
+  if (!value || typeof value !== "object") return null;
+
+  const record = value as Record<string, unknown>;
+
+  for (const key of keys) {
+    const routeValue = stringifyRouteValue(record[key]);
+
+    if (routeValue) return routeValue;
+  }
+
+  for (const nestedValue of Object.values(record)) {
+    const routeValue: string | null = findRouteValueByKeys(nestedValue, keys);
+
+    if (routeValue) return routeValue;
+  }
+
+  return null;
+}
+
+function getDeviceAlertId(notification: NotificationItem) {
+  const payload = getNotificationPayload(notification);
+  const topLevel = notification as NotificationItem & Record<string, unknown>;
+  const loosePayload = payload as NotificationPayload & Record<string, unknown>;
+  const alertIdKeys = [
+    "alertId",
+    "alert_id",
+    "deviceAlertId",
+    "device_alert_id",
+    "deviceAlertID",
+    "deviceDetectionAlertId",
+    "device_detection_alert_id",
+    "deviceDetectionId",
+    "device_detection_id",
+    "targetId",
+    "target_id",
+    "referenceId",
+    "reference_id",
+  ];
+  const value =
+    notification.alertId ??
+    notification.deviceAlertId ??
+    notification.device_alert_id ??
+    notification.deviceAlertID ??
+    notification.deviceDetectionAlertId ??
+    notification.deviceDetectionId ??
+    notification.targetId ??
+    notification.target_id ??
+    notification.referenceId ??
+    notification.reference_id ??
+    payload.alertId ??
+    payload.deviceAlertId ??
+    payload.device_alert_id ??
+    payload.deviceAlertID ??
+    payload.deviceDetectionAlertId ??
+    payload.deviceDetectionId ??
+    payload.targetId ??
+    payload.target_id ??
+    payload.referenceId ??
+    payload.reference_id ??
+    topLevel.alert_id ??
+    topLevel.device_detection_alert_id ??
+    topLevel.device_detection_id ??
+    topLevel.target_id ??
+    topLevel.reference_id ??
+    loosePayload.alert_id ??
+    loosePayload.device_detection_alert_id ??
+    loosePayload.device_detection_id ??
+    loosePayload.target_id ??
+    loosePayload.reference_id ??
+    findRouteValueByKeys(payload, alertIdKeys) ??
+    findRouteValueByKeys(topLevel, alertIdKeys) ??
+    (notification.type === "DEVICE_CHECK_REQUEST" ? notification.id : null);
+
+  return stringifyRouteValue(value);
+}
+
+function getDeviceAlertTextInfo(notification: NotificationItem) {
+  const content = notification.webContent || notification.content || "";
+  const inlineMatch = content.match(/낯선 기기\(([^)]+)\)가\s+(.+?)에서 감지/);
+  const labeledMatch = content.match(/기기:\s*([^/\n]+)\s*\/\s*위치:\s*([^\n]+)/);
+
+  return {
+    detectedDevice: inlineMatch?.[1]?.trim() || labeledMatch?.[1]?.trim(),
+    detectedLocation: inlineMatch?.[2]?.trim() || labeledMatch?.[2]?.trim(),
+  };
+}
+
 function getNotificationMeta(type: NotificationType) {
   switch (type) {
     case "PARTY_MATCHED":
@@ -151,6 +341,48 @@ function getNotificationMeta(type: NotificationType) {
         iconClassName: "bg-rose-50 text-rose-500",
       };
 
+    case "CONCURRENT_WARNING_1":
+    case "LEADER_ACTION_REQUIRED_24H":
+      return {
+        label: "동시접속 경고",
+        icon: "solar:danger-triangle-bold",
+        badgeClassName: "bg-amber-50 text-amber-700 ring-amber-100",
+        iconClassName: "bg-amber-50 text-amber-600",
+      };
+
+    case "DEVICE_ALERT":
+    case "DEVICE_CHECK_REQUEST":
+      return {
+        label: "새 기기 감지",
+        icon: "solar:smartphone-bold",
+        badgeClassName: "bg-orange-50 text-orange-700 ring-orange-100",
+        iconClassName: "bg-orange-50 text-orange-600",
+      };
+
+    case "CREDENTIALS_UPDATED":
+      return {
+        label: "이용정보 변경",
+        icon: "solar:lock-password-bold",
+        badgeClassName: "bg-sky-50 text-sky-700 ring-sky-100",
+        iconClassName: "bg-sky-50 text-sky-600",
+      };
+
+    case "PARTY_DISSOLVING":
+      return {
+        label: "해체 예정",
+        icon: "solar:shield-warning-bold",
+        badgeClassName: "bg-rose-50 text-rose-700 ring-rose-100",
+        iconClassName: "bg-rose-50 text-rose-600",
+      };
+
+    case "PARTY_DISSOLVED_FINAL":
+      return {
+        label: "파티 해체",
+        icon: "solar:logout-3-bold",
+        badgeClassName: "bg-slate-100 text-slate-700 ring-slate-200",
+        iconClassName: "bg-slate-100 text-slate-500",
+      };
+
     case "PAYMENT_SUCCEEDED":
       return {
         label: "결제 완료",
@@ -187,10 +419,45 @@ function getNotificationMeta(type: NotificationType) {
   }
 }
 
+function isDeviceAlertNotification(notification: NotificationItem) {
+  const title = notification.title || "";
+  const content = notification.webContent || notification.content || "";
+
+  return (
+    notification.type === "DEVICE_ALERT" ||
+    notification.type === "DEVICE_CHECK_REQUEST" ||
+    notification.type.includes("DEVICE_ALERT") ||
+    Boolean(getDeviceAlertId(notification)) ||
+    Boolean(getNotificationField(notification, "detectedDevice")) ||
+    title.includes("기기 확인 요청") ||
+    content.includes("본인 기기인지 확인")
+  );
+}
+
+function isLeaderActionRequiredNotification(notification: NotificationItem) {
+  const title = notification.title || "";
+  const content = notification.webContent || notification.content || "";
+
+  return (
+    notification.type === "LEADER_ACTION_REQUIRED_24H" ||
+    title.includes("파티장 조치 요청") ||
+    content.includes("비밀번호를 변경하고 이용 정보를 재공유")
+  );
+}
+
 function getNotificationTargetPath(notification: NotificationItem) {
-  const partyPath = notification.partyId
-    ? `/myparty/${notification.partyId}`
-    : "/myparty";
+  const partyId = getNotificationPartyId(notification);
+  const partyPath = partyId ? `/myparty/${partyId}` : "/myparty";
+
+  if (isDeviceAlertNotification(notification)) {
+    const alertId = getDeviceAlertId(notification);
+
+    if (!alertId) return "/notification";
+
+    return partyId
+      ? `/myparty/${partyId}/device-alert/${alertId}`
+      : `/device-alert/${alertId}`;
+  }
 
   switch (notification.type) {
     case "PARTY_MATCHED":
@@ -206,22 +473,34 @@ function getNotificationTargetPath(notification: NotificationItem) {
     case "PROVISION_INVITE_CODE_REQUIRED":
     case "PROVISION_ACCOUNT_SHARED_REMINDER":
     case "PROVISION_INVITE_ACCEPT_REQUIRED":
-      return notification.partyId
-        ? `/myparty/${notification.partyId}/provision/confirm`
-        : "/myparty";
+      return partyId ? `/myparty/${partyId}/provision/confirm` : "/myparty";
+
+    case "CREDENTIALS_UPDATED":
+      return partyId ? `/myparty/${partyId}/provision/confirm` : "/myparty";
+
+    case "CONCURRENT_WARNING_1":
+      return (
+        getNotificationField(notification, "faqUrl") ||
+        "/support?category=동시접속"
+      );
+
+    case "LEADER_ACTION_REQUIRED_24H":
+      return partyId ? `/myparty/${partyId}/provision/dashboard` : "/myparty";
+
+    case "PARTY_DISSOLVING":
+    case "PARTY_DISSOLVED_FINAL":
+      return "/parties";
 
     case "PAYMENT_FAILED":
-      return notification.partyId
-        ? `/myparty/${notification.partyId}/provision/member-settings`
+      return partyId
+        ? `/myparty/${partyId}/provision/member-settings`
         : "/mypage/payment-method";
 
     case "PAYMENT_SUCCEEDED":
       return "/mypage/payment-method";
 
     case "SETTLEMENT_COMPLETED":
-      return notification.partyId
-        ? `/myparty/${notification.partyId}/provision/settings`
-        : "/mypage/payment-method";
+      return "/mypage/money";
 
     case "PARTY_TERMINATED":
     case "HOST_PROVISION_TIMEOUT_TERMINATED":
@@ -230,7 +509,11 @@ function getNotificationTargetPath(notification: NotificationItem) {
       return "/myparty";
 
     default:
-      return notification.partyId ? partyPath : "/myparty";
+      if (isLeaderActionRequiredNotification(notification)) {
+        return partyId ? `/myparty/${partyId}/provision/dashboard` : "/myparty";
+      }
+
+      return partyId ? partyPath : "/myparty";
   }
 }
 
@@ -251,6 +534,9 @@ export default function NotificationPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [readingIds, setReadingIds] = useState<Set<number>>(new Set());
+  const [resolvingIncidentIds, setResolvingIncidentIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   const hasNotifications = notifications.length > 0;
   const totalCount = notifications.length;
@@ -337,12 +623,112 @@ export default function NotificationPage() {
     }
   };
 
+  const getDeviceAlertTargetPath = (notification: NotificationItem) => {
+    const partyId = getNotificationPartyId(notification);
+    const alertId = getDeviceAlertId(notification);
+
+    if (!alertId) return "/notification";
+
+    return partyId
+      ? `/myparty/${partyId}/device-alert/${alertId}`
+      : `/device-alert/${alertId}`;
+  };
+
   const handleNotificationClick = async (notification: NotificationItem) => {
     const readSuccess = await markNotificationRead(notification);
 
     if (!readSuccess) return;
 
+    if (isDeviceAlertNotification(notification)) {
+      if (!getDeviceAlertId(notification)) {
+        console.error(
+          "Device alert notification is missing alert id",
+          notification,
+        );
+        toast.error("기기 확인 알림 정보를 찾을 수 없습니다.");
+        return;
+      }
+
+      const textInfo = getDeviceAlertTextInfo(notification);
+
+      navigate(getDeviceAlertTargetPath(notification), {
+        state: {
+          ottProviderType:
+            getNotificationField(notification, "ottProviderType") || "OTT",
+          detectedDevice:
+            getNotificationField(notification, "detectedDevice") ||
+            textInfo.detectedDevice ||
+            "확인 필요",
+          detectedLocation:
+            getNotificationField(notification, "detectedLocation") ||
+            textInfo.detectedLocation ||
+            "확인 필요",
+          detectedAt:
+            getNotificationField(notification, "detectedAt") ||
+            notification.createdAt,
+          expiresAt:
+            getNotificationField(notification, "expiresAt") ||
+            notification.createdAt,
+        },
+      });
+      return;
+    }
+
     navigate(getNotificationTargetPath(notification));
+  };
+
+  const handleReportConcurrentIssue = async (
+    notification: NotificationItem,
+  ) => {
+    const readSuccess = await markNotificationRead(notification);
+    if (!readSuccess) return;
+    const partyId = getNotificationPartyId(notification);
+
+    if (!partyId) {
+      toast.info("파티 정보를 확인할 수 없습니다.");
+      return;
+    }
+
+    navigate(`/myparty/${partyId}`, {
+      state: {
+        openConcurrentIssueModal: true,
+      },
+    });
+  };
+
+  const handleResolveIncident = async (notification: NotificationItem) => {
+    const partyId = getNotificationPartyId(notification);
+    const incidentId = getNotificationField(notification, "incidentId");
+
+    if (!partyId || !incidentId) {
+      toast.info("처리할 경고 정보를 확인할 수 없습니다.");
+      return;
+    }
+
+    if (resolvingIncidentIds.has(incidentId)) return;
+
+    setResolvingIncidentIds((prev) => {
+      const next = new Set(prev);
+      next.add(incidentId);
+      return next;
+    });
+
+    try {
+      await resolveConcurrentIssue(partyId, {
+        incidentId: Number(incidentId),
+      });
+      toast.success("파티장 조치 완료로 처리했습니다.");
+      await markNotificationRead(notification);
+    } catch (error) {
+      console.error(error);
+      toast.error(getApiErrorMessage(error, "조치 완료 처리에 실패했습니다."));
+    } finally {
+      setResolvingIncidentIds((prev) => {
+        const next = new Set(prev);
+        next.delete(incidentId);
+        return next;
+      });
+    }
   };
 
   useEffect(() => {
@@ -436,10 +822,17 @@ export default function NotificationPage() {
                   "알림 내용을 확인해주세요.";
 
                 return (
-                  <button
+                  <article
                     key={notification.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => handleNotificationClick(notification)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleNotificationClick(notification);
+                      }
+                    }}
                     className={`relative w-full px-5 py-5 text-left transition hover:bg-slate-50 ${
                       unread ? "bg-amber-50/35" : "bg-white"
                     }`}
@@ -506,9 +899,29 @@ export default function NotificationPage() {
                             />
                           </span>
                         </div>
+
+                        <NotificationActions
+                          notification={notification}
+                          isResolving={
+                            getNotificationField(notification, "incidentId")
+                              ? resolvingIncidentIds.has(
+                                  getNotificationField(
+                                    notification,
+                                    "incidentId",
+                                  ) as string,
+                                )
+                              : false
+                          }
+                          onFaq={() => navigate("/support?category=동시접속")}
+                          onReport={() =>
+                            handleReportConcurrentIssue(notification)
+                          }
+                          onResolve={() => handleResolveIncident(notification)}
+                          onFindParty={() => navigate("/parties")}
+                        />
                       </div>
                     </div>
-                  </button>
+                  </article>
                 );
               })}
             </div>
@@ -517,4 +930,82 @@ export default function NotificationPage() {
       </div>
     </div>
   );
+}
+
+function NotificationActions({
+  notification,
+  isResolving,
+  onFaq,
+  onReport,
+  onResolve,
+  onFindParty,
+}: {
+  notification: NotificationItem;
+  isResolving: boolean;
+  onFaq: () => void;
+  onReport: () => void;
+  onResolve: () => void;
+  onFindParty: () => void;
+}) {
+  const stop = (handler: () => void) => {
+    return (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      handler();
+    };
+  };
+
+  if (notification.type === "CONCURRENT_WARNING_1") {
+    return (
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={stop(onFaq)}
+          className="inline-flex h-9 items-center justify-center rounded-full bg-white px-3 text-xs font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
+        >
+          FAQ 확인하기
+        </button>
+        <button
+          type="button"
+          onClick={stop(onReport)}
+          className="inline-flex h-9 items-center justify-center rounded-full bg-amber-50 px-3 text-xs font-bold text-amber-700 ring-1 ring-amber-100 transition hover:bg-amber-100"
+        >
+          문제 신고하기
+        </button>
+      </div>
+    );
+  }
+
+  if (notification.type === "LEADER_ACTION_REQUIRED_24H") {
+    return (
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={stop(onResolve)}
+          disabled={isResolving}
+          className="inline-flex h-9 items-center justify-center rounded-full bg-brand-main px-3 text-xs font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+        >
+          {isResolving ? "처리 중" : "조치 완료"}
+        </button>
+      </div>
+    );
+  }
+
+  if (
+    notification.type === "PARTY_DISSOLVING" ||
+    notification.type === "PARTY_DISSOLVED_FINAL"
+  ) {
+    return (
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={stop(onFindParty)}
+          className="inline-flex h-9 items-center justify-center rounded-full bg-rose-50 px-3 text-xs font-bold text-rose-700 ring-1 ring-rose-100 transition hover:bg-rose-100"
+        >
+          새 파티 찾기
+        </button>
+      </div>
+    );
+  }
+
+  return null;
 }

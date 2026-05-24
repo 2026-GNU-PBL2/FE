@@ -1,7 +1,16 @@
 import { Icon } from "@iconify/react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { getOttServicePlans, type OttServicePlan } from "@/api/concurrent";
 
-type SupportCategory = "전체" | "결제" | "파티" | "정산" | "계정" | "기타";
+type SupportCategory =
+  | "전체"
+  | "결제"
+  | "파티"
+  | "동시접속"
+  | "정산"
+  | "계정"
+  | "기타";
 
 type FaqItem = {
   id: number;
@@ -21,6 +30,7 @@ const categoryOptions: SupportCategory[] = [
   "전체",
   "결제",
   "파티",
+  "동시접속",
   "정산",
   "계정",
   "기타",
@@ -83,6 +93,41 @@ const faqItems: FaqItem[] = [
     answer:
       "네, 운영 정책 위반이나 비정상 이용이 의심되는 경우 신고 접수가 가능합니다. 관련 파티 정보와 사유를 함께 제출해 주시면 운영 기준에 따라 확인합니다.",
   },
+  {
+    id: 9,
+    category: "동시접속",
+    question: '"동시 재생 한도 초과" 메시지가 뜨면 어떻게 하나요?',
+    answer:
+      "파티의 동시접속 한도를 초과한 상태예요.\n\n1. 다른 파티원이 동시에 시청 중인 경우 - 잠시 후 다시 시도하세요.\n2. 내 다른 기기에서 시청 중인 경우 - 해당 기기에서 종료 후 시도하세요.\n3. 계속 발생한다면 - 파티 이용 정보 화면에서 신고해 주세요.",
+  },
+  {
+    id: 10,
+    category: "동시접속",
+    question: "기기는 여러 대 써도 되나요?",
+    answer:
+      "여러 기기에서 이용하셔도 됩니다.\n단, 동시에 2대 이상 사용하면 다른 파티원이 접속하지 못할 수 있어요.\n한 번에 1대씩만 사용해 주세요.",
+  },
+  {
+    id: 11,
+    category: "동시접속",
+    question: "계정을 외부에 공유하면 어떻게 되나요?",
+    answer:
+      "파티 계정을 파티원 외 제3자에게 공유하는 행위는 이용 약관 위반입니다.\n\n1차 경고\n파티 전체에 경고 알림이 발송되고, 파티장에게 조치가 요청됩니다.\n\n2차 발생 시\n비밀번호가 즉시 변경되고, 다음 이용일에 파티가 해체됩니다.\n\n파티 해체 후\n- 이번 달 이용일까지는 정상 이용 가능합니다.\n- 파티원의 다음 달 자동결제는 발생하지 않습니다.\n- 파티장의 이번 달 정산은 정상 처리됩니다.\n- 전원의 이력에 기록되며, 반복 발생 시 새 파티 참여가 제한됩니다.",
+  },
+  {
+    id: 12,
+    category: "동시접속",
+    question: "OTT 연결 기기를 확인하거나 제거하는 방법",
+    answer:
+      "Netflix: 설정 -> 계정 -> 기기 관리 -> 원하는 기기 로그아웃\nTving: 마이페이지 -> 기기 관리 -> 삭제\nWavve: 마이페이지 -> 이용 중인 기기 -> 삭제\n\n전체 로그아웃: 각 OTT -> 설정 -> 모든 기기에서 로그아웃",
+  },
+  {
+    id: 13,
+    category: "동시접속",
+    question: "비밀번호가 갑자기 안 맞아요",
+    answer:
+      "파티장이 비밀번호를 변경했을 수 있어요.\n파티 상세 -> 이용 정보에서 새 비밀번호를 확인하세요.",
+  },
 ];
 
 const noticeItems: NoticeItem[] = [
@@ -106,14 +151,79 @@ const noticeItems: NoticeItem[] = [
   },
 ];
 
+function getProviderDisplayName(providerType: string) {
+  const normalized = providerType.trim().toUpperCase();
+
+  if (normalized === "NETFLIX") return "Netflix";
+  if (normalized === "TVING") return "Tving";
+  if (normalized === "WAVVE" || normalized === "WAVE") return "Wavve";
+  if (normalized === "WATCHA") return "Watcha";
+  if (normalized === "DISNEY_PLUS" || normalized === "DISNEYPLUS")
+    return "Disney+";
+  if (normalized === "YOUTUBE") return "YouTube";
+  if (normalized === "APPLE_TV" || normalized === "APPLETV")
+    return "Apple TV+";
+  if (normalized === "LAFTEL") return "Laftel";
+
+  return providerType;
+}
+
+function getProviderInitial(providerType: string) {
+  return getProviderDisplayName(providerType).slice(0, 1).toUpperCase();
+}
+
 export default function SupportPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] =
-    useState<SupportCategory>("전체");
+    useState<SupportCategory>(() => {
+      const category = searchParams.get("category");
+
+      return categoryOptions.includes(category as SupportCategory)
+        ? (category as SupportCategory)
+        : "전체";
+    });
   const [openedFaqIds, setOpenedFaqIds] = useState<number[]>([1]);
+  const [ottPlans, setOttPlans] = useState<OttServicePlan[]>([]);
+  const [isOttPlansLoading, setIsOttPlansLoading] = useState(false);
 
   const filteredFaqs = faqItems.filter((item) => {
     return selectedCategory === "전체" || item.category === selectedCategory;
   });
+
+  const groupedOttPlans = useMemo(() => {
+    return ottPlans.reduce<Record<string, OttServicePlan[]>>((acc, plan) => {
+      const key = plan.ottProviderType || plan.serviceName || "OTT";
+      acc[key] = [...(acc[key] ?? []), plan];
+      return acc;
+    }, {});
+  }, [ottPlans]);
+
+  useEffect(() => {
+    const category = searchParams.get("category");
+
+    if (categoryOptions.includes(category as SupportCategory)) {
+      setSelectedCategory(category as SupportCategory);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const fetchOttPlans = async () => {
+      if (selectedCategory !== "동시접속") return;
+
+      try {
+        setIsOttPlansLoading(true);
+
+        setOttPlans(await getOttServicePlans());
+      } catch (error) {
+        console.error(error);
+        setOttPlans([]);
+      } finally {
+        setIsOttPlansLoading(false);
+      }
+    };
+
+    fetchOttPlans();
+  }, [selectedCategory]);
 
   const toggleFaq = (id: number) => {
     setOpenedFaqIds((prev) =>
@@ -232,7 +342,13 @@ export default function SupportPage() {
                     <button
                       key={category}
                       type="button"
-                      onClick={() => setSelectedCategory(category)}
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setSearchParams(
+                          category === "전체" ? {} : { category },
+                          { replace: true },
+                        );
+                      }}
                       className={[
                         "h-9 shrink-0 rounded-full px-3.5 text-sm font-bold transition",
                         isActive
@@ -246,6 +362,13 @@ export default function SupportPage() {
                 })}
               </div>
             </div>
+
+            {selectedCategory === "동시접속" && (
+              <OttPlanLimitCard
+                groupedPlans={groupedOttPlans}
+                isLoading={isOttPlansLoading}
+              />
+            )}
 
             <div className="divide-y divide-slate-100">
               {filteredFaqs.map((item) => {
@@ -274,7 +397,7 @@ export default function SupportPage() {
                         </div>
 
                         {isOpened ? (
-                          <p className="mt-3 text-sm leading-7 text-slate-600">
+                          <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">
                             {item.answer}
                           </p>
                         ) : null}
@@ -352,6 +475,80 @@ export default function SupportPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+function OttPlanLimitCard({
+  groupedPlans,
+  isLoading,
+}: {
+  groupedPlans: Record<string, OttServicePlan[]>;
+  isLoading: boolean;
+}) {
+  const providerTypes = Object.keys(groupedPlans);
+
+  return (
+    <section className="border-b border-slate-100 bg-[#F8FAFC] px-5 py-5 sm:px-6">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold text-brand-main">동시접속 기준</p>
+          <h3 className="mt-1 text-lg font-extrabold text-slate-950">
+            OTT별 동시접속 한도
+          </h3>
+        </div>
+        <Icon
+          icon="solar:monitor-smartphone-bold"
+          className="h-6 w-6 text-brand-main"
+        />
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        {isLoading ? (
+          Array.from({ length: 2 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-28 animate-pulse rounded-2xl bg-white ring-1 ring-slate-100"
+            />
+          ))
+        ) : providerTypes.length > 0 ? (
+          providerTypes.map((providerType) => (
+            <article
+              key={providerType}
+              className="rounded-2xl bg-white px-4 py-4 ring-1 ring-slate-100"
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-extrabold text-brand-main ring-1 ring-blue-100">
+                  {getProviderInitial(providerType)}
+                </span>
+                <h4 className="text-sm font-extrabold text-slate-950">
+                  {getProviderDisplayName(providerType)}
+                </h4>
+              </div>
+
+              <div className="mt-3 space-y-1.5">
+                {groupedPlans[providerType].map((plan) => (
+                  <p
+                    key={`${providerType}-${plan.planName}-${plan.concurrentLimit}`}
+                    className="text-sm font-semibold leading-6 text-slate-600"
+                  >
+                    {plan.planName}: 동시 {plan.concurrentLimit}대
+                    {plan.resolution ? (
+                      <span className="text-slate-400"> · {plan.resolution}</span>
+                    ) : null}
+                  </p>
+                ))}
+              </div>
+            </article>
+          ))
+        ) : (
+          <div className="rounded-2xl bg-white px-4 py-6 text-center ring-1 ring-slate-100 sm:col-span-2">
+            <p className="text-sm font-semibold text-slate-500">
+              동시접속 한도 정보를 준비 중입니다.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 

@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "@/api/axios";
+import { getOttServicePlans, type OttServicePlan } from "@/api/concurrent";
 
 type ProductDetailResponse = {
   id: string;
@@ -117,6 +118,8 @@ export default function PartyCreatePage() {
   const { productId = "" } = useParams();
 
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
+  const [ottPlans, setOttPlans] = useState<OttServicePlan[]>([]);
+  const [selectedPlanKey, setSelectedPlanKey] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -169,6 +172,19 @@ export default function PartyCreatePage() {
     };
   }, [productId]);
 
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        setOttPlans(await getOttServicePlans());
+      } catch (error) {
+        console.error("OTT 플랜 조회 실패", error);
+        setOttPlans([]);
+      }
+    };
+
+    fetchPlans();
+  }, []);
+
   const isRounded = useMemo(() => {
     if (!product) return false;
     return shouldUseRoundedLogo(product.serviceName);
@@ -193,6 +209,33 @@ export default function PartyCreatePage() {
     if (!product) return "-";
     return `${product.maxMemberCount}인 기준`;
   }, [product]);
+
+  const relatedPlans = useMemo(() => {
+    if (!product) return [];
+    const productService = product.serviceName.toLowerCase();
+
+    return ottPlans.filter((plan) => {
+      const serviceName = (plan.serviceName || plan.ottProviderType || "")
+        .toLowerCase()
+        .replace(/_/g, "");
+      return (
+        productService.includes(serviceName) ||
+        serviceName.includes(resolveServiceSlug(product.serviceName).replace("-", ""))
+      );
+    });
+  }, [ottPlans, product]);
+
+  const selectedPlan = useMemo(() => {
+    return (
+      relatedPlans.find(
+        (plan) =>
+          `${plan.serviceName || plan.ottProviderType}-${plan.planName}` ===
+          selectedPlanKey,
+      ) ??
+      relatedPlans[0] ??
+      null
+    );
+  }, [relatedPlans, selectedPlanKey]);
 
   if (isLoading) {
     return (
@@ -407,6 +450,45 @@ export default function PartyCreatePage() {
                 </p>
               </div>
             </div>
+
+            {relatedPlans.length > 0 && (
+              <div className="mt-5 rounded-[24px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
+                <label className="block">
+                  <span className="text-sm font-bold text-slate-600">
+                    서비스 플랜
+                  </span>
+                  <select
+                    value={
+                      selectedPlan
+                        ? `${selectedPlan.serviceName || selectedPlan.ottProviderType}-${selectedPlan.planName}`
+                        : ""
+                    }
+                    onChange={(event) => setSelectedPlanKey(event.target.value)}
+                    className="mt-2 h-11 w-full rounded-2xl bg-white px-3 text-sm font-bold text-slate-900 outline-none ring-1 ring-slate-100"
+                  >
+                    {relatedPlans.map((plan) => {
+                      const key = `${plan.serviceName || plan.ottProviderType}-${plan.planName}`;
+                      return (
+                        <option key={key} value={key}>
+                          {plan.planName}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </label>
+
+                {selectedPlan && (
+                  <div className="mt-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-slate-100">
+                    <p className="text-xs font-bold text-slate-400">
+                      동시접속 한도
+                    </p>
+                    <p className="mt-1 text-lg font-extrabold text-brand-main">
+                      동시 {selectedPlan.concurrentLimit}대
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             <button
               className="mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-brand-main px-6 text-base font-bold text-white shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5 hover:bg-blue-800"

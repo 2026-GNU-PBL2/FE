@@ -387,8 +387,8 @@ export default function PartyMemberProvisionConfirmPage() {
       </div>
 
       {isConfirmModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 px-0 backdrop-blur-sm sm:items-center sm:px-4">
-          <div className="w-full max-w-[420px] rounded-t-[30px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] ring-1 ring-slate-100 sm:rounded-[30px] sm:px-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-[420px] rounded-[30px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] ring-1 ring-slate-100 sm:px-6">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-100">
                 <Icon icon="solar:shield-warning-bold" className="h-7 w-7" />

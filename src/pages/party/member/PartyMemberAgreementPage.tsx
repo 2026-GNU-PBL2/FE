@@ -123,8 +123,8 @@ function AgreementModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 p-0 backdrop-blur-sm sm:items-center sm:p-6">
-      <div className="flex h-[88vh] w-full max-w-[680px] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl shadow-slate-950/20 sm:h-auto sm:max-h-[85vh] sm:rounded-[32px]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm sm:p-6">
+      <div className="flex h-[88vh] w-full max-w-[680px] flex-col overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-slate-950/20 sm:h-auto sm:max-h-[85vh] sm:rounded-[32px]">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-7 sm:py-5">
           <div className="pr-4">
             <div className="inline-flex items-center rounded-full bg-teal-50 px-3 py-1.5 text-[11px] font-bold text-[#0F766E]">

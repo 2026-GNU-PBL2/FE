@@ -29,6 +29,7 @@ import PaymentMethodManagePage from "@/pages/my/payment/PaymentMethodManagePage"
 import MoneyManagePage from "@/pages/my/payment/MoneyManagePage";
 import MyPageAccountRegisterPage from "@/pages/my/payment/MyPageAccountRegisterPage";
 import PartyHistoryPage from "@/pages/my/usage/PartyHistoryPage";
+import ViolationHistoryPage from "@/pages/my/usage/ViolationHistoryPage";
 import SettingsPage from "@/pages/my/account/SettingsPage";
 import Myparty from "@/pages/party/my/MyParty";
 
@@ -71,6 +72,7 @@ import PartyMemberProvisionConfirmPage from "@/pages/party/my/provision/member/P
 import PartyMemberProvisionDashboardPage from "@/pages/party/my/provision/member/PartyMemberProvisionDashboardPage";
 import PartyMemberSettingsPage from "@/pages/party/my/provision/member/PartyMemberSettingsPage";
 import PartyMemberInviteActivationPage from "@/pages/party/my/provision/member/PartyMemberInviteActivationPage";
+import DeviceAlertRespondPage from "@/pages/notification/DeviceAlertRespondPage";
 
 const router = createBrowserRouter([
   {
@@ -172,7 +174,14 @@ const router = createBrowserRouter([
             path: "/myparty/:partyId/provision/member-settings",
             element: <PartyMemberSettingsPage />,
           },
-
+          {
+            path: "/myparty/:partyId/device-alert/:alertId",
+            element: <DeviceAlertRespondPage />,
+          },
+          {
+            path: "/device-alert/:alertId",
+            element: <DeviceAlertRespondPage />,
+          },
           { path: "/party/create/:productId", element: <PartyCreatePage /> },
 
           {
@@ -259,6 +268,7 @@ const router = createBrowserRouter([
                   },
                   { path: "money", element: <MoneyManagePage /> },
                   { path: "party-history", element: <PartyHistoryPage /> },
+                  { path: "violations", element: <ViolationHistoryPage /> },
                   { path: "mailbox", element: <MailboxPage /> },
                   { path: "settings", element: <SettingsPage /> },
                 ],

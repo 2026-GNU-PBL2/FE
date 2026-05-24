@@ -37,7 +37,13 @@ type ProvisionMember = {
 };
 
 type PartyProvisionResponse = {
+  provisionType?: string | null;
   members: ProvisionMember[];
+};
+
+type PartyHistoryItem = {
+  partyId: number;
+  productId: string;
 };
 
 type PartySettingsResponse = {
@@ -143,6 +149,19 @@ function formatDayOfMonth(value?: number | null) {
   return `매달 ${value}일`;
 }
 
+function isAccountShareProvisionType(type?: string | null) {
+  return (
+    type === "ACCOUNT_SHARE" ||
+    type === "SHARED_ACCOUNT" ||
+    type === "SHARED_CREDENTIAL" ||
+    type === "SHARED_CREDENTIALS"
+  );
+}
+
+function isInviteProvisionType(type?: string | null) {
+  return type === "INVITE_CODE" || type === "INVITE_LINK";
+}
+
 export default function PartyHostSettingsPage() {
   const navigate = useNavigate();
   const { partyId } = useParams<{ partyId: string }>();
@@ -153,6 +172,8 @@ export default function PartyHostSettingsPage() {
   );
   const [reservations, setReservations] = useState<PartyLeaveReservation[]>([]);
   const [members, setMembers] = useState<ProvisionMember[]>([]);
+  const [productId, setProductId] = useState<string | null>(null);
+  const [provisionType, setProvisionType] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFeeDetailModalOpen, setIsFeeDetailModalOpen] = useState(false);
@@ -160,6 +181,11 @@ export default function PartyHostSettingsPage() {
   const [isLeaveConfirmOpen, setIsLeaveConfirmOpen] = useState(false);
   const [isLeaveCancelConfirmOpen, setIsLeaveCancelConfirmOpen] =
     useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isResetSubmitting, setIsResetSubmitting] = useState(false);
+  const [provisionMessage, setProvisionMessage] = useState(
+    "공유 계정 정보가 변경되어 다시 확인해 주세요.",
+  );
 
   const memberMap = useMemo(() => {
     const map = new Map<number, ProvisionMember>();
@@ -192,11 +218,17 @@ export default function PartyHostSettingsPage() {
     try {
       setIsLoading(true);
 
-      const [reservationResult, provisionResult, settingsResult] =
+      const [
+        reservationResult,
+        provisionResult,
+        settingsResult,
+        partyHistoryResult,
+      ] =
         await Promise.allSettled([
           api.get(`/api/v1/party-leave/${partyId}/reservations`),
           api.get(`/api/v1/parties/${partyId}/provision`),
           api.get(`/api/v1/parties/${partyId}/settings`),
+          api.get("/api/v1/me/party-history"),
         ]);
 
       if (reservationResult.status === "rejected") {
@@ -213,8 +245,10 @@ export default function PartyHostSettingsPage() {
           provisionResult.value.data,
         );
         setMembers(provisionData?.members ?? []);
+        setProvisionType(provisionData?.provisionType ?? null);
       } else {
         setMembers([]);
+        setProvisionType(null);
       }
 
       if (settingsResult.status === "fulfilled") {
@@ -224,6 +258,20 @@ export default function PartyHostSettingsPage() {
         setPartySettings(settingsData);
       } else {
         setPartySettings(null);
+      }
+
+      if (partyHistoryResult.status === "fulfilled") {
+        const partyHistoryData = unwrapResponse<PartyHistoryItem[]>(
+          partyHistoryResult.value.data,
+        );
+        const currentParty = Array.isArray(partyHistoryData)
+          ? partyHistoryData.find(
+              (party) => String(party.partyId) === String(partyId),
+            )
+          : null;
+        setProductId(currentParty?.productId ?? null);
+      } else {
+        setProductId(null);
       }
     } catch (error) {
       console.error(error);
@@ -345,6 +393,70 @@ export default function PartyHostSettingsPage() {
     }
   };
 
+  const handleResetProvision = async () => {
+    if (!partyId || isResetSubmitting) return;
+
+    const message = provisionMessage.trim();
+
+    if (!message) {
+      toast.error("파티원에게 보여줄 안내 메시지를 입력해주세요.");
+      return;
+    }
+
+    try {
+      setIsResetSubmitting(true);
+
+      await api.post(`/api/v1/parties/${partyId}/provision/reset`, {
+        provisionMessage: message,
+      });
+
+      if (isAccountShareProvisionType(provisionType)) {
+        await api.post(`/api/v1/credentials/${partyId}/notify-update`);
+      }
+
+      setIsResetModalOpen(false);
+      toast.success("파티 이용 정보가 재설정되었습니다.");
+
+      if (isAccountShareProvisionType(provisionType) && productId) {
+        navigate(`/myparty/${partyId}/provision/setup/${productId}`, {
+          state: {
+            productId,
+          },
+        });
+        return;
+      }
+
+      if (isInviteProvisionType(provisionType) && productId) {
+        navigate(`/myparty/${partyId}/provision/invite-setup/${productId}`, {
+          state: {
+            productId,
+          },
+        });
+        return;
+      }
+
+      await fetchSettings();
+    } catch (error) {
+      if (!isExpectedClientError(error)) {
+        console.error(error);
+      }
+      toast.error(
+        getApiErrorMessage(error, "파티 이용 정보 재설정에 실패했습니다."),
+      );
+    } finally {
+      setIsResetSubmitting(false);
+    }
+  };
+
+  const handleOpenResetProvision = () => {
+    setProvisionMessage(
+      isInviteProvisionType(provisionType)
+        ? "초대 링크를 받지 못한 파티원이 있어 다시 전송해 주세요."
+        : "공유 계정 정보가 변경되어 다시 확인해 주세요.",
+    );
+    setIsResetModalOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
@@ -391,6 +503,12 @@ export default function PartyHostSettingsPage() {
             <SettlementAccountSection settings={partySettings} />
           </>
         )}
+
+        <ProvisionResetSection
+          provisionType={provisionType}
+          isSubmitting={isResetSubmitting}
+          onOpen={handleOpenResetProvision}
+        />
 
         <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 sm:px-6">
           <div className="flex items-start justify-between gap-4">
@@ -528,7 +646,70 @@ export default function PartyHostSettingsPage() {
           onConfirm={handleCancelHostLeave}
         />
       )}
+      {isResetModalOpen && (
+        <ProvisionResetModal
+          message={provisionMessage}
+          isSubmitting={isResetSubmitting}
+          onMessageChange={setProvisionMessage}
+          onClose={() => {
+            if (!isResetSubmitting) setIsResetModalOpen(false);
+          }}
+          onConfirm={handleResetProvision}
+        />
+      )}
     </div>
+  );
+}
+
+function ProvisionResetSection({
+  provisionType,
+  isSubmitting,
+  onOpen,
+}: {
+  provisionType?: string | null;
+  isSubmitting: boolean;
+  onOpen: () => void;
+}) {
+  const isInvite = isInviteProvisionType(provisionType);
+  const title = isInvite ? "초대 링크 재전송" : "공유 계정 재설정";
+  const description = isInvite
+    ? "초대 링크를 다시 발송하고 파티원이 이용 확인을 다시 진행하도록 요청합니다."
+    : "공유 계정 정보를 다시 입력하고 파티원이 이용 확인을 다시 진행하도록 요청합니다.";
+  const label = isInvite ? "INVITE RESEND" : "ACCOUNT RESET";
+
+  return (
+    <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 sm:px-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
+          <Icon icon="solar:restart-bold" className="h-6 w-6" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-bold text-brand-main">{label}</p>
+          <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+            {title}
+          </h2>
+          <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+            {description}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onOpen}
+          disabled={isSubmitting}
+          className="flex h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-full bg-brand-main px-4 text-xs font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
+        >
+          <Icon
+            icon={
+              isSubmitting
+                ? "solar:refresh-circle-bold"
+                : "solar:restart-bold"
+            }
+            className={`h-4 w-4 ${isSubmitting ? "animate-spin" : ""}`}
+          />
+          {isSubmitting ? "재설정 중" : "재설정"}
+        </button>
+      </div>
+    </section>
   );
 }
 
@@ -666,7 +847,7 @@ function FeeDetailModal({
 }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:items-center sm:py-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:py-8"
       onMouseDown={onClose}
       role="presentation"
     >
@@ -829,6 +1010,103 @@ function FeeDetailCard({ label, value }: { label: string; value: string }) {
   );
 }
 
+function ProvisionResetModal({
+  message,
+  isSubmitting,
+  onMessageChange,
+  onClose,
+  onConfirm,
+}: {
+  message: string;
+  isSubmitting: boolean;
+  onMessageChange: (value: string) => void;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:py-8"
+      onMouseDown={() => {
+        if (!isSubmitting) onClose();
+      }}
+      role="presentation"
+    >
+      <section
+        className="w-full max-w-[480px] rounded-[28px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] ring-1 ring-slate-100 sm:px-6"
+        onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="provision-reset-title"
+      >
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
+            <Icon icon="solar:restart-bold" className="h-6 w-6" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-bold text-brand-main">재확인 요청</p>
+            <h2
+              id="provision-reset-title"
+              className="mt-1 text-lg font-semibold text-slate-950"
+            >
+              이용 정보를 재설정할까요?
+            </h2>
+            <p className="mt-2 text-sm font-normal leading-6 text-slate-500">
+              기존 파티원도 다시 이용 정보를 확인해야 할 수 있습니다.
+            </p>
+          </div>
+        </div>
+
+        <label className="mt-5 block">
+          <span className="text-sm font-bold text-slate-700">
+            파티원 안내 메시지
+          </span>
+          <textarea
+            value={message}
+            onChange={(event) => onMessageChange(event.target.value)}
+            disabled={isSubmitting}
+            rows={4}
+            className="mt-2 w-full resize-none rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none ring-1 ring-slate-100 transition placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:text-slate-400"
+            placeholder="공유 계정 정보가 변경되어 다시 확인해 주세요."
+          />
+        </label>
+
+        <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 ring-1 ring-amber-100">
+          <p className="text-sm font-semibold leading-6 text-amber-800">
+            재설정 후 파티원에게 다시 확인 절차가 필요하다는 안내가 표시됩니다.
+          </p>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center rounded-full bg-slate-50 text-sm font-bold text-slate-600 ring-1 ring-slate-100 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center gap-2 rounded-full bg-brand-main text-sm font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            <Icon
+              icon={
+                isSubmitting
+                  ? "solar:refresh-circle-bold"
+                  : "solar:restart-bold"
+              }
+              className={`h-4 w-4 ${isSubmitting ? "animate-spin" : ""}`}
+            />
+            {isSubmitting ? "재설정 중" : "재설정"}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function LeaveReserveConfirmModal({
   title,
   description,
@@ -859,7 +1137,7 @@ function LeaveReserveConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:items-center sm:py-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:py-8"
       onMouseDown={() => {
         if (!isSubmitting) {
           onClose();

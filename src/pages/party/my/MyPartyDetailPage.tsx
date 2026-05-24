@@ -71,6 +71,7 @@ type MyPartyDetailLocationState = {
   endAt?: string | null;
   operationType?: ProvisionType | null;
   provisionType?: ProvisionType | null;
+  openConcurrentIssueModal?: boolean;
 };
 
 type PartyHistoryItem = {
@@ -152,7 +153,12 @@ function isInviteProvisionType(type?: string | null) {
 }
 
 function isAccountShareProvisionType(type?: string | null) {
-  return type === "ACCOUNT_SHARE" || type === "SHARED_ACCOUNT";
+  return (
+    type === "ACCOUNT_SHARE" ||
+    type === "SHARED_ACCOUNT" ||
+    type === "SHARED_CREDENTIAL" ||
+    type === "SHARED_CREDENTIALS"
+  );
 }
 
 function isProvisionSetupComplete(provision?: PartyProvisionResponse | null) {
@@ -235,6 +241,11 @@ export default function MyPartyDetailPage() {
   const [partyMeta, setPartyMeta] = useState<MyPartyDetailLocationState | null>(
     locationState,
   );
+  const [isConcurrentIssueModalOpen, setIsConcurrentIssueModalOpen] = useState(
+    Boolean(locationState?.openConcurrentIssueModal),
+  );
+  const [isConcurrentIssueSubmitting, setIsConcurrentIssueSubmitting] =
+    useState(false);
   const isHost = partyMeta?.role === "HOST";
   const isMember = partyMeta?.role === "MEMBER";
   const isScheduledParty = partyMeta?.status === "SCHEDULED";
@@ -303,6 +314,11 @@ export default function MyPartyDetailPage() {
     provision && isInviteProvisionType(provision.provisionType)
       ? null
       : provision?.provisionGuide;
+  useEffect(() => {
+    if (locationState?.openConcurrentIssueModal) {
+      setIsConcurrentIssueModalOpen(true);
+    }
+  }, [locationState?.openConcurrentIssueModal]);
 
   useEffect(() => {
     const fetchProvision = async () => {
@@ -575,6 +591,26 @@ export default function MyPartyDetailPage() {
     });
   };
 
+  const handleSubmitConcurrentIssue = async () => {
+    if (!partyId || isConcurrentIssueSubmitting) return;
+
+    try {
+      setIsConcurrentIssueSubmitting(true);
+
+      await api.post(`/api/v1/concurrent-issues/${partyId}`, {
+        reportType: "동시접속 위반 의심",
+      });
+
+      toast.success("동시접속 문제를 신고했습니다.");
+      setIsConcurrentIssueModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("신고를 접수하지 못했습니다.");
+    } finally {
+      setIsConcurrentIssueSubmitting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
@@ -749,8 +785,20 @@ export default function MyPartyDetailPage() {
                 나의 파티 목록으로 이동
               </button>
             </div>
+
           </section>
         </div>
+        {isConcurrentIssueModalOpen && (
+          <ConcurrentIssueModal
+            isSubmitting={isConcurrentIssueSubmitting}
+            onClose={() => {
+              if (!isConcurrentIssueSubmitting) {
+                setIsConcurrentIssueModalOpen(false);
+              }
+            }}
+            onSubmit={handleSubmitConcurrentIssue}
+          />
+        )}
       </div>
     );
   }
@@ -954,6 +1002,7 @@ export default function MyPartyDetailPage() {
                 <Icon icon="solar:alt-arrow-right-linear" className="h-5 w-5" />
               </button>
             )}
+
           </div>
         </section>
 
@@ -993,6 +1042,89 @@ export default function MyPartyDetailPage() {
           </section>
         )}
       </div>
+      {isConcurrentIssueModalOpen && (
+        <ConcurrentIssueModal
+          isSubmitting={isConcurrentIssueSubmitting}
+          onClose={() => {
+            if (!isConcurrentIssueSubmitting) {
+              setIsConcurrentIssueModalOpen(false);
+            }
+          }}
+          onSubmit={handleSubmitConcurrentIssue}
+        />
+      )}
+    </div>
+  );
+}
+
+function ConcurrentIssueModal({
+  isSubmitting,
+  onClose,
+  onSubmit,
+}: {
+  isSubmitting: boolean;
+  onClose: () => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:py-8"
+      onMouseDown={() => {
+        if (!isSubmitting) onClose();
+      }}
+      role="presentation"
+    >
+      <section
+        className="w-full max-w-[480px] rounded-[28px] bg-white px-5 py-5 shadow-[0_28px_90px_-34px_rgba(15,23,42,0.7)] ring-1 ring-slate-100 sm:px-6"
+        onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="concurrent-issue-title"
+      >
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
+            <Icon icon="solar:danger-triangle-bold" className="h-6 w-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-amber-700">문제 신고</p>
+            <h2
+              id="concurrent-issue-title"
+              className="mt-1 text-lg font-extrabold text-slate-950"
+            >
+              동시접속 문제를 신고할까요?
+            </h2>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+              파티 이용에 영향을 준 상황을 남겨주시면 확인 후 조치됩니다.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-2xl bg-amber-50 px-4 py-4 ring-1 ring-amber-100">
+          <p className="text-sm font-semibold leading-6 text-amber-800">
+            신고 유형은 동시접속 위반 의심으로 접수됩니다. 1차 신고 시 파티
+            전체에 경고가 발송되고, 2차 신고 시 해체 예정 상태로 전환됩니다.
+          </p>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center rounded-2xl bg-slate-50 text-sm font-bold text-slate-600 ring-1 ring-slate-100 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+          >
+            닫기
+          </button>
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center rounded-2xl bg-amber-600 text-sm font-bold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            {isSubmitting ? "접수 중" : "신고하기"}
+          </button>
+        </div>
+      </section>
     </div>
   );
 }

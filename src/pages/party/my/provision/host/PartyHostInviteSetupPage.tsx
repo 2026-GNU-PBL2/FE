@@ -96,8 +96,7 @@ const OTT_INVITE_LINKS: OttInviteLink[] = [
   {
     serviceNames: ["유튜브", "youtube"],
     title: "유튜브 가족 멤버 초대",
-    description:
-      "유튜브 Premium 가족 공유 설정에서 파티원 계정을 초대하세요.",
+    description: "유튜브 Premium 가족 공유 설정에서 파티원 계정을 초대하세요.",
     url: "https://www.youtube.com/paid_memberships",
     buttonLabel: "초대하러 가기",
     note: "가족 요금제는 동일 거주지 조건이 적용될 수 있습니다.",
@@ -268,9 +267,11 @@ export default function PartyHostInviteSetupPage() {
           const membersResponse = await api.get<
             ProvisionMember[] | ApiEnvelope<ProvisionMember[]>
           >(`/api/v1/parties/${partyId}/provision/members`);
+
           const memberData =
             unwrapResponse<ProvisionMember[]>(membersResponse.data) ?? [];
 
+          console.log(memberData);
           setMembers(memberData);
         } catch (membersError) {
           console.error(membersError);
@@ -367,8 +368,7 @@ export default function PartyHostInviteSetupPage() {
                   {product.serviceName}
                 </h1>
                 <p className="mt-2 max-w-xl text-sm font-semibold leading-6 text-slate-500">
-                  서비스 구독이 완료되었다면 파티원 이용 안내를
-                  활성화해주세요.
+                  서비스 구독이 완료되었다면 파티원 이용 안내를 활성화해주세요.
                 </p>
               </div>
             </div>
@@ -423,7 +423,10 @@ export default function PartyHostInviteSetupPage() {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex min-w-0 gap-4">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
-                      <Icon icon="solar:cart-large-2-bold" className="h-6 w-6" />
+                      <Icon
+                        icon="solar:cart-large-2-bold"
+                        className="h-6 w-6"
+                      />
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-brand-main">
