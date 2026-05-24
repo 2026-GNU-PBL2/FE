@@ -1,6 +1,5 @@
 import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
-import { useAuthStore } from "@/stores/authStore";
 
 type LegalSection = {
   title: string;
@@ -24,19 +23,28 @@ export default function LegalDocumentPage({
   updatedDate,
   sections,
 }: LegalDocumentPageProps) {
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const authStatus = useAuthStore((state) => state.authStatus);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const isLoggedIn =
-    Boolean(accessToken) && isAuthenticated && authStatus === "authenticated";
-  const returnPath = isLoggedIn ? "/" : "/log-in";
-  const returnLabel = isLoggedIn ? "홈으로 돌아가기" : "로그인으로 돌아가기";
-
   return (
-    <div className="min-h-full bg-brand-bg">
-      <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+    <main className="min-h-screen bg-brand-bg">
+      <header className="absolute inset-x-0 top-0 z-20">
+        <div className="mx-auto flex max-w-5xl items-center px-4 py-5 sm:px-6 lg:px-8">
+          <Link to="/" className="inline-flex items-center gap-2.5">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-[15px] bg-white shadow-[0_10px_28px_rgba(15,23,42,0.12)] ring-1 ring-[#d6d6d6]/70">
+              <img
+                src="/images/logo-symbol.png"
+                alt=""
+                className="h-6 w-6 object-contain"
+              />
+            </span>
+            <span className="text-lg font-extrabold tracking-tight text-[#1d1d1f]">
+              <span className="text-[#4f46e5]">Sub</span>mate
+            </span>
+          </Link>
+        </div>
+      </header>
+
+      <div className="mx-auto w-full max-w-5xl px-4 pb-8 pt-24 sm:px-6 lg:px-8 lg:pb-10">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[280px_1fr] lg:items-start">
-          <aside className="rounded-[28px] bg-white p-5 shadow-[0_12px_34px_rgba(15,23,42,0.05)] ring-1 ring-slate-100 lg:sticky lg:top-24">
+          <aside className="rounded-[28px] bg-white p-5 shadow-[0_12px_34px_rgba(15,23,42,0.05)] ring-1 ring-slate-100 lg:sticky lg:top-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-main ring-1 ring-blue-100">
               <Icon icon="solar:document-text-bold-duotone" className="h-4 w-4" />
               {badge}
@@ -61,10 +69,10 @@ export default function LegalDocumentPage({
             </div>
 
             <Link
-              to={returnPath}
+              to="/"
               className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white transition hover:bg-slate-800 active:scale-95"
             >
-              {returnLabel}
+              홈으로 돌아가기
             </Link>
           </aside>
 
@@ -127,6 +135,6 @@ export default function LegalDocumentPage({
           </article>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

@@ -120,8 +120,6 @@ const router = createBrowserRouter([
           { path: "/about", element: <AboutPage /> },
           { path: "/event", element: <EventPage /> },
           { path: "/support", element: <SupportPage /> },
-          { path: "/terms", element: <TermsPage /> },
-          { path: "/privacy", element: <PrivacyPage /> },
           { path: "/parties", element: <PartyListPage /> },
           {
             path: "/parties/:type/:partyId",
@@ -281,6 +279,8 @@ const router = createBrowserRouter([
         element: <PublicRoute />,
         children: [{ path: "/log-in", element: <LoginPage /> }],
       },
+      { path: "/terms", element: <TermsPage /> },
+      { path: "/privacy", element: <PrivacyPage /> },
       {
         path: "/oauth/:provider/callback",
         element: <SocialLoginCallbackPage />,
