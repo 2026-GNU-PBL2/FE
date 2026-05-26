@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
-import { getApiErrorMessage, resolveConcurrentIssue } from "@/api/concurrent";
 
 type NotificationStatus = "UNREAD" | "READ" | string;
 
@@ -26,12 +25,16 @@ type NotificationType =
   | "MEMBER_PROVISION_TIMEOUT_NOTICE"
   | "MEMBER_AUTO_REMATCH_STARTED"
   | "CONCURRENT_WARNING_1"
-  | "LEADER_ACTION_REQUIRED_24H"
+  | "HOST_ACTION_REQUIRED_24H"
+  | "HOST_RENOTIFY"
   | "DEVICE_ALERT"
   | "DEVICE_CHECK_REQUEST"
+  | "DEVICE_CONFIRMED_MINE"
   | "CREDENTIALS_UPDATED"
   | "PARTY_DISSOLVING"
+  | "HOST_URGENT_PASSWORD_CHANGE"
   | "PARTY_DISSOLVED_FINAL"
+  | "LEADER_ACTION_REQUIRED_24H"
   | string;
 
 type NotificationPayload = {
@@ -40,6 +43,10 @@ type NotificationPayload = {
   party_id?: string | number;
   partyID?: string | number;
   partyName?: string;
+  role?: string;
+  partyRole?: string;
+  memberRole?: string;
+  userRole?: string;
   incidentId?: string;
   alertId?: string | number;
   deviceAlertId?: string | number;
@@ -73,6 +80,10 @@ type NotificationItem = {
   createdAt: string;
   readAt: string | null;
   partyName?: string | null;
+  role?: string | null;
+  partyRole?: string | null;
+  memberRole?: string | null;
+  userRole?: string | null;
   incidentId?: string | null;
   alertId?: string | number | null;
   deviceAlertId?: string | number | null;
@@ -102,6 +113,11 @@ type ApiEnvelope<T> = {
   data?: T;
   result?: T;
   payload?: T;
+};
+
+type PartyHistoryRoleItem = {
+  partyId: number;
+  role?: string | null;
 };
 
 function unwrapResponse<T>(
@@ -187,6 +203,47 @@ function getNotificationPartyId(notification: NotificationItem) {
   );
 }
 
+function normalizeRole(value: unknown) {
+  const normalized = String(value ?? "")
+    .trim()
+    .toUpperCase();
+
+  if (normalized === "HOST" || normalized === "LEADER") return "HOST";
+  if (normalized === "MEMBER") return "MEMBER";
+
+  return null;
+}
+
+function getNotificationRole(notification: NotificationItem) {
+  const payload = getNotificationPayload(notification);
+  const topLevel = notification as NotificationItem & Record<string, unknown>;
+  const loosePayload = payload as NotificationPayload & Record<string, unknown>;
+
+  return normalizeRole(
+    notification.role ??
+      notification.partyRole ??
+      notification.memberRole ??
+      notification.userRole ??
+      payload.role ??
+      payload.partyRole ??
+      payload.memberRole ??
+      payload.userRole ??
+      topLevel.party_role ??
+      topLevel.member_role ??
+      topLevel.user_role ??
+      loosePayload.party_role ??
+      loosePayload.member_role ??
+      loosePayload.user_role,
+  );
+}
+
+function getDashboardPathByRole(partyId: string | number, role: string | null) {
+  if (role === "HOST") return `/myparty/${partyId}/provision/dashboard`;
+  if (role === "MEMBER") return `/myparty/${partyId}/provision/member-dashboard`;
+
+  return `/myparty/${partyId}`;
+}
+
 function getNotificationField<K extends keyof NotificationPayload>(
   notification: NotificationItem,
   key: K,
@@ -229,6 +286,21 @@ function getDeviceAlertId(notification: NotificationItem) {
   const payload = getNotificationPayload(notification);
   const topLevel = notification as NotificationItem & Record<string, unknown>;
   const loosePayload = payload as NotificationPayload & Record<string, unknown>;
+  const referenceIdKeys = ["referenceId", "reference_id"];
+  const referenceId =
+    notification.referenceId ??
+    notification.reference_id ??
+    payload.referenceId ??
+    payload.reference_id ??
+    topLevel.reference_id ??
+    loosePayload.reference_id ??
+    findRouteValueByKeys(payload, referenceIdKeys) ??
+    findRouteValueByKeys(topLevel, referenceIdKeys);
+
+  if (notification.type === "DEVICE_CHECK_REQUEST") {
+    return stringifyRouteValue(referenceId);
+  }
+
   const alertIdKeys = [
     "alertId",
     "alert_id",
@@ -276,8 +348,7 @@ function getDeviceAlertId(notification: NotificationItem) {
     loosePayload.target_id ??
     loosePayload.reference_id ??
     findRouteValueByKeys(payload, alertIdKeys) ??
-    findRouteValueByKeys(topLevel, alertIdKeys) ??
-    (notification.type === "DEVICE_CHECK_REQUEST" ? notification.id : null);
+    findRouteValueByKeys(topLevel, alertIdKeys);
 
   return stringifyRouteValue(value);
 }
@@ -342,6 +413,9 @@ function getNotificationMeta(type: NotificationType) {
       };
 
     case "CONCURRENT_WARNING_1":
+    case "HOST_ACTION_REQUIRED_24H":
+    case "HOST_RENOTIFY":
+    case "HOST_URGENT_PASSWORD_CHANGE":
     case "LEADER_ACTION_REQUIRED_24H":
       return {
         label: "동시접속 경고",
@@ -357,6 +431,14 @@ function getNotificationMeta(type: NotificationType) {
         icon: "solar:smartphone-bold",
         badgeClassName: "bg-orange-50 text-orange-700 ring-orange-100",
         iconClassName: "bg-orange-50 text-orange-600",
+      };
+
+    case "DEVICE_CONFIRMED_MINE":
+      return {
+        label: "기기 확인",
+        icon: "solar:smartphone-update-bold",
+        badgeClassName: "bg-teal-50 text-teal-700 ring-teal-100",
+        iconClassName: "bg-teal-50 text-teal-600",
       };
 
     case "CREDENTIALS_UPDATED":
@@ -427,7 +509,6 @@ function isDeviceAlertNotification(notification: NotificationItem) {
     notification.type === "DEVICE_ALERT" ||
     notification.type === "DEVICE_CHECK_REQUEST" ||
     notification.type.includes("DEVICE_ALERT") ||
-    Boolean(getDeviceAlertId(notification)) ||
     Boolean(getNotificationField(notification, "detectedDevice")) ||
     title.includes("기기 확인 요청") ||
     content.includes("본인 기기인지 확인")
@@ -439,6 +520,9 @@ function isLeaderActionRequiredNotification(notification: NotificationItem) {
   const content = notification.webContent || notification.content || "";
 
   return (
+    notification.type === "HOST_ACTION_REQUIRED_24H" ||
+    notification.type === "HOST_RENOTIFY" ||
+    notification.type === "HOST_URGENT_PASSWORD_CHANGE" ||
     notification.type === "LEADER_ACTION_REQUIRED_24H" ||
     title.includes("파티장 조치 요청") ||
     content.includes("비밀번호를 변경하고 이용 정보를 재공유")
@@ -484,6 +568,9 @@ function getNotificationTargetPath(notification: NotificationItem) {
         "/support?category=동시접속"
       );
 
+    case "HOST_ACTION_REQUIRED_24H":
+    case "HOST_RENOTIFY":
+    case "HOST_URGENT_PASSWORD_CHANGE":
     case "LEADER_ACTION_REQUIRED_24H":
       return partyId ? `/myparty/${partyId}/provision/dashboard` : "/myparty";
 
@@ -534,9 +621,6 @@ export default function NotificationPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [readingIds, setReadingIds] = useState<Set<number>>(new Set());
-  const [resolvingIncidentIds, setResolvingIncidentIds] = useState<Set<string>>(
-    new Set(),
-  );
 
   const hasNotifications = notifications.length > 0;
   const totalCount = notifications.length;
@@ -634,6 +718,36 @@ export default function NotificationPage() {
       : `/device-alert/${alertId}`;
   };
 
+  const resolvePartyDashboardPath = async (notification: NotificationItem) => {
+    const partyId = getNotificationPartyId(notification);
+
+    if (!partyId) return "/myparty";
+
+    const notificationRole = getNotificationRole(notification);
+
+    if (notificationRole) {
+      return getDashboardPathByRole(partyId, notificationRole);
+    }
+
+    try {
+      const response = await api.get("/api/v1/me/party-history");
+      const data = unwrapResponse<PartyHistoryRoleItem[]>(response.data) ?? [];
+      const party = Array.isArray(data)
+        ? data.find((item) => String(item.partyId) === String(partyId))
+        : null;
+
+      return getDashboardPathByRole(partyId, normalizeRole(party?.role));
+    } catch (error) {
+      console.error(error);
+      toast.info("내 파티 역할을 확인하지 못해 파티 상세로 이동합니다.");
+      return `/myparty/${partyId}`;
+    }
+  };
+
+  const handleGoPartyDashboard = async (notification: NotificationItem) => {
+    navigate(await resolvePartyDashboardPath(notification));
+  };
+
   const handleNotificationClick = async (notification: NotificationItem) => {
     const readSuccess = await markNotificationRead(notification);
 
@@ -666,11 +780,14 @@ export default function NotificationPage() {
           detectedAt:
             getNotificationField(notification, "detectedAt") ||
             notification.createdAt,
-          expiresAt:
-            getNotificationField(notification, "expiresAt") ||
-            notification.createdAt,
+          expiresAt: getNotificationField(notification, "expiresAt"),
         },
       });
+      return;
+    }
+
+    if (notification.type === "DEVICE_CONFIRMED_MINE") {
+      navigate(await resolvePartyDashboardPath(notification));
       return;
     }
 
@@ -694,41 +811,6 @@ export default function NotificationPage() {
         openConcurrentIssueModal: true,
       },
     });
-  };
-
-  const handleResolveIncident = async (notification: NotificationItem) => {
-    const partyId = getNotificationPartyId(notification);
-    const incidentId = getNotificationField(notification, "incidentId");
-
-    if (!partyId || !incidentId) {
-      toast.info("처리할 경고 정보를 확인할 수 없습니다.");
-      return;
-    }
-
-    if (resolvingIncidentIds.has(incidentId)) return;
-
-    setResolvingIncidentIds((prev) => {
-      const next = new Set(prev);
-      next.add(incidentId);
-      return next;
-    });
-
-    try {
-      await resolveConcurrentIssue(partyId, {
-        incidentId: Number(incidentId),
-      });
-      toast.success("파티장 조치 완료로 처리했습니다.");
-      await markNotificationRead(notification);
-    } catch (error) {
-      console.error(error);
-      toast.error(getApiErrorMessage(error, "조치 완료 처리에 실패했습니다."));
-    } finally {
-      setResolvingIncidentIds((prev) => {
-        const next = new Set(prev);
-        next.delete(incidentId);
-        return next;
-      });
-    }
   };
 
   useEffect(() => {
@@ -902,21 +984,16 @@ export default function NotificationPage() {
 
                         <NotificationActions
                           notification={notification}
-                          isResolving={
-                            getNotificationField(notification, "incidentId")
-                              ? resolvingIncidentIds.has(
-                                  getNotificationField(
-                                    notification,
-                                    "incidentId",
-                                  ) as string,
-                                )
-                              : false
-                          }
                           onFaq={() => navigate("/support?category=동시접속")}
                           onReport={() =>
                             handleReportConcurrentIssue(notification)
                           }
-                          onResolve={() => handleResolveIncident(notification)}
+                          onHostAction={() =>
+                            navigate(getNotificationTargetPath(notification))
+                          }
+                          onParty={() =>
+                            void handleGoPartyDashboard(notification)
+                          }
                           onFindParty={() => navigate("/parties")}
                         />
                       </div>
@@ -934,17 +1011,17 @@ export default function NotificationPage() {
 
 function NotificationActions({
   notification,
-  isResolving,
   onFaq,
   onReport,
-  onResolve,
+  onHostAction,
+  onParty,
   onFindParty,
 }: {
   notification: NotificationItem;
-  isResolving: boolean;
   onFaq: () => void;
   onReport: () => void;
-  onResolve: () => void;
+  onHostAction: () => void;
+  onParty: () => void;
   onFindParty: () => void;
 }) {
   const stop = (handler: () => void) => {
@@ -975,16 +1052,34 @@ function NotificationActions({
     );
   }
 
-  if (notification.type === "LEADER_ACTION_REQUIRED_24H") {
+  if (
+    notification.type === "HOST_ACTION_REQUIRED_24H" ||
+    notification.type === "HOST_RENOTIFY" ||
+    notification.type === "HOST_URGENT_PASSWORD_CHANGE" ||
+    notification.type === "LEADER_ACTION_REQUIRED_24H"
+  ) {
     return (
       <div className="mt-4 flex flex-wrap gap-2">
         <button
           type="button"
-          onClick={stop(onResolve)}
-          disabled={isResolving}
+          onClick={stop(onHostAction)}
           className="inline-flex h-9 items-center justify-center rounded-full bg-brand-main px-3 text-xs font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
-          {isResolving ? "처리 중" : "조치 완료"}
+          조치하러 가기
+        </button>
+      </div>
+    );
+  }
+
+  if (notification.type === "DEVICE_CONFIRMED_MINE") {
+    return (
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={stop(onParty)}
+          className="inline-flex h-9 items-center justify-center rounded-full bg-teal-50 px-3 text-xs font-bold text-teal-700 ring-1 ring-teal-100 transition hover:bg-teal-100"
+        >
+          파티 확인하기
         </button>
       </div>
     );
