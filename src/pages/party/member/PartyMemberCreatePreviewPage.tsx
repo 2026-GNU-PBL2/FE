@@ -112,7 +112,7 @@ export default function PartyMemberCreatePreviewPage() {
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-2xl items-center justify-center">
           <section className="w-full rounded-[28px] bg-white px-6 py-10 text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-[#047857]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-[#00875A]">
               <Icon icon="solar:refresh-bold" className="h-7 w-7 animate-spin" />
             </div>
             <p className="mt-4 text-[18px] font-extrabold text-slate-950">
@@ -129,7 +129,7 @@ export default function PartyMemberCreatePreviewPage() {
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-2xl items-center justify-center">
           <section className="w-full rounded-[28px] bg-white px-6 py-10 text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-[#047857]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-[#00875A]">
               <Icon icon="solar:info-circle-bold" className="h-7 w-7" />
             </div>
             <h1 className="mt-5 text-[24px] font-extrabold tracking-tight text-slate-950">
@@ -201,14 +201,14 @@ export default function PartyMemberCreatePreviewPage() {
                   ) : (
                     <Icon
                       icon="solar:play-circle-bold"
-                      className="h-6 w-6 text-[#047857]"
+                      className="h-6 w-6 text-[#00875A]"
                     />
                   )}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-[#047857]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-[#00875A]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#00A86B]" />
                     파티원 최종 확인
                   </div>
 
@@ -236,13 +236,13 @@ export default function PartyMemberCreatePreviewPage() {
                   </p>
                 </div>
 
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#047857] shadow-sm ring-1 ring-emerald-100">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#00875A] shadow-sm ring-1 ring-[#A9E6C9]">
                   <Icon icon="solar:card-bold" className="h-5 w-5" />
                 </div>
               </div>
 
               <div className="mt-4 h-2 overflow-hidden rounded-full bg-white">
-                <div className="h-full w-full rounded-full bg-[#10B981]" />
+                <div className="h-full w-full rounded-full bg-[#00A86B]" />
               </div>
 
               <div className="mt-2.5 flex items-center justify-between text-[12px] font-bold text-slate-400">
@@ -298,18 +298,18 @@ export default function PartyMemberCreatePreviewPage() {
                   <span className="text-[16px] font-extrabold text-slate-950">
                     최초 결제 예정 금액
                   </span>
-                  <strong className="text-right text-[22px] font-extrabold text-[#047857]">
+                  <strong className="text-right text-[22px] font-extrabold text-[#00875A]">
                     {formatPrice(preview.firstPaymentAmount)}
                   </strong>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 rounded-2xl bg-emerald-50/80 px-4 py-3 ring-1 ring-emerald-100">
+            <div className="mt-4 rounded-2xl bg-emerald-50/80 px-4 py-3 ring-1 ring-[#A9E6C9]">
               <div className="flex gap-3">
                 <Icon
                   icon="solar:shield-check-bold"
-                  className="mt-0.5 h-4 w-4 shrink-0 text-[#047857]"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-[#00875A]"
                 />
                 <p className="text-[13px] font-semibold leading-6 text-slate-600">
                   등록된 카드로 파티 참여 결제가 진행됩니다.
@@ -318,11 +318,11 @@ export default function PartyMemberCreatePreviewPage() {
             </div>
 
             {preview.paymentNotice ? (
-              <div className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 ring-1 ring-emerald-100">
+              <div className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 ring-1 ring-[#A9E6C9]">
                 <div className="flex gap-3">
                   <Icon
                     icon="solar:shield-warning-bold"
-                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[#00875A]"
                   />
                   <p className="text-[13px] font-semibold leading-6 text-slate-600">
                     {preview.paymentNotice}
@@ -330,11 +330,11 @@ export default function PartyMemberCreatePreviewPage() {
                 </div>
               </div>
             ) : (
-              <div className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 ring-1 ring-emerald-100">
+              <div className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 ring-1 ring-[#A9E6C9]">
                 <div className="flex gap-3">
                   <Icon
                     icon="solar:shield-warning-bold"
-                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[#00875A]"
                   />
                   <p className="text-[13px] font-semibold leading-6 text-slate-600">
                     결제 금액과 참여 조건을 확인한 뒤 다음 단계로 진행해 주세요.
@@ -351,7 +351,7 @@ export default function PartyMemberCreatePreviewPage() {
                 "mt-5 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full px-6 text-[15px] font-bold transition",
                 isApplying
                   ? "cursor-not-allowed bg-slate-200 text-slate-400"
-                  : "bg-[#10B981] text-white shadow-lg shadow-emerald-900/20 hover:-translate-y-0.5 hover:bg-[#059669]",
+                  : "bg-[#00A86B] text-white shadow-lg shadow-emerald-900/20 hover:-translate-y-0.5 hover:bg-[#00875A]",
               ].join(" ")}
             >
               {isApplying ? "파티 참여 신청 중..." : "파티 참여 신청"}

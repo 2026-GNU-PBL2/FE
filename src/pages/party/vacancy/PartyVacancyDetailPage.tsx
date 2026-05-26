@@ -144,11 +144,11 @@ export default function PartyVacancyDetailPage() {
         noticeTitle: "파티장 참여 안내",
       }
     : {
-        text: "text-[#047857]",
-        bg: "bg-[#10B981]",
-        lightBg: "bg-[#ECFDF5]",
-        ring: "ring-[#6EE7B7]",
-        buttonHover: "hover:bg-[#059669]",
+        text: "text-[#00875A]",
+        bg: "bg-[#00A86B]",
+        lightBg: "bg-[#EAF8F1]",
+        ring: "ring-[#A9E6C9]",
+        buttonHover: "hover:bg-[#00875A]",
         action: "파티원 참여하기",
         caption: "MEMBER VACANCY",
         headline: "파티원 참여 정보를 확인해 주세요",

@@ -174,7 +174,7 @@ function getMemberStatusLabel(status: MemberStatus) {
 
 function getStatusStyle(status: MemberStatus) {
   if (status === "ACTIVE") {
-    return "bg-emerald-50 text-emerald-700 ring-emerald-100";
+    return "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]";
   }
 
   if (status === "REQUIRED") {
@@ -589,7 +589,7 @@ function ChecklistItem({ text }: { text: string }) {
     <div className="flex items-start gap-2.5">
       <Icon
         icon="solar:check-circle-bold"
-        className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600"
+        className="mt-0.5 h-5 w-5 shrink-0 text-[#00875A]"
       />
       <p className="text-sm font-semibold leading-6 text-slate-600">{text}</p>
     </div>

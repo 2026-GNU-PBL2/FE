@@ -12,7 +12,7 @@ function getStatusContent(result: PartyJoinApplyResponse | null) {
     return {
       badge: "ACTIVE",
       icon: "solar:check-circle-bold",
-      iconClassName: "bg-white text-[#047857] ring-emerald-100",
+      iconClassName: "bg-white text-[#00875A] ring-[#A9E6C9]",
       title: "파티 참여가 완료되었습니다",
       description:
         result.message || "즉시 참여 가능한 파티에 정상적으로 참여했습니다.",
@@ -34,7 +34,7 @@ function getStatusContent(result: PartyJoinApplyResponse | null) {
   return {
     badge: "REQUESTED",
     icon: "solar:clipboard-check-bold",
-    iconClassName: "bg-white text-[#047857] ring-emerald-100",
+    iconClassName: "bg-white text-[#00875A] ring-[#A9E6C9]",
     title: "파티 참여 신청이 접수되었습니다",
     description: result?.message || "파티 참여 신청 결과를 확인해 주세요.",
   };
@@ -59,7 +59,7 @@ export default function PartyMemberCreateCompletePage() {
               <Icon icon={content.icon} className="h-10 w-10" />
             </div>
 
-            <p className="mt-6 text-[11px] font-extrabold tracking-[0.16em] text-[#047857]">
+            <p className="mt-6 text-[11px] font-extrabold tracking-[0.16em] text-[#00875A]">
               {content.badge}
             </p>
 
@@ -74,13 +74,13 @@ export default function PartyMemberCreateCompletePage() {
 
           <div className="px-6 py-6">
             <div className="mx-auto mb-6 flex h-2 w-16 overflow-hidden rounded-full bg-emerald-50">
-              <div className="h-full w-full rounded-full bg-[#10B981]" />
+              <div className="h-full w-full rounded-full bg-[#00A86B]" />
             </div>
 
             <div className="flex flex-col gap-3">
             <Link
               to="/myparty"
-              className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#10B981] text-[15px] font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669]"
+              className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#00A86B] text-[15px] font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#00875A]"
             >
               내 파티로 이동
             </Link>

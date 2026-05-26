@@ -352,7 +352,7 @@ function RecruitPartyCard({
       className={[
         "group overflow-hidden rounded-[28px] border bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-xl sm:p-5",
         isMint
-          ? "border-[#A7F3D0] shadow-emerald-900/5 hover:border-[#10B981] hover:shadow-emerald-900/10"
+          ? "border-[#A9E6C9] shadow-emerald-900/5 hover:border-[#00A86B] hover:shadow-emerald-900/10"
           : "border-blue-100 shadow-blue-900/5 hover:border-brand-sub hover:shadow-blue-900/10",
       ].join(" ")}
     >
@@ -394,7 +394,7 @@ function RecruitPartyCard({
                 className={[
                   "inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1",
                   isMint
-                    ? "bg-[#ECFDF5] text-[#047857] ring-[#6EE7B7]"
+                    ? "bg-[#EAF8F1] text-[#00875A] ring-[#A9E6C9]"
                     : "bg-blue-50 text-brand-main ring-blue-100",
                 ].join(" ")}
               >
@@ -416,7 +416,7 @@ function RecruitPartyCard({
             className={[
               "inline-flex h-11 shrink-0 items-center justify-center rounded-full px-5 text-sm font-bold text-white shadow-md transition group-hover:scale-[1.02]",
               isMint
-                ? "bg-[#10B981] shadow-emerald-900/20 hover:bg-[#059669]"
+                ? "bg-[#00A86B] shadow-emerald-900/20 hover:bg-[#00875A]"
                 : "bg-brand-main shadow-blue-900/20 hover:bg-blue-800",
             ].join(" ")}
           >
@@ -480,7 +480,7 @@ function RecruitSection({
             className={[
               "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold",
               isMint
-                ? "bg-[#ECFDF5] text-[#047857]"
+                ? "bg-[#EAF8F1] text-[#00875A]"
                 : "bg-blue-50 text-brand-main",
             ].join(" ")}
           >
@@ -502,7 +502,7 @@ function RecruitSection({
           className={[
             "inline-flex h-11 items-center justify-center gap-2 rounded-full border bg-white px-5 text-sm font-bold transition hover:-translate-y-0.5 hover:shadow-md",
             isMint
-              ? "border-[#6EE7B7] text-[#047857] hover:bg-[#ECFDF5]"
+              ? "border-[#A9E6C9] text-[#00875A] hover:bg-[#EAF8F1]"
               : "border-slate-200 text-slate-700 hover:border-sky-200 hover:bg-slate-50",
           ].join(" ")}
         >
@@ -529,7 +529,7 @@ function RecruitSection({
               icon="solar:document-text-search-bold"
               className={[
                 "h-7 w-7",
-                isMint ? "text-[#047857]" : "text-brand-main",
+                isMint ? "text-[#00875A]" : "text-brand-main",
               ].join(" ")}
             />
           </div>
@@ -848,7 +848,7 @@ export default function HomePage() {
                         {getProductSubtitle(product)}
                       </p>
 
-                      <p className="mt-3 text-sm font-extrabold text-[#047857]">
+                      <p className="mt-3 text-sm font-extrabold text-[#00875A]">
                         {formatPrice(product.pricePerMember)}
                       </p>
                     </div>

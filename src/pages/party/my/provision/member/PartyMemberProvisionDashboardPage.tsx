@@ -141,7 +141,7 @@ function getMemberStatusLabel(status?: MemberStatus | null) {
 
 function getStatusStyle(status?: string | null) {
   if (status === "ACTIVE" || status === "COMPLETED") {
-    return "bg-emerald-50 text-emerald-700 ring-emerald-100";
+    return "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]";
   }
 
   if (status === "IN_PROGRESS" || status === "REQUIRED") {
@@ -159,7 +159,7 @@ function getStatusTone(status?: string | null) {
   if (status === "ACTIVE" || status === "COMPLETED") {
     return {
       icon: "solar:check-circle-bold",
-      className: "bg-[#ECFDF5] text-[#047857] ring-[#6EE7B7]",
+      className: "bg-[#EAF8F1] text-[#00875A] ring-[#A9E6C9]",
     };
   }
 
@@ -589,7 +589,7 @@ export default function PartyMemberProvisionDashboardPage() {
           <div className="px-5 py-6 sm:px-8">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-[13px] font-extrabold text-[#10B981]">
+                <p className="text-[13px] font-extrabold text-[#00875A]">
                   MEMBER PARTY
                 </p>
                 <h1 className="mt-2 truncate text-[28px] font-extrabold tracking-tight text-slate-950">
@@ -599,7 +599,7 @@ export default function PartyMemberProvisionDashboardPage() {
                   현재 이용 중인 파티입니다.
                 </p>
               </div>
-              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-[#ECFDF5] text-[#047857] ring-1 ring-[#6EE7B7]">
+              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-[#EAF8F1] text-[#00875A] ring-1 ring-[#A9E6C9]">
                 <Icon icon="solar:user-check-bold" className="h-6 w-6" />
               </div>
             </div>
@@ -610,7 +610,7 @@ export default function PartyMemberProvisionDashboardPage() {
           <div className="px-5 py-5 sm:px-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-xs font-medium text-[#10B981]">
+                <p className="text-xs font-medium text-[#00875A]">
                   파티원 이용 현황
                 </p>
                 <h2 className="mt-1 text-xl font-bold text-slate-950">
@@ -647,7 +647,7 @@ export default function PartyMemberProvisionDashboardPage() {
         {isInviteProvision ? (
           <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
             <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#ECFDF5] text-[#047857] ring-1 ring-[#6EE7B7]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EAF8F1] text-[#00875A] ring-1 ring-[#A9E6C9]">
                 <Icon icon="solar:check-circle-bold" className="h-6 w-6" />
               </div>
               <div className="min-w-0 flex-1">
@@ -707,7 +707,7 @@ export default function PartyMemberProvisionDashboardPage() {
                           type="button"
                           onClick={handleRevealPassword}
                           disabled={isPasswordLoading}
-                          className="flex h-9 shrink-0 items-center justify-center rounded-xl bg-[#10B981] px-3 text-xs font-bold text-white transition hover:bg-[#059669] disabled:cursor-not-allowed disabled:bg-slate-300"
+                          className="flex h-9 shrink-0 items-center justify-center rounded-xl bg-[#00A86B] px-3 text-xs font-bold text-white transition hover:bg-[#00875A] disabled:cursor-not-allowed disabled:bg-slate-300"
                         >
                           {isPasswordLoading ? "조회 중" : "보기"}
                         </button>
@@ -831,7 +831,7 @@ function MemberDeviceTools({
     <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-medium text-[#10B981]">DEVICE</p>
+          <p className="text-xs font-medium text-[#00875A]">DEVICE</p>
           <h2 className="mt-1 text-lg font-bold text-slate-950">
             내 기기 관리
           </h2>

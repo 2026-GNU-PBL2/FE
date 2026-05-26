@@ -180,7 +180,7 @@ function isProvisionSetupComplete(provision?: PartyProvisionResponse | null) {
 
 function getStatusStyle(status: string) {
   if (status === "ACTIVE" || status === "COMPLETED") {
-    return "bg-emerald-50 text-emerald-700 ring-emerald-100";
+    return "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]";
   }
 
   if (status === "WAITING") {
@@ -738,7 +738,7 @@ export default function MyPartyDetailPage() {
         <div className="mx-auto w-full max-w-3xl">
           <section className="overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
             <div className="border-b border-slate-100 px-6 py-10 sm:px-10">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-50 text-[#047857] ring-1 ring-emerald-100">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-50 text-[#00875A] ring-1 ring-[#A9E6C9]">
                 <Icon
                   icon="solar:users-group-rounded-bold"
                   className="h-9 w-9"
@@ -762,9 +762,9 @@ export default function MyPartyDetailPage() {
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-emerald-50 px-4 py-4 ring-1 ring-emerald-100">
-                <p className="text-xs font-bold text-[#047857]">이용 방식</p>
-                <p className="mt-1 text-sm font-extrabold text-[#047857]">
+              <div className="rounded-2xl bg-emerald-50 px-4 py-4 ring-1 ring-[#A9E6C9]">
+                <p className="text-xs font-bold text-[#00875A]">이용 방식</p>
+                <p className="mt-1 text-sm font-extrabold text-[#00875A]">
                   {provisionTypeText}
                 </p>
               </div>
@@ -773,7 +773,7 @@ export default function MyPartyDetailPage() {
             <div className="flex flex-col items-center justify-center gap-3 px-6 pb-6 sm:flex-row sm:px-10">
               <button
                 onClick={handleGoMemberGuide}
-                className="inline-flex h-13 w-full items-center justify-center rounded-full bg-[#10B981] px-6 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669] sm:w-auto"
+                className="inline-flex h-13 w-full items-center justify-center rounded-full bg-[#00A86B] px-6 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#00875A] sm:w-auto"
               >
                 안내사항 확인하기
               </button>
@@ -988,7 +988,7 @@ export default function MyPartyDetailPage() {
               )}
 
             {visibleProvisionGuide && (
-              <div className="mt-6 rounded-3xl bg-emerald-50 px-5 py-4 text-sm font-semibold leading-6 text-emerald-800 ring-1 ring-emerald-100">
+              <div className="mt-6 rounded-3xl bg-emerald-50 px-5 py-4 text-sm font-semibold leading-6 text-[#00875A] ring-1 ring-[#A9E6C9]">
                 {visibleProvisionGuide}
               </div>
             )}
@@ -996,7 +996,7 @@ export default function MyPartyDetailPage() {
             {!isHost && (
               <button
                 onClick={handleGoMemberGuide}
-                className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#10B981] text-base font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669]"
+                className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#00A86B] text-base font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#00875A]"
               >
                 안내사항 확인하기
                 <Icon icon="solar:alt-arrow-right-linear" className="h-5 w-5" />

@@ -388,8 +388,8 @@ function getNotificationMeta(type: NotificationType) {
       return {
         label: "이용 정보",
         icon: "solar:shield-keyhole-bold",
-        badgeClassName: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-        iconClassName: "bg-emerald-50 text-emerald-600",
+        badgeClassName: "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]",
+        iconClassName: "bg-emerald-50 text-[#00875A]",
       };
 
     case "PROVISION_ACCOUNT_SHARED_REQUIRED":
@@ -400,8 +400,8 @@ function getNotificationMeta(type: NotificationType) {
       return {
         label: "이용 확인",
         icon: "solar:checklist-minimalistic-bold",
-        badgeClassName: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-        iconClassName: "bg-emerald-50 text-emerald-500",
+        badgeClassName: "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]",
+        iconClassName: "bg-emerald-50 text-[#00875A]",
       };
 
     case "PAYMENT_FAILED":
@@ -429,16 +429,16 @@ function getNotificationMeta(type: NotificationType) {
       return {
         label: "새 기기 감지",
         icon: "solar:smartphone-bold",
-        badgeClassName: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-        iconClassName: "bg-emerald-50 text-emerald-600",
+        badgeClassName: "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]",
+        iconClassName: "bg-emerald-50 text-[#00875A]",
       };
 
     case "DEVICE_CONFIRMED_MINE":
       return {
         label: "기기 확인",
         icon: "solar:smartphone-update-bold",
-        badgeClassName: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-        iconClassName: "bg-emerald-50 text-emerald-700",
+        badgeClassName: "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]",
+        iconClassName: "bg-emerald-50 text-[#00875A]",
       };
 
     case "CREDENTIALS_UPDATED":
@@ -469,16 +469,16 @@ function getNotificationMeta(type: NotificationType) {
       return {
         label: "결제 완료",
         icon: "solar:card-2-bold",
-        badgeClassName: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-        iconClassName: "bg-emerald-50 text-emerald-600",
+        badgeClassName: "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]",
+        iconClassName: "bg-emerald-50 text-[#00875A]",
       };
 
     case "SETTLEMENT_COMPLETED":
       return {
         label: "정산 완료",
         icon: "solar:wallet-money-bold",
-        badgeClassName: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-        iconClassName: "bg-emerald-50 text-emerald-500",
+        badgeClassName: "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]",
+        iconClassName: "bg-emerald-50 text-[#00875A]",
       };
 
     case "PARTY_TERMINATED":
@@ -1077,7 +1077,7 @@ function NotificationActions({
         <button
           type="button"
           onClick={stop(onParty)}
-          className="inline-flex h-9 items-center justify-center rounded-full bg-emerald-50 px-3 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100 transition hover:bg-emerald-100"
+          className="inline-flex h-9 items-center justify-center rounded-full bg-emerald-50 px-3 text-xs font-bold text-[#00875A] ring-1 ring-[#A9E6C9] transition hover:bg-[#EAF8F1]"
         >
           파티 확인하기
         </button>

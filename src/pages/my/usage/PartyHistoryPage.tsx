@@ -87,7 +87,7 @@ function getRoleClassName(role: PartyRole) {
   }
 
   if (role === "MEMBER") {
-    return "bg-emerald-50 text-emerald-700 ring-emerald-100";
+    return "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]";
   }
 
   return "bg-slate-100 text-slate-600 ring-slate-200";
@@ -95,7 +95,7 @@ function getRoleClassName(role: PartyRole) {
 
 function getStatusClassName(status: PartyHistoryStatus) {
   if (status === "USING") {
-    return "bg-emerald-50 text-emerald-700 ring-emerald-100";
+    return "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]";
   }
 
   if (status === "SCHEDULED") {

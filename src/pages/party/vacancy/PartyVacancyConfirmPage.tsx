@@ -143,11 +143,11 @@ export default function PartyVacancyConfirmPage() {
         action: "파티장 참여 완료하기",
       }
     : {
-        text: "text-[#047857]",
-        bg: "bg-[#10B981]",
-        hover: "hover:bg-[#059669]",
-        lightBg: "bg-[#ECFDF5]",
-        ring: "ring-[#6EE7B7]",
+        text: "text-[#00875A]",
+        bg: "bg-[#00A86B]",
+        hover: "hover:bg-[#00875A]",
+        lightBg: "bg-[#EAF8F1]",
+        ring: "ring-[#A9E6C9]",
         title: "파티원 참여 최종 확인",
         readyLabel: "결제 카드 확인 완료",
         readyDescription:

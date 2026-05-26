@@ -57,7 +57,7 @@ export default function PartyMemberCardRegisterFailPage() {
                       )
                     : "/parties/members"
                 }
-                className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#10B981] text-[15px] font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669]"
+                className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#00A86B] text-[15px] font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#00875A]"
               >
                 다시 등록하기
                 <Icon icon="solar:alt-arrow-right-linear" className="h-5 w-5" />

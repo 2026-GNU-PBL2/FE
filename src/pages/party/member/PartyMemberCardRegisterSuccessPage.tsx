@@ -178,7 +178,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
                 loading
                   ? "text-brand-main ring-blue-100"
                   : authorized
-                    ? "text-[#10B981] ring-emerald-100"
+                    ? "text-[#00875A] ring-[#A9E6C9]"
                     : duplicated
                       ? "text-amber-500 ring-amber-100"
                       : "text-rose-500 ring-rose-100",
@@ -201,8 +201,8 @@ export default function PartyMemberCardRegisterSuccessPage() {
             </div>
 
             <div className="mt-6">
-              <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#047857] shadow-sm ring-1 ring-emerald-100">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
+              <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#00875A] shadow-sm ring-1 ring-[#A9E6C9]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#00A86B]" />
                 카드 등록
               </div>
 
@@ -249,7 +249,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
                   className={[
                     "h-full w-full rounded-full",
                     authorized
-                      ? "bg-[#10B981]"
+                      ? "bg-[#00A86B]"
                       : duplicated
                         ? "bg-amber-400"
                         : "bg-rose-400",
@@ -262,7 +262,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
               {authorized && redirectUrl ? (
                 <Link
                   to={memberCreatePreviewPath}
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#10B981] text-base font-bold tracking-tight text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669]"
+                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#00A86B] text-base font-bold tracking-tight text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#00875A]"
                 >
                   다음 단계로 이동
                 </Link>
@@ -271,7 +271,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
               {authorized && !redirectUrl ? (
                 <Link
                   to={memberCreatePreviewPath}
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#10B981] text-base font-bold tracking-tight text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669]"
+                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#00A86B] text-base font-bold tracking-tight text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#00875A]"
                 >
                   다음 단계로 이동
                 </Link>
@@ -280,7 +280,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
               {duplicated ? (
                 <Link
                   to={memberCreatePreviewPath}
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#10B981] text-base font-bold tracking-tight text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669]"
+                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#00A86B] text-base font-bold tracking-tight text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#00875A]"
                 >
                   다음 단계로 이동
                 </Link>

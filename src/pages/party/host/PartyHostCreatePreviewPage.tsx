@@ -355,7 +355,7 @@ export default function PartyHostCreatePreviewPage() {
                   <span className="text-[14px] font-semibold text-slate-500">
                     파티장 할인 금액
                   </span>
-                  <strong className="text-right text-[14px] font-extrabold text-[#065F46]">
+                  <strong className="text-right text-[14px] font-extrabold text-[#00875A]">
                     -{formatPrice(preview.hostDiscountAmount)}
                   </strong>
                 </div>
