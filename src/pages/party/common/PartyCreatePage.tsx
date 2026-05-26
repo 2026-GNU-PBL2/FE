@@ -365,7 +365,7 @@ export default function PartyCreatePage() {
                     <span className="font-semibold text-slate-400 line-through">
                       {originalPrice}
                     </span>
-                    <span className="rounded-full bg-teal-50 px-3 py-1.5 font-bold text-[#0F766E] ring-1 ring-teal-100">
+                    <span className="rounded-full bg-emerald-50 px-3 py-1.5 font-bold text-[#047857] ring-1 ring-emerald-100">
                       {product.maxMemberCount}인 분담
                     </span>
                     <span className="font-semibold text-slate-500">
@@ -387,7 +387,7 @@ export default function PartyCreatePage() {
                 </article>
 
                 <article className="rounded-[24px] border border-slate-100 bg-white p-5 shadow-sm shadow-slate-900/5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 text-[#0F766E]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-[#047857]">
                     <Icon
                       icon="solar:users-group-rounded-linear"
                       className="h-5 w-5"

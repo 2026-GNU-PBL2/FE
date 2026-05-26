@@ -171,14 +171,14 @@ export default function PartyMemberCardRegisterSuccessPage() {
     <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-[520px] items-center justify-center">
         <div className="w-full overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-          <div className="bg-linear-to-br from-teal-50 via-white to-white px-6 py-10">
+          <div className="bg-linear-to-br from-emerald-50 via-white to-white px-6 py-10">
             <div
               className={[
                 "mx-auto flex h-18 w-18 items-center justify-center rounded-full bg-white shadow-sm ring-1",
                 loading
                   ? "text-brand-main ring-blue-100"
                   : authorized
-                    ? "text-[#14B8A6] ring-teal-100"
+                    ? "text-[#10B981] ring-emerald-100"
                     : duplicated
                       ? "text-amber-500 ring-amber-100"
                       : "text-rose-500 ring-rose-100",
@@ -201,8 +201,8 @@ export default function PartyMemberCardRegisterSuccessPage() {
             </div>
 
             <div className="mt-6">
-              <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#0F766E] shadow-sm ring-1 ring-teal-100">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+              <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#047857] shadow-sm ring-1 ring-emerald-100">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
                 카드 등록
               </div>
 
@@ -239,7 +239,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
                 className={[
                   "mx-auto mb-6 h-2 w-16 overflow-hidden rounded-full",
                   authorized
-                    ? "bg-teal-50"
+                    ? "bg-emerald-50"
                     : duplicated
                       ? "bg-amber-50"
                       : "bg-rose-50",
@@ -249,7 +249,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
                   className={[
                     "h-full w-full rounded-full",
                     authorized
-                      ? "bg-[#14B8A6]"
+                      ? "bg-[#10B981]"
                       : duplicated
                         ? "bg-amber-400"
                         : "bg-rose-400",
@@ -262,7 +262,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
               {authorized && redirectUrl ? (
                 <Link
                   to={memberCreatePreviewPath}
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#14B8A6] text-base font-bold tracking-tight text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488]"
+                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#10B981] text-base font-bold tracking-tight text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669]"
                 >
                   다음 단계로 이동
                 </Link>
@@ -271,7 +271,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
               {authorized && !redirectUrl ? (
                 <Link
                   to={memberCreatePreviewPath}
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#14B8A6] text-base font-bold tracking-tight text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488]"
+                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#10B981] text-base font-bold tracking-tight text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669]"
                 >
                   다음 단계로 이동
                 </Link>
@@ -280,7 +280,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
               {duplicated ? (
                 <Link
                   to={memberCreatePreviewPath}
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#14B8A6] text-base font-bold tracking-tight text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488]"
+                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#10B981] text-base font-bold tracking-tight text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669]"
                 >
                   다음 단계로 이동
                 </Link>

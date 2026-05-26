@@ -153,7 +153,7 @@ function getPaymentStatusLabel(status?: PaymentStatus | null) {
 }
 
 function getPaymentStatusClassName(status?: PaymentStatus | null) {
-  if (status === "PAID") return "bg-[#EAFBF5] text-[#0F766E] ring-[#BDEFE4]";
+  if (status === "PAID") return "bg-emerald-50 text-emerald-700 ring-emerald-100";
   if (status === "FAILED") return "bg-rose-50 text-rose-700 ring-rose-100";
   if (status === "CANCELLED")
     return "bg-slate-100 text-slate-600 ring-slate-200";
@@ -545,7 +545,7 @@ export default function PartyMemberSettingsPage() {
         <section className="mt-5 rounded-[32px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-xs font-bold text-[#14B8A6]">
+              <p className="text-xs font-bold text-[#10B981]">
                 {partySettings?.ottServiceName || "파티"}
               </p>
               <h1 className="mt-1 text-xl font-bold text-slate-950">
@@ -556,7 +556,7 @@ export default function PartyMemberSettingsPage() {
               </p>
             </div>
 
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EAFBF5] text-[#0F766E] ring-1 ring-[#BDEFE4]">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#ECFDF5] text-[#047857] ring-1 ring-[#6EE7B7]">
               <Icon icon="solar:settings-bold" className="h-5 w-5" />
             </div>
           </div>
@@ -640,9 +640,9 @@ function LeaveActionCard({
 }) {
   if (isLeaveReserved && leaveReservation) {
     return (
-      <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-teal-100 sm:px-6">
+      <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-emerald-100 sm:px-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 ring-1 ring-teal-100">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
             <Icon icon="solar:refresh-bold" className="h-5 w-5" />
           </div>
 
@@ -651,7 +651,7 @@ function LeaveActionCard({
               <h2 className="text-lg font-extrabold text-slate-950">
                 해지 예약 현황
               </h2>
-              <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700 ring-1 ring-teal-100">
+              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">
                 {getStatusLabel(leaveReservation.status)}
               </span>
             </div>
@@ -668,7 +668,7 @@ function LeaveActionCard({
             type="button"
             onClick={onCancelReserve}
             disabled={isSubmitting}
-            className="flex h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-full bg-teal-50 px-4 text-sm font-bold text-teal-700 ring-1 ring-teal-100 transition hover:bg-teal-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200 sm:w-auto"
+            className="flex h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-full bg-emerald-50 px-4 text-sm font-bold text-emerald-700 ring-1 ring-emerald-100 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200 sm:w-auto"
           >
             <Icon
               icon={
@@ -741,10 +741,10 @@ function LeaveReserveConfirmModal({
 }) {
   const isSuccess = variant === "success";
   const iconClassName = isSuccess
-    ? "bg-teal-50 text-teal-700 ring-teal-100"
+    ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
     : "bg-rose-50 text-rose-600 ring-rose-100";
   const buttonClassName = isSuccess
-    ? "bg-teal-50 text-teal-700 ring-teal-100 hover:bg-teal-100"
+    ? "bg-emerald-50 text-emerald-700 ring-emerald-100 hover:bg-emerald-100"
     : "bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-100";
   const icon = isSuccess ? "solar:refresh-bold" : "solar:logout-3-bold";
 
@@ -837,7 +837,7 @@ function BillingMethodCard({
       <div className="px-5 py-5 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-bold text-[#14B8A6]">BILLING</p>
+            <p className="text-xs font-bold text-[#10B981]">BILLING</p>
             <h2 className="mt-1 text-lg font-bold text-slate-950">
               내 결제 수단
             </h2>
@@ -848,7 +848,7 @@ function BillingMethodCard({
           <div
             className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ring-1 ${
               hasBillingKey
-                ? "bg-[#EAFBF5] text-[#0F766E] ring-[#BDEFE4]"
+                ? "bg-[#ECFDF5] text-[#047857] ring-[#6EE7B7]"
                 : "bg-slate-100 text-slate-400 ring-slate-200"
             }`}
           >
@@ -861,7 +861,7 @@ function BillingMethodCard({
         <div className="border-t border-slate-100 bg-slate-50 px-5 py-5 sm:px-6">
           <div className="rounded-[24px] bg-white px-5 py-5 ring-1 ring-slate-200">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAFBF5] text-[#0F766E] ring-1 ring-[#BDEFE4]">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#ECFDF5] text-[#047857] ring-1 ring-[#6EE7B7]">
                 <Icon icon="solar:card-2-bold" className="h-6 w-6" />
               </div>
               <div className="min-w-0 flex-1">
@@ -879,7 +879,7 @@ function BillingMethodCard({
                 type="button"
                 onClick={onChange}
                 disabled={isChanging}
-                className="flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-2xl bg-[#EAFBF5] px-3 text-xs font-bold text-[#0F766E] ring-1 ring-[#BDEFE4] transition hover:bg-[#DDF8EF] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
+                className="flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-2xl bg-[#ECFDF5] px-3 text-xs font-bold text-[#047857] ring-1 ring-[#6EE7B7] transition hover:bg-[#D1FAE5] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
               >
                 <Icon
                   icon={
@@ -926,7 +926,7 @@ function PaymentHistorySection({
     <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold text-[#14B8A6]">PAYMENTS</p>
+          <p className="text-xs font-bold text-[#10B981]">PAYMENTS</p>
           <h2 className="mt-1 text-lg font-bold text-slate-950">내 결제내역</h2>
           <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
             현재 파티에 해당하는 최근 결제내역입니다.

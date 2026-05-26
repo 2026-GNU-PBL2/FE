@@ -12,7 +12,7 @@ function getStatusContent(result: PartyJoinApplyResponse | null) {
     return {
       badge: "ACTIVE",
       icon: "solar:check-circle-bold",
-      iconClassName: "bg-white text-[#0F766E] ring-teal-100",
+      iconClassName: "bg-white text-[#047857] ring-emerald-100",
       title: "파티 참여가 완료되었습니다",
       description:
         result.message || "즉시 참여 가능한 파티에 정상적으로 참여했습니다.",
@@ -34,7 +34,7 @@ function getStatusContent(result: PartyJoinApplyResponse | null) {
   return {
     badge: "REQUESTED",
     icon: "solar:clipboard-check-bold",
-    iconClassName: "bg-white text-[#0F766E] ring-teal-100",
+    iconClassName: "bg-white text-[#047857] ring-emerald-100",
     title: "파티 참여 신청이 접수되었습니다",
     description: result?.message || "파티 참여 신청 결과를 확인해 주세요.",
   };
@@ -49,7 +49,7 @@ export default function PartyMemberCreateCompletePage() {
     <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-[calc(100vh-80px)] w-full max-w-[520px] items-center justify-center">
         <div className="w-full overflow-hidden rounded-[32px] bg-white text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-          <div className="bg-linear-to-br from-teal-50 via-white to-emerald-50 px-6 py-10">
+          <div className="bg-linear-to-br from-emerald-50 via-white to-emerald-50 px-6 py-10">
             <div
               className={[
                 "mx-auto flex h-18 w-18 items-center justify-center rounded-full shadow-sm ring-1",
@@ -59,7 +59,7 @@ export default function PartyMemberCreateCompletePage() {
               <Icon icon={content.icon} className="h-10 w-10" />
             </div>
 
-            <p className="mt-6 text-[11px] font-extrabold tracking-[0.16em] text-[#0F766E]">
+            <p className="mt-6 text-[11px] font-extrabold tracking-[0.16em] text-[#047857]">
               {content.badge}
             </p>
 
@@ -73,14 +73,14 @@ export default function PartyMemberCreateCompletePage() {
           </div>
 
           <div className="px-6 py-6">
-            <div className="mx-auto mb-6 flex h-2 w-16 overflow-hidden rounded-full bg-teal-50">
-              <div className="h-full w-full rounded-full bg-[#14B8A6]" />
+            <div className="mx-auto mb-6 flex h-2 w-16 overflow-hidden rounded-full bg-emerald-50">
+              <div className="h-full w-full rounded-full bg-[#10B981]" />
             </div>
 
             <div className="flex flex-col gap-3">
             <Link
               to="/myparty"
-              className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#14B8A6] text-[15px] font-bold text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488]"
+              className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#10B981] text-[15px] font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669]"
             >
               내 파티로 이동
             </Link>

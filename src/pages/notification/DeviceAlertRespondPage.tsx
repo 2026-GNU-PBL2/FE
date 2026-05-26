@@ -149,11 +149,11 @@ export default function DeviceAlertRespondPage() {
 
           {respondResult ? (
             <div className="mt-5">
-              <div className="rounded-2xl bg-teal-50 px-4 py-4 text-center ring-1 ring-teal-100">
-                <p className="text-sm font-bold text-teal-800">
+              <div className="rounded-2xl bg-emerald-50 px-4 py-4 text-center ring-1 ring-emerald-100">
+                <p className="text-sm font-bold text-emerald-800">
                   {getResultMessage(respondResult)}
                 </p>
-                <p className="mt-2 text-sm font-semibold text-teal-700">
+                <p className="mt-2 text-sm font-semibold text-emerald-700">
                   현재 {respondResult.responseCount}명이 응답했습니다.
                 </p>
               </div>

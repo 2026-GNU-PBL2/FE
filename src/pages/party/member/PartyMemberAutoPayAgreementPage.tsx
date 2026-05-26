@@ -61,15 +61,15 @@ function LeftAgreementItem({
       className={[
         "group flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all duration-500",
         opened
-          ? "border-teal-100 bg-teal-50/70 shadow-teal-900/5"
-          : "border-slate-100 bg-white shadow-sm shadow-slate-900/5 hover:border-teal-100 hover:bg-white",
+          ? "border-emerald-100 bg-emerald-50/70 shadow-emerald-900/5"
+          : "border-slate-100 bg-white shadow-sm shadow-slate-900/5 hover:border-emerald-100 hover:bg-white",
       ].join(" ")}
     >
       <div className="flex min-w-0 items-center gap-3">
         <div
           className={[
             "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-all duration-300",
-            checked ? "text-[#0F766E]" : "text-slate-300",
+            checked ? "text-[#047857]" : "text-slate-300",
           ].join(" ")}
         >
           <Icon
@@ -94,7 +94,7 @@ function LeftAgreementItem({
         icon="solar:alt-arrow-right-linear"
         className={[
           "h-4 w-4 shrink-0 text-slate-300 transition-all duration-500 group-hover:text-slate-500",
-          opened ? "rotate-90 text-[#0F766E]" : "",
+          opened ? "rotate-90 text-[#047857]" : "",
         ].join(" ")}
       />
     </button>
@@ -156,8 +156,8 @@ export default function PartyMemberAutoPayAgreementPage() {
               <div className="flex min-h-155 flex-col">
                 <div className="px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
                   <div className="mt-2">
-                    <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-bold tracking-tight text-[#0F766E]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold tracking-tight text-[#047857]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
                       자동결제 동의
                     </div>
 
@@ -195,7 +195,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                     className={[
                       "inline-flex h-14 w-full items-center justify-center rounded-full text-base font-bold tracking-tight transition-all duration-300",
                       allRequiredAgreed
-                        ? "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/20 hover:bg-[#0D9488]"
+                        ? "bg-[#10B981] text-white shadow-lg shadow-emerald-900/20 hover:bg-[#059669]"
                         : "cursor-not-allowed bg-slate-200 text-slate-400",
                     ].join(" ")}
                   >
@@ -217,7 +217,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                 <div className="rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 transition-all duration-500 sm:px-6 sm:py-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-bold tracking-[0.14em] text-[#0F766E]">
+                      <p className="text-xs font-bold tracking-[0.14em] text-[#047857]">
                         REQUIRED
                       </p>
                       <h2 className="mt-2 text-[24px] font-extrabold tracking-tight text-slate-950">
@@ -225,7 +225,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                       </h2>
                     </div>
 
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ECFEF8] text-[#0F766E]">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ECFDF5] text-[#047857]">
                       <Icon
                         icon="solar:document-text-bold"
                         className="h-5 w-5"
@@ -237,7 +237,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                     {agreementParagraphs.intro}
                   </p>
 
-                  <div className="mt-8 rounded-2xl bg-teal-50/70 px-4 py-4 ring-1 ring-teal-100">
+                  <div className="mt-8 rounded-2xl bg-emerald-50/70 px-4 py-4 ring-1 ring-emerald-100">
                     <h3 className="text-[18px] font-extrabold tracking-tight text-slate-950">
                       {agreementParagraphs.consentTitle}
                     </h3>
@@ -257,7 +257,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                           key={`${index}-${item}`}
                           className="grid grid-cols-[24px_minmax(0,1fr)] gap-3"
                         >
-                          <span className="pt-0.5 text-sm font-semibold text-[#0F766E]">
+                          <span className="pt-0.5 text-sm font-semibold text-[#047857]">
                             {index + 1}.
                           </span>
                           <p className="text-sm leading-7 text-slate-600">
@@ -269,9 +269,9 @@ export default function PartyMemberAutoPayAgreementPage() {
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-[20px] bg-teal-50/70 px-5 py-5 ring-1 ring-teal-100">
+                <div className="mt-5 rounded-[20px] bg-emerald-50/70 px-5 py-5 ring-1 ring-emerald-100">
                   <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#ECFEF8] text-[#0F766E]">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#ECFDF5] text-[#047857]">
                       <Icon
                         icon="solar:shield-check-bold"
                         className="h-5 w-5"
@@ -298,7 +298,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                         className={[
                           "flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
                           agreedMap["auto-pay-terms"]
-                            ? "text-[#0F766E]"
+                            ? "text-[#047857]"
                             : "text-slate-300",
                         ].join(" ")}
                       >
@@ -328,7 +328,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                       className={[
                         "inline-flex h-10 shrink-0 items-center justify-center rounded-full px-4 text-sm font-bold transition-all duration-300",
                         agreedMap["auto-pay-terms"]
-                          ? "bg-[#ECFEF8] text-[#0F766E] hover:bg-[#DDFBF1]"
+                          ? "bg-[#ECFDF5] text-[#047857] hover:bg-[#D1FAE5]"
                           : "bg-slate-100 text-slate-600 hover:bg-slate-200",
                       ].join(" ")}
                     >
@@ -353,8 +353,8 @@ export default function PartyMemberAutoPayAgreementPage() {
             <aside className="flex h-full flex-col overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
               <div className="px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
                 <div className="mt-2">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-bold tracking-tight text-[#0F766E]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold tracking-tight text-[#047857]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
                     자동결제 동의
                   </div>
 
@@ -392,7 +392,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                   className={[
                     "inline-flex h-14 w-full items-center justify-center rounded-full text-base font-bold tracking-tight transition-all duration-300",
                     allRequiredAgreed
-                      ? "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/20 hover:bg-[#0D9488]"
+                      ? "bg-[#10B981] text-white shadow-lg shadow-emerald-900/20 hover:bg-[#059669]"
                       : "cursor-not-allowed bg-slate-200 text-slate-400",
                   ].join(" ")}
                 >
@@ -414,8 +414,8 @@ export default function PartyMemberAutoPayAgreementPage() {
               <div className="flex h-full flex-col">
                 <div className="border-b border-slate-100 bg-white px-5 py-4 sm:px-6 lg:px-8">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 items-center rounded-full bg-teal-50 px-3">
-                      <span className="text-sm font-bold tracking-tight text-[#0F766E]">
+                    <div className="flex h-9 items-center rounded-full bg-emerald-50 px-3">
+                      <span className="text-sm font-bold tracking-tight text-[#047857]">
                         payments
                       </span>
                     </div>
@@ -431,7 +431,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                       <div className="rounded-[28px] bg-white px-5 py-5 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100 transition-all duration-500 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <p className="text-xs font-bold tracking-[0.14em] text-[#0F766E]">
+                            <p className="text-xs font-bold tracking-[0.14em] text-[#047857]">
                               REQUIRED
                             </p>
                             <h2 className="mt-2 text-[24px] font-extrabold tracking-tight text-slate-950 sm:text-[28px]">
@@ -439,7 +439,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                             </h2>
                           </div>
 
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ECFEF8] text-[#0F766E]">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ECFDF5] text-[#047857]">
                             <Icon
                               icon="solar:document-text-bold"
                               className="h-5 w-5"
@@ -451,7 +451,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                           {agreementParagraphs.intro}
                         </p>
 
-                        <div className="mt-8 rounded-2xl bg-teal-50/70 px-4 py-4 ring-1 ring-teal-100 sm:px-5 sm:py-5">
+                        <div className="mt-8 rounded-2xl bg-emerald-50/70 px-4 py-4 ring-1 ring-emerald-100 sm:px-5 sm:py-5">
                           <h3 className="text-[18px] font-extrabold tracking-tight text-slate-950 sm:text-[20px]">
                             {agreementParagraphs.consentTitle}
                           </h3>
@@ -471,7 +471,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                                 key={`${index}-${item}`}
                                 className="grid grid-cols-[24px_minmax(0,1fr)] gap-3"
                               >
-                                <span className="pt-0.5 text-sm font-semibold text-[#0F766E]">
+                                <span className="pt-0.5 text-sm font-semibold text-[#047857]">
                                   {index + 1}.
                                 </span>
                                 <p className="text-sm leading-7 text-slate-600 sm:text-[15px]">
@@ -483,9 +483,9 @@ export default function PartyMemberAutoPayAgreementPage() {
                         </div>
                       </div>
 
-                      <div className="mt-5 rounded-[20px] bg-teal-50/70 px-5 py-5 ring-1 ring-teal-100 sm:px-6 sm:py-6">
+                      <div className="mt-5 rounded-[20px] bg-emerald-50/70 px-5 py-5 ring-1 ring-emerald-100 sm:px-6 sm:py-6">
                         <div className="flex items-start gap-4">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#ECFEF8] text-[#0F766E]">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#ECFDF5] text-[#047857]">
                             <Icon
                               icon="solar:shield-check-bold"
                               className="h-5 w-5"
@@ -512,7 +512,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                               className={[
                                 "flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
                                 agreedMap["auto-pay-terms"]
-                                  ? "text-[#0F766E]"
+                                  ? "text-[#047857]"
                                   : "text-slate-300",
                               ].join(" ")}
                             >
@@ -545,7 +545,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                             className={[
                               "inline-flex h-10 shrink-0 items-center justify-center rounded-full px-4 text-sm font-bold transition-all duration-300",
                               agreedMap["auto-pay-terms"]
-                                ? "bg-[#ECFEF8] text-[#0F766E] hover:bg-[#DDFBF1]"
+                                ? "bg-[#ECFDF5] text-[#047857] hover:bg-[#D1FAE5]"
                                 : "bg-slate-100 text-slate-600 hover:bg-slate-200",
                             ].join(" ")}
                           >

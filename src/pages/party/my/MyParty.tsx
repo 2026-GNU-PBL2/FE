@@ -102,7 +102,7 @@ function getStatusLabel(status: PartyHistoryStatus) {
 
 function getStatusStyle(status: PartyHistoryStatus) {
   if (status === "USING") {
-    return "bg-teal-50 text-[#0F766E] ring-teal-100";
+    return "bg-emerald-50 text-emerald-700 ring-emerald-100";
   }
 
   if (status === "ENDED") {
@@ -127,9 +127,9 @@ function getRoleStyle(role: PartyRole) {
 
   if (role === "MEMBER") {
     return {
-      iconBg: "bg-teal-50 text-[#0F766E] ring-teal-100",
-      badge: "bg-teal-50 text-[#0F766E] ring-teal-100",
-      accent: "bg-[#14B8A6]",
+      iconBg: "bg-emerald-50 text-[#047857] ring-emerald-100",
+      badge: "bg-emerald-50 text-[#047857] ring-emerald-100",
+      accent: "bg-[#10B981]",
     };
   }
 
@@ -148,7 +148,7 @@ function getJoinStatusStyle(status: PartyJoinStatus) {
   }
 
   if (normalizedStatus === "ACTIVE" || normalizedStatus === "MATCHED") {
-    return "bg-[#2DD4BF]/10 text-[#0F766E] ring-[#2DD4BF]/20";
+    return "bg-[#10B981]/10 text-[#047857] ring-[#10B981]/20";
   }
 
   if (normalizedStatus === "CANCELED") {
@@ -519,7 +519,7 @@ export default function MyParty() {
                 <SummaryCount
                   label="이용 중"
                   count={usingParties.length}
-                  className="text-[#0F766E]"
+                  className="text-emerald-700"
                 />
                 <SummaryCount
                   label="예정"
@@ -538,7 +538,7 @@ export default function MyParty() {
 
         <section className="mt-8">
           <div>
-            <p className="text-[13px] font-extrabold text-[#0F766E]">이용 중</p>
+            <p className="text-[13px] font-extrabold text-emerald-700">이용 중</p>
             <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
               현재 이용 중인 구독
             </h2>
@@ -549,7 +549,7 @@ export default function MyParty() {
               <div className="flex min-h-56 flex-col items-center justify-center px-6 py-10 text-center">
                 <Icon
                   icon="solar:refresh-circle-bold"
-                  className="h-10 w-10 animate-spin text-[#0F766E]"
+                  className="h-10 w-10 animate-spin text-emerald-700"
                 />
                 <p className="mt-4 text-sm font-semibold text-slate-600">
                   파티 목록을 불러오는 중입니다
@@ -595,7 +595,7 @@ export default function MyParty() {
                   onClick={() => navigate("/")}
                   className="flex w-full items-center gap-4 rounded-[24px] bg-slate-50 px-4 py-5 text-left ring-1 ring-slate-100 transition hover:bg-white"
                 >
-                  <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0F766E] ring-1 ring-slate-100">
+                  <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-white text-[#047857] ring-1 ring-slate-100">
                     <Icon icon="solar:add-circle-bold" className="h-7 w-7" />
                   </div>
 
@@ -674,7 +674,7 @@ export default function MyParty() {
           <section className="mt-8">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[13px] font-extrabold text-[#0F766E]">
+                <p className="text-[13px] font-extrabold text-[#047857]">
                   자동 매칭
                 </p>
                 <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
@@ -696,7 +696,7 @@ export default function MyParty() {
                 >
                   <div className="flex flex-col gap-5">
                     <div className="flex min-w-0 items-start gap-4">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 text-[#0F766E] ring-1 ring-slate-100">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 text-[#047857] ring-1 ring-slate-100">
                         {request.thumbnailUrl ? (
                           <img
                             src={request.thumbnailUrl}
@@ -754,9 +754,9 @@ export default function MyParty() {
                         </div>
                       </div>
 
-                      <div className="rounded-2xl bg-teal-50 px-3 py-3 ring-1 ring-teal-100">
+                      <div className="rounded-2xl bg-emerald-50 px-3 py-3 ring-1 ring-emerald-100">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0F766E] ring-1 ring-[#D9FBEF]">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#047857] ring-1 ring-[#A7F3D0]">
                             <Icon
                               icon="solar:wallet-money-bold"
                               className="h-5 w-5"
@@ -764,10 +764,10 @@ export default function MyParty() {
                           </div>
 
                           <div className="min-w-0">
-                            <p className="text-[11px] font-bold text-[#0F766E]">
+                            <p className="text-[11px] font-bold text-[#047857]">
                               예상 결제
                             </p>
-                            <p className="mt-1 text-sm font-extrabold text-[#0F766E]">
+                            <p className="mt-1 text-sm font-extrabold text-[#047857]">
                               {formatPrice(request.expectedPaymentAmount)}
                             </p>
                           </div>
@@ -794,7 +794,7 @@ export default function MyParty() {
                             <button
                               type="button"
                               onClick={() => handleGoJoinRequestParty(request)}
-                              className="flex h-11 items-center justify-center gap-2 rounded-full bg-[#14B8A6] px-3 text-sm font-bold text-white shadow-sm shadow-teal-900/15 transition hover:bg-[#0D9488]"
+                              className="flex h-11 items-center justify-center gap-2 rounded-full bg-[#10B981] px-3 text-sm font-bold text-white shadow-sm shadow-emerald-900/15 transition hover:bg-[#059669]"
                             >
                               상세 보기
                               <Icon
@@ -1013,7 +1013,7 @@ function PartyListItem({
         </p>
 
         {party.status === "USING" && usagePeriod && (
-          <p className="mt-2 text-xs font-bold text-[#0F766E]">
+          <p className="mt-2 text-xs font-bold text-[#047857]">
             {formatUsageDayCount(usagePeriod.currentStartDate)}
           </p>
         )}

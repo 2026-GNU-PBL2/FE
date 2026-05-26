@@ -39,7 +39,7 @@ export default function PartyMemberInviteActivationPage() {
               <Icon icon="solar:mailbox-bold" className="h-7 w-7" />
             </div>
 
-            <p className="mt-6 text-[13px] font-extrabold text-[#0F766E]">
+            <p className="mt-6 text-[13px] font-extrabold text-[#047857]">
               MEMBER PARTY
             </p>
 
@@ -103,7 +103,7 @@ export default function PartyMemberInviteActivationPage() {
                 type="button"
                 onClick={handleCompleteActivation}
                 disabled={isSubmitting}
-                className="flex h-14 items-center justify-center gap-2 rounded-full bg-[#14B8A6] text-base font-bold text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none disabled:hover:translate-y-0"
+                className="flex h-14 items-center justify-center gap-2 rounded-full bg-[#10B981] text-base font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none disabled:hover:translate-y-0"
               >
                 {isSubmitting ? (
                   <>

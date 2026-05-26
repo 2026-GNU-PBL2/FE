@@ -120,7 +120,7 @@ function isAccountShareProvisionType(type?: ProvisionType | null) {
 
 function getStatusStyle(status: string) {
   if (status === "ACTIVE") {
-    return "bg-teal-50 text-teal-700 ring-teal-100";
+    return "bg-emerald-50 text-emerald-700 ring-emerald-100";
   }
 
   if (status === "IN_PROGRESS" || status === "REQUIRED") {

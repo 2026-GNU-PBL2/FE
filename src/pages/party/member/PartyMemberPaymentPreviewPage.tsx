@@ -103,7 +103,7 @@ export default function PartyMemberPaymentPreviewPage() {
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-2xl items-center justify-center">
           <section className="w-full rounded-[28px] bg-white px-6 py-10 text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-[#0F766E]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-[#047857]">
               <Icon icon="solar:info-circle-bold" className="h-7 w-7" />
             </div>
 
@@ -162,8 +162,8 @@ export default function PartyMemberPaymentPreviewPage() {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-[#0F766E]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-[#047857]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
                     파티원 결제 확인
                   </div>
                   <h1 className="mt-2 truncate text-[22px] font-extrabold tracking-tight text-slate-950 sm:text-[26px]">
@@ -190,7 +190,7 @@ export default function PartyMemberPaymentPreviewPage() {
                   </p>
                 </div>
 
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0F766E] shadow-sm ring-1 ring-teal-100">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#047857] shadow-sm ring-1 ring-emerald-100">
                   <Icon icon="solar:card-bold" className="h-5 w-5" />
                 </div>
               </div>
@@ -220,7 +220,7 @@ export default function PartyMemberPaymentPreviewPage() {
                   <p className="text-[16px] font-extrabold text-slate-950">
                     최초 결제 예정 금액
                   </p>
-                  <p className="text-right text-[22px] font-extrabold text-[#0F766E]">
+                  <p className="text-right text-[22px] font-extrabold text-[#047857]">
                     {formatPrice(preview.firstPaymentAmount)}
                   </p>
                 </div>
@@ -228,11 +228,11 @@ export default function PartyMemberPaymentPreviewPage() {
             </div>
 
             {preview.paymentNotice ? (
-              <section className="mt-4 rounded-2xl bg-teal-50/80 px-4 py-3 ring-1 ring-teal-100">
+              <section className="mt-4 rounded-2xl bg-emerald-50/80 px-4 py-3 ring-1 ring-emerald-100">
                 <div className="flex gap-3">
                   <Icon
                     icon="solar:info-circle-bold"
-                    className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[#047857]"
                   />
 
                   <div>
@@ -252,7 +252,7 @@ export default function PartyMemberPaymentPreviewPage() {
                 <div className="flex gap-3">
                   <Icon
                     icon="solar:card-bold"
-                    className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[#047857]"
                   />
 
                   <div>
@@ -272,7 +272,7 @@ export default function PartyMemberPaymentPreviewPage() {
               type="button"
               onClick={handleGoNext}
               disabled={isBillingLoading}
-              className="mt-5 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#14B8A6] px-5 text-[15px] font-bold text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
+              className="mt-5 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#10B981] px-5 text-[15px] font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#059669] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
             >
               {isBillingLoading ? (
                 <>

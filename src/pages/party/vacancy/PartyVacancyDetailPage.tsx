@@ -144,11 +144,11 @@ export default function PartyVacancyDetailPage() {
         noticeTitle: "파티장 참여 안내",
       }
     : {
-        text: "text-[#0F766E]",
-        bg: "bg-[#14B8A6]",
-        lightBg: "bg-[#ECFEF8]",
-        ring: "ring-[#C9F7EA]",
-        buttonHover: "hover:bg-[#0D9488]",
+        text: "text-[#047857]",
+        bg: "bg-[#10B981]",
+        lightBg: "bg-[#ECFDF5]",
+        ring: "ring-[#6EE7B7]",
+        buttonHover: "hover:bg-[#059669]",
         action: "파티원 참여하기",
         caption: "MEMBER VACANCY",
         headline: "파티원 참여 정보를 확인해 주세요",
@@ -447,7 +447,7 @@ export default function PartyVacancyDetailPage() {
                   ? `${pageTone.bg} ${pageTone.buttonHover} ${
                       isHostRecruit
                         ? "shadow-blue-900/20"
-                        : "shadow-teal-900/20"
+                        : "shadow-emerald-900/20"
                     } hover:-translate-y-0.5`
                   : "",
               ].join(" ")}

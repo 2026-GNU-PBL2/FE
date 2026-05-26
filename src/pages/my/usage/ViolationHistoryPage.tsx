@@ -65,7 +65,7 @@ export default function ViolationHistoryPage() {
   if (records.length === 0) {
     return (
       <div className="rounded-3xl bg-slate-50 px-5 py-10 text-center ring-1 ring-slate-100">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-teal-600 ring-1 ring-teal-100">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-emerald-700 ring-1 ring-emerald-100">
           <Icon icon="solar:shield-check-bold" className="h-7 w-7" />
         </div>
         <h2 className="mt-4 text-lg font-extrabold text-slate-950">

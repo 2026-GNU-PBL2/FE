@@ -221,9 +221,9 @@ export function IllustSubscription() {
             height: 68,
             borderRadius: 20,
             background:
-              "linear-gradient(135deg, #4f46e5 0%, #6d28d9 50%, #0071e3 100%)",
+              "linear-gradient(135deg, #0f6fff 0%, #0071e3 52%, #38bdf8 100%)",
             boxShadow:
-              "0 0 44px rgba(79,70,229,0.75), 0 8px 28px rgba(0,0,0,0.5)",
+              "0 0 44px rgba(0,113,227,0.58), 0 8px 28px rgba(0,0,0,0.5)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

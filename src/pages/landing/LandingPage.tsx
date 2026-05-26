@@ -388,7 +388,7 @@ function HeroStage() {
       <div className="absolute left-1/2 top-1/2 z-30 w-[min(88vw,430px)] -translate-x-1/2 -translate-y-1/2 rounded-[34px] border border-[#d6d6d6]/80 bg-white/92 p-4 text-[#1d1d1f] shadow-[0_42px_110px_rgba(15,23,42,0.16)] backdrop-blur-2xl md:w-[450px] md:p-5">
         <div className="flex items-center justify-between border-b border-[#e2e2e5] pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#f5f5f7] text-[#4f46e5] ring-1 ring-[#d6d6d6]/70">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#f5f5f7] text-[#0071e3] ring-1 ring-[#d6d6d6]/70">
               <img
                 src="/images/logo-symbol.png"
                 alt=""
@@ -560,7 +560,7 @@ export default function LandingPage() {
             <h1 className="landing-reveal mt-7 text-[44px] font-black leading-[1.02] tracking-[-0.045em] text-[#1d1d1f] sm:text-[54px] lg:text-[62px] xl:text-[66px]">
               OTT 파티 만들기
               <br />
-              <span className="bg-gradient-to-r from-[#4f46e5] via-[#0071e3] to-[#12b981] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#0f6fff] via-[#0071e3] to-[#12b981] bg-clip-text text-transparent">
                 참여부터 정산까지
               </span>
             </h1>
@@ -698,7 +698,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div className="mt-4 h-2 overflow-hidden rounded-full bg-white">
-                  <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-[#4f46e5] via-[#0071e3] to-[#12b981]" />
+                  <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-[#0f6fff] via-[#0071e3] to-[#12b981]" />
                 </div>
               </div>
 

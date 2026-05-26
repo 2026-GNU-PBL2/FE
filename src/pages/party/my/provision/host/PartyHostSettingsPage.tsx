@@ -549,14 +549,14 @@ export default function PartyHostSettingsPage() {
 
         <section
           className={`mt-5 rounded-[24px] bg-white px-4 py-4 shadow-lg shadow-slate-900/5 ring-1 sm:px-5 ${
-            hasHostReservation ? "ring-teal-100" : "ring-rose-100"
+            hasHostReservation ? "ring-emerald-100" : "ring-rose-100"
           }`}
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1 ${
                 hasHostReservation
-                  ? "bg-teal-50 text-teal-700 ring-teal-100"
+                  ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
                   : "bg-rose-50 text-rose-600 ring-rose-100"
               }`}
             >
@@ -589,7 +589,7 @@ export default function PartyHostSettingsPage() {
               disabled={isSubmitting}
               className={`flex h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-bold ring-1 transition disabled:cursor-not-allowed sm:w-auto ${
                 hasHostReservation
-                  ? "bg-teal-50 text-teal-700 ring-teal-100 hover:bg-teal-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
+                  ? "bg-emerald-50 text-emerald-700 ring-emerald-100 hover:bg-emerald-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
                   : "bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
               }`}
             >
@@ -1124,10 +1124,10 @@ function LeaveReserveConfirmModal({
 }) {
   const isSuccess = variant === "success";
   const iconClassName = isSuccess
-    ? "bg-teal-50 text-teal-700 ring-teal-100"
+    ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
     : "bg-rose-50 text-rose-600 ring-rose-100";
   const buttonClassName = isSuccess
-    ? "bg-teal-50 text-teal-700 ring-teal-100 hover:bg-teal-100"
+    ? "bg-emerald-50 text-emerald-700 ring-emerald-100 hover:bg-emerald-100"
     : "bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-100";
   const icon = isSuccess ? "solar:refresh-bold" : "solar:logout-3-bold";
 
