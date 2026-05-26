@@ -59,17 +59,28 @@ function resolveServiceSlug(serviceName: string) {
     return "disney-plus";
   }
 
+  if (normalized.includes("wavve") || normalized.includes("웨이브")) {
+    return "wavve";
+  }
+
+  if (normalized.includes("laftel") || normalized.includes("라프텔")) {
+    return "laftel";
+  }
+
   return "";
 }
 
-function shouldUseRoundedLogo(serviceName: string) {
+function shouldUseNestedCircle(serviceName: string) {
   const slug = resolveServiceSlug(serviceName);
 
   return (
     slug === "netflix" ||
     slug === "tving" ||
     slug === "disney-plus" ||
-    slug === "watcha"
+    slug === "watcha" ||
+    slug === "apple-tv" ||
+    slug === "wavve" ||
+    slug === "laftel"
   );
 }
 
@@ -80,21 +91,65 @@ function getImageClassName(serviceName: string) {
     return "h-5 w-8 object-contain";
   }
 
-  return "h-10 w-10 object-contain";
+  return "h-6 w-6 object-contain";
+}
+
+function getLogoFillClassName(serviceName: string) {
+  const slug = resolveServiceSlug(serviceName);
+
+  if (slug === "watcha") {
+    return "h-full w-full scale-105 object-cover";
+  }
+
+  if (slug === "apple-tv") {
+    return "h-[82%] w-[82%] object-contain";
+  }
+
+  if (slug === "netflix" || slug === "wavve") {
+    return "h-full w-full scale-125 object-cover";
+  }
+
+  return "h-full w-full object-cover";
+}
+
+function ProductLogo({
+  image,
+  serviceName,
+}: {
+  image: string;
+  serviceName: string;
+}) {
+  if (shouldUseNestedCircle(serviceName)) {
+    return (
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[24px] bg-white shadow-sm ring-1 ring-slate-100 sm:h-20 sm:w-20">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200 sm:h-16 sm:w-16">
+          <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+            <img
+              src={image}
+              alt={serviceName}
+              className={getLogoFillClassName(serviceName)}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[24px] bg-white shadow-sm ring-1 ring-slate-100 sm:h-20 sm:w-20">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white sm:h-14 sm:w-14">
+        <img
+          src={image}
+          alt={serviceName}
+          className={getImageClassName(serviceName)}
+        />
+      </div>
+    </div>
+  );
 }
 
 function formatPrice(value: number) {
   return `${value.toLocaleString("ko-KR")}원`;
-}
-
-function getBadgeText(product: ProductDetailResponse) {
-  const operationType = product.operationType?.trim();
-
-  if (operationType) {
-    return operationType;
-  }
-
-  return product.serviceName.toUpperCase();
 }
 
 function getSummaryText(product: ProductDetailResponse) {
@@ -184,11 +239,6 @@ export default function PartyCreatePage() {
 
     fetchPlans();
   }, []);
-
-  const isRounded = useMemo(() => {
-    if (!product) return false;
-    return shouldUseRoundedLogo(product.serviceName);
-  }, [product]);
 
   const originalPrice = useMemo(() => {
     if (!product) return "0원";
@@ -302,31 +352,13 @@ export default function PartyCreatePage() {
             <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 p-6 sm:p-8 lg:p-10">
               <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex min-w-0 items-start gap-4 sm:gap-5">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[24px] bg-white shadow-sm ring-1 ring-slate-100 sm:h-20 sm:w-20">
-                    {isRounded ? (
-                      <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-white sm:h-16 sm:w-16">
-                        <img
-                          src={product.thumbnailUrl}
-                          alt={product.serviceName}
-                          className="h-full w-full object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <img
-                        src={product.thumbnailUrl}
-                        alt={product.serviceName}
-                        className={getImageClassName(product.serviceName)}
-                      />
-                    )}
-                  </div>
+                  <ProductLogo
+                    image={product.thumbnailUrl}
+                    serviceName={product.serviceName}
+                  />
 
                   <div className="min-w-0 flex-1">
-                    <div className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-brand-main shadow-sm ring-1 ring-blue-100">
-                      <span className="h-1.5 w-1.5 rounded-full bg-brand-accent" />
-                      {getBadgeText(product)}
-                    </div>
-
-                    <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
+                    <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
                       {product.serviceName}
                     </h1>
 

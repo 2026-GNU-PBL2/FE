@@ -201,12 +201,7 @@ export default function PartyMemberCardRegisterSuccessPage() {
             </div>
 
             <div className="mt-6">
-              <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#00875A] shadow-sm ring-1 ring-[#A9E6C9]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#00A86B]" />
-                카드 등록
-              </div>
-
-              <h1 className="mt-4 text-[26px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
+              <h1 className="text-[26px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
                 {loading
                   ? "카드 등록을 완료하고 있습니다"
                   : authorized

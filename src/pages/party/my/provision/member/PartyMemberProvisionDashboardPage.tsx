@@ -589,10 +589,7 @@ export default function PartyMemberProvisionDashboardPage() {
           <div className="px-5 py-6 sm:px-8">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-[13px] font-extrabold text-[#00875A]">
-                  MEMBER PARTY
-                </p>
-                <h1 className="mt-2 truncate text-[28px] font-extrabold tracking-tight text-slate-950">
+                <h1 className="truncate text-[28px] font-extrabold tracking-tight text-slate-950">
                   {view.productName}
                 </h1>
                 <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
@@ -610,10 +607,7 @@ export default function PartyMemberProvisionDashboardPage() {
           <div className="px-5 py-5 sm:px-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-xs font-medium text-[#00875A]">
-                  파티원 이용 현황
-                </p>
-                <h2 className="mt-1 text-xl font-bold text-slate-950">
+                <h2 className="text-xl font-bold text-slate-950">
                   이용 정보 확인
                 </h2>
                 <p className="mt-1.5 text-sm font-normal leading-6 text-slate-500">
@@ -651,8 +645,7 @@ export default function PartyMemberProvisionDashboardPage() {
                 <Icon icon="solar:check-circle-bold" className="h-6 w-6" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-slate-400">STATUS</p>
-                <h2 className="mt-1 text-lg font-bold text-slate-950">
+                <h2 className="text-lg font-bold text-slate-950">
                   OTT 계정 활성화 완료
                 </h2>
                 <p className="mt-2 text-sm font-normal leading-6 text-slate-500">
@@ -675,8 +668,7 @@ export default function PartyMemberProvisionDashboardPage() {
             <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-medium text-slate-400">ACCESS</p>
-                  <h2 className="mt-1 text-lg font-bold text-slate-950">
+                  <h2 className="text-lg font-bold text-slate-950">
                     이용 정보
                   </h2>
                 </div>
@@ -831,8 +823,7 @@ function MemberDeviceTools({
     <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-medium text-[#00875A]">DEVICE</p>
-          <h2 className="mt-1 text-lg font-bold text-slate-950">
+          <h2 className="text-lg font-bold text-slate-950">
             내 기기 관리
           </h2>
           <p className="mt-2 text-sm font-normal leading-6 text-slate-500">

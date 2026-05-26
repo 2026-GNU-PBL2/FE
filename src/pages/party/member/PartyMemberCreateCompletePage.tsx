@@ -59,11 +59,7 @@ export default function PartyMemberCreateCompletePage() {
               <Icon icon={content.icon} className="h-10 w-10" />
             </div>
 
-            <p className="mt-6 text-[11px] font-extrabold tracking-[0.16em] text-[#00875A]">
-              {content.badge}
-            </p>
-
-            <h1 className="mt-3 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
+            <h1 className="mt-6 text-[27px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
               {content.title}
             </h1>
 
@@ -78,19 +74,19 @@ export default function PartyMemberCreateCompletePage() {
             </div>
 
             <div className="flex flex-col gap-3">
-            <Link
-              to="/myparty"
-              className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#00A86B] text-[15px] font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#00875A]"
-            >
-              내 파티로 이동
-            </Link>
+              <Link
+                to="/myparty"
+                className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#00A86B] text-[15px] font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#00875A]"
+              >
+                내 파티로 이동
+              </Link>
 
-            <Link
-              to="/parties/member"
-              className="inline-flex h-14 w-full items-center justify-center rounded-full border border-slate-100 bg-white text-[15px] font-bold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
-            >
-              파티 목록으로 이동
-            </Link>
+              <Link
+                to="/parties/member"
+                className="inline-flex h-14 w-full items-center justify-center rounded-full border border-slate-100 bg-white text-[15px] font-bold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
+              >
+                파티 목록으로 이동
+              </Link>
             </div>
           </div>
         </div>

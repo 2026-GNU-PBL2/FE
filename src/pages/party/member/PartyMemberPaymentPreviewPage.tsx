@@ -2,10 +2,25 @@ import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { api } from "@/api/axios";
+import { ottServices } from "@/mocks/ott";
+import type { OttSlug } from "@/types/ott";
+
+type ProductCategory =
+  | "NETFLIX"
+  | "TVING"
+  | "WATCHA"
+  | "DISNEY_PLUS"
+  | "APPLE_TV"
+  | "WAVVE"
+  | "LAFTEL"
+  | string;
 
 type PartyJoinPreviewResponse = {
   productId: string;
   productName: string;
+  category?: ProductCategory | null;
+  productCategory?: ProductCategory | null;
+  ottProviderType?: ProductCategory | null;
   thumbnailUrl: string;
   productPricePerMember: number;
   platformFee: number;
@@ -43,6 +58,136 @@ function unwrapResponse<T>(
 
 function formatPrice(value: number) {
   return `${value.toLocaleString("ko-KR")}원`;
+}
+
+function normalizeProductName(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/\+/g, "plus")
+    .replace(/플러스/g, "plus");
+}
+
+function resolveOttSlugByCategory(
+  category?: ProductCategory | null,
+): OttSlug | null {
+  const normalizedCategory = String(category ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/-/g, "_");
+
+  if (normalizedCategory === "NETFLIX") return "netflix";
+  if (normalizedCategory === "TVING") return "tving";
+  if (normalizedCategory === "WATCHA") return "watcha";
+  if (
+    normalizedCategory === "DISNEY_PLUS" ||
+    normalizedCategory === "DISNEYPLUS"
+  ) {
+    return "disney-plus";
+  }
+  if (normalizedCategory === "APPLE_TV" || normalizedCategory === "APPLETV") {
+    return "apple-tv";
+  }
+  if (normalizedCategory === "WAVVE" || normalizedCategory === "WAVE") {
+    return "wavve";
+  }
+  if (normalizedCategory === "LAFTEL") return "laftel";
+
+  return null;
+}
+
+function resolveOttServiceByCategory(category?: ProductCategory | null) {
+  const slug = resolveOttSlugByCategory(category);
+  if (!slug) return null;
+  return ottServices.find((service) => service.slug === slug) ?? null;
+}
+
+function resolveOttServiceByProductName(productName: string) {
+  const normalizedName = normalizeProductName(productName);
+
+  return (
+    ottServices.find((service) => {
+      const normalizedServiceName = normalizeProductName(service.name);
+      const normalizedSlug = service.slug.replace("-", "");
+      const aliases: Record<OttSlug, string[]> = {
+        youtube: ["youtube", "유튜브"],
+        watcha: ["watcha", "왓챠", "와챠"],
+        "apple-tv": ["appletv", "apple티비", "애플tv", "애플티비"],
+        netflix: ["netflix", "넷플릭스"],
+        tving: ["tving", "티빙"],
+        "disney-plus": ["disneyplus", "디즈니plus", "디즈니+"],
+        wavve: ["wavve", "wave", "웨이브"],
+        laftel: ["laftel", "라프텔"],
+      };
+
+      return (
+        normalizedName.includes(normalizedServiceName) ||
+        normalizedName.includes(normalizedSlug) ||
+        aliases[service.slug].some((alias) =>
+          normalizedName.includes(normalizeProductName(alias)),
+        )
+      );
+    }) ?? null
+  );
+}
+
+function getProductLogoFillClassName(slug: OttSlug) {
+  if (slug === "watcha") {
+    return "h-full w-full scale-105 object-cover";
+  }
+
+  if (slug === "apple-tv") {
+    return "h-[82%] w-[82%] object-contain";
+  }
+
+  if (slug === "netflix" || slug === "wavve") {
+    return "h-full w-full scale-125 object-cover";
+  }
+
+  return "h-full w-full object-cover";
+}
+
+function ProductLogo({
+  productName,
+  category,
+  fallbackImage,
+}: {
+  productName: string;
+  category?: ProductCategory | null;
+  fallbackImage?: string | null;
+}) {
+  const service =
+    resolveOttServiceByCategory(category) ??
+    resolveOttServiceByProductName(productName);
+
+  if (service) {
+    return (
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200">
+        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+          <img
+            src={service.image}
+            alt={productName}
+            className={getProductLogoFillClassName(service.slug)}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100">
+      {fallbackImage ? (
+        <img
+          src={fallbackImage}
+          alt={productName}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <Icon icon="solar:play-circle-bold" className="h-6 w-6 text-brand-main" />
+      )}
+    </div>
+  );
 }
 
 export default function PartyMemberPaymentPreviewPage() {
@@ -146,20 +291,15 @@ export default function PartyMemberPaymentPreviewPage() {
           <div className="bg-white px-5 py-5 sm:px-8 sm:py-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100">
-                  {preview.thumbnailUrl ? (
-                    <img
-                      src={preview.thumbnailUrl}
-                      alt={preview.productName}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <Icon
-                      icon="solar:play-circle-bold"
-                      className="h-6 w-6 text-brand-main"
-                    />
-                  )}
-                </div>
+                <ProductLogo
+                  productName={preview.productName}
+                  category={
+                    preview.category ??
+                    preview.productCategory ??
+                    preview.ottProviderType
+                  }
+                  fallbackImage={preview.thumbnailUrl}
+                />
 
                 <div className="min-w-0 flex-1">
                   <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-[#00875A]">

@@ -137,7 +137,6 @@ export default function PartyVacancyDetailPage() {
         ring: "ring-blue-100",
         buttonHover: "hover:bg-blue-800",
         action: "파티장 참여하기",
-        caption: "HOST VACANCY",
         headline: "파티장 참여 정보를 확인해 주세요",
         description:
           "파티장 참여 전 상품 정보, 다음 회차 기준 인원 현황, 월 결제 금액을 확인합니다.",
@@ -150,7 +149,6 @@ export default function PartyVacancyDetailPage() {
         ring: "ring-[#A9E6C9]",
         buttonHover: "hover:bg-[#00875A]",
         action: "파티원 참여하기",
-        caption: "MEMBER VACANCY",
         headline: "파티원 참여 정보를 확인해 주세요",
         description:
           "파티원 참여 전 상품 정보, 다음 회차 기준 인원 현황, 월 결제 금액을 확인합니다.",
@@ -313,17 +311,7 @@ export default function PartyVacancyDetailPage() {
           <div className="border-b border-slate-100 px-6 py-7 sm:px-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <div
-                  className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${pageTone.lightBg} ${pageTone.text} ring-1 ${pageTone.ring}`}
-                >
-                  <Icon
-                    icon="solar:users-group-rounded-bold"
-                    className="h-4 w-4"
-                  />
-                  {pageTone.caption}
-                </div>
-
-                <h1 className="mt-4 text-[28px] font-extrabold leading-tight tracking-tight text-slate-950 sm:text-[32px]">
+                <h1 className="text-[28px] font-extrabold leading-tight tracking-tight text-slate-950 sm:text-[32px]">
                   {pageTone.headline}
                 </h1>
 

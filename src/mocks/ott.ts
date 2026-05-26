@@ -35,7 +35,7 @@ export const ottServices: OttService[] = [
     name: "애플티비",
     subtitle: "오리지널 콘텐츠",
     price: "월 4,900원부터",
-    image: "/images/ott/apple.svg",
+    image: "/images/ott/apple.png",
     imageClassName: "h-6 w-6 object-contain",
     chipClassName: "bg-slate-100 text-slate-700 ring-slate-200",
   },

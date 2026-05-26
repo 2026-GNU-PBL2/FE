@@ -127,10 +127,7 @@ export default function DeviceAlertRespondPage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
               <Icon icon="solar:smartphone-bold" className="h-7 w-7" />
             </div>
-            <p className="mt-4 text-xs font-bold text-amber-700">
-              DEVICE CHECK
-            </p>
-            <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-[28px]">
+            <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-[28px]">
               새 기기 로그인을 확인해주세요
             </h1>
             <p className="mt-2 max-w-sm text-sm font-semibold leading-6 text-slate-500">

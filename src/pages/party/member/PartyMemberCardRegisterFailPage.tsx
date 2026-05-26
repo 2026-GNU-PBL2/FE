@@ -24,12 +24,7 @@ export default function PartyMemberCardRegisterFailPage() {
             </div>
 
             <div className="mt-6">
-              <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1.5 text-[11px] font-bold text-rose-600 ring-1 ring-rose-100">
-                <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-                카드 등록
-              </div>
-
-              <h1 className="mt-4 text-[26px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
+              <h1 className="text-[26px] font-extrabold tracking-tight text-slate-950 sm:text-[30px]">
                 카드 등록에 실패했습니다
               </h1>
 

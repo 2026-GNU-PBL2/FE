@@ -837,8 +837,7 @@ function BillingMethodCard({
       <div className="px-5 py-5 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-bold text-[#00875A]">BILLING</p>
-            <h2 className="mt-1 text-lg font-bold text-slate-950">
+            <h2 className="text-lg font-bold text-slate-950">
               내 결제 수단
             </h2>
             <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
@@ -926,8 +925,7 @@ function PaymentHistorySection({
     <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold text-[#00875A]">PAYMENTS</p>
-          <h2 className="mt-1 text-lg font-bold text-slate-950">내 결제내역</h2>
+          <h2 className="text-lg font-bold text-slate-950">내 결제내역</h2>
           <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
             현재 파티에 해당하는 최근 결제내역입니다.
           </p>

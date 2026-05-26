@@ -507,8 +507,7 @@ export default function PartyHostInviteSetupPage() {
             <section className="mt-6 rounded-[24px] bg-white px-5 py-5 ring-1 ring-slate-100">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold text-brand-main">MEMBERS</p>
-                  <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+                  <h2 className="text-lg font-extrabold text-slate-950">
                     OTT 초대에 사용할 이메일
                   </h2>
                 </div>

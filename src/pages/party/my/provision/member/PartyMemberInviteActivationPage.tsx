@@ -39,11 +39,7 @@ export default function PartyMemberInviteActivationPage() {
               <Icon icon="solar:mailbox-bold" className="h-7 w-7" />
             </div>
 
-            <p className="mt-6 text-[13px] font-extrabold text-[#00875A]">
-              MEMBER PARTY
-            </p>
-
-            <h1 className="mt-2 text-[28px] font-extrabold tracking-tight text-slate-950">
+            <h1 className="mt-6 text-[28px] font-extrabold tracking-tight text-slate-950">
               초대 코드 활성화
             </h1>
 

@@ -3,15 +3,29 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import { ottServices } from "@/mocks/ott";
+import type { OttSlug } from "@/types/ott";
 
 type PartyRole = "HOST" | "MEMBER" | string;
 type PartyHistoryStatus = "USING" | "SCHEDULED" | "ENDED" | string;
+type ProductCategory =
+  | "NETFLIX"
+  | "TVING"
+  | "WATCHA"
+  | "DISNEY_PLUS"
+  | "APPLE_TV"
+  | "WAVVE"
+  | "LAFTEL"
+  | string;
 
 type PartyHistoryItem = {
   partyId: number;
   displayPartyId: string;
   productId: string;
   productName: string;
+  category?: ProductCategory | null;
+  productCategory?: ProductCategory | null;
+  ottProviderType?: ProductCategory | null;
   role: PartyRole;
   status: PartyHistoryStatus;
   startAt: string | null;
@@ -27,6 +41,9 @@ type PartyJoinRequestItem = {
   partyId?: number | null;
   productId: string;
   productName: string;
+  category?: ProductCategory | null;
+  productCategory?: ProductCategory | null;
+  ottProviderType?: ProductCategory | null;
   thumbnailUrl: string;
   joinStatus: PartyJoinStatus;
   requestedAt: string | null;
@@ -223,6 +240,171 @@ function formatScheduledStartText(startDate?: string | null) {
 function formatPrice(value?: number | null) {
   if (typeof value !== "number") return "-";
   return `${value.toLocaleString("ko-KR")}원`;
+}
+
+function normalizeProductName(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/\+/g, "plus")
+    .replace(/플러스/g, "plus");
+}
+
+function resolveOttSlugByCategory(category?: ProductCategory | null): OttSlug | null {
+  const normalizedCategory = String(category ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/-/g, "_");
+
+  if (normalizedCategory === "NETFLIX") return "netflix";
+  if (normalizedCategory === "TVING") return "tving";
+  if (normalizedCategory === "WATCHA") return "watcha";
+  if (normalizedCategory === "DISNEY_PLUS" || normalizedCategory === "DISNEYPLUS")
+    return "disney-plus";
+  if (normalizedCategory === "APPLE_TV" || normalizedCategory === "APPLETV")
+    return "apple-tv";
+  if (normalizedCategory === "WAVVE" || normalizedCategory === "WAVE")
+    return "wavve";
+  if (normalizedCategory === "LAFTEL") return "laftel";
+
+  return null;
+}
+
+function resolveOttServiceByCategory(category?: ProductCategory | null) {
+  const slug = resolveOttSlugByCategory(category);
+  if (!slug) return null;
+  return ottServices.find((service) => service.slug === slug) ?? null;
+}
+
+function resolveOttServiceByProductName(productName: string) {
+  const normalizedName = normalizeProductName(productName);
+
+  return ottServices.find((service) => {
+    const normalizedServiceName = normalizeProductName(service.name);
+    const normalizedSlug = service.slug.replace("-", "");
+    const aliases: Record<OttSlug, string[]> = {
+      youtube: ["youtube", "유튜브"],
+      watcha: ["watcha", "왓챠", "와챠"],
+      "apple-tv": ["appletv", "apple티비", "애플tv", "애플티비"],
+      netflix: ["netflix", "넷플릭스"],
+      tving: ["tving", "티빙"],
+      "disney-plus": ["disneyplus", "디즈니plus", "디즈니+"],
+      wavve: ["wavve", "wave", "웨이브"],
+      laftel: ["laftel", "라프텔"],
+    };
+
+    return (
+      normalizedName.includes(normalizedServiceName) ||
+      normalizedName.includes(normalizedSlug) ||
+      aliases[service.slug].some((alias) =>
+        normalizedName.includes(normalizeProductName(alias)),
+      )
+    );
+  });
+}
+
+function shouldUseNestedCircle(slug?: OttSlug) {
+  return (
+    slug === "netflix" ||
+    slug === "tving" ||
+    slug === "disney-plus" ||
+    slug === "watcha" ||
+    slug === "apple-tv" ||
+    slug === "wavve" ||
+    slug === "laftel"
+  );
+}
+
+function getProductImageClassName(slug?: OttSlug) {
+  if (slug === "disney-plus") {
+    return "h-5 w-8 object-contain";
+  }
+
+  return "h-6 w-6 object-contain";
+}
+
+function getProductLogoFillClassName(slug: OttSlug) {
+  if (slug === "watcha") {
+    return "h-full w-full scale-105 object-cover";
+  }
+
+  if (slug === "apple-tv") {
+    return "h-[82%] w-[82%] object-contain";
+  }
+
+  if (slug === "netflix" || slug === "wavve") {
+    return "h-full w-full scale-125 object-cover";
+  }
+
+  return "h-full w-full object-cover";
+}
+
+function ProductLogo({
+  productName,
+  category,
+  fallbackImage,
+  className,
+}: {
+  productName: string;
+  category?: ProductCategory | null;
+  fallbackImage?: string | null;
+  className: string;
+}) {
+  const service =
+    resolveOttServiceByCategory(category) ??
+    resolveOttServiceByProductName(productName);
+
+  if (!service) {
+    return (
+      <div
+        className={[
+          className,
+          "flex shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white text-slate-500 ring-1 ring-slate-100",
+        ].join(" ")}
+      >
+        {fallbackImage ? (
+          <img src={fallbackImage} alt={productName} className="h-full w-full object-cover" />
+        ) : (
+          <Icon icon={getProductIcon(productName)} className="h-7 w-7" />
+        )}
+      </div>
+    );
+  }
+
+  if (shouldUseNestedCircle(service.slug)) {
+    return (
+      <div
+        className={[
+          className,
+          "flex shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200",
+        ].join(" ")}
+      >
+        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+          <img
+            src={service.image}
+            alt={productName}
+            className={getProductLogoFillClassName(service.slug)}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={[
+        className,
+        "flex shrink-0 items-center justify-center rounded-2xl bg-white",
+      ].join(" ")}
+    >
+      <img
+        src={service.image}
+        alt={productName}
+        className={getProductImageClassName(service.slug)}
+      />
+    </div>
+  );
 }
 
 function getProductIcon(productName: string) {
@@ -500,11 +682,7 @@ export default function MyParty() {
                 </div>
 
                 <div>
-                  <p className="text-[13px] font-extrabold text-slate-400">
-                    MY PARTY
-                  </p>
-
-                  <h1 className="mt-2 text-[28px] font-extrabold leading-tight tracking-tight text-slate-950 sm:text-[34px]">
+                  <h1 className="text-[28px] font-extrabold leading-tight tracking-tight text-slate-950 sm:text-[34px]">
                     내 파티
                   </h1>
 
@@ -696,20 +874,16 @@ export default function MyParty() {
                 >
                   <div className="flex flex-col gap-5">
                     <div className="flex min-w-0 items-start gap-4">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 text-[#00875A] ring-1 ring-slate-100">
-                        {request.thumbnailUrl ? (
-                          <img
-                            src={request.thumbnailUrl}
-                            alt={request.productName}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <Icon
-                            icon={getProductIcon(request.productName)}
-                            className="h-7 w-7"
-                          />
-                        )}
-                      </div>
+                      <ProductLogo
+                        productName={request.productName}
+                        category={
+                          request.category ??
+                          request.productCategory ??
+                          request.ottProviderType
+                        }
+                        fallbackImage={request.thumbnailUrl}
+                        className="h-14 w-14"
+                      />
 
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -962,11 +1136,16 @@ function PartyListItem({
     >
       <div
         className={[
-          "relative flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl ring-1",
-          roleStyle.iconBg,
+          "relative flex h-13 w-13 shrink-0 items-center justify-center",
         ].join(" ")}
       >
-        <Icon icon={getProductIcon(party.productName)} className="h-7 w-7" />
+        <ProductLogo
+          productName={party.productName}
+          category={
+            party.category ?? party.productCategory ?? party.ottProviderType
+          }
+          className="h-13 w-13"
+        />
 
         {party.role === "HOST" && (
           <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-main text-white ring-2 ring-white">
@@ -991,16 +1170,22 @@ function PartyListItem({
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
           <p className="truncate text-base font-extrabold text-slate-800">
             {party.productName}
           </p>
 
-          <span
-            className={`rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ${getStatusStyle(party.status)}`}
-          >
-            {getStatusLabel(party.status)}
-          </span>
+          {party.status === "USING" && usagePeriod ? (
+            <span className="text-xs font-bold text-[#00875A]">
+              {formatUsageDayCount(usagePeriod.currentStartDate)}
+            </span>
+          ) : party.status === "USING" ? null : (
+            <span
+              className={`rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ${getStatusStyle(party.status)}`}
+            >
+              {getStatusLabel(party.status)}
+            </span>
+          )}
         </div>
 
         <p
@@ -1011,12 +1196,6 @@ function PartyListItem({
         >
           {getRoleLabel(party.role)}
         </p>
-
-        {party.status === "USING" && usagePeriod && (
-          <p className="mt-2 text-xs font-bold text-[#00875A]">
-            {formatUsageDayCount(usagePeriod.currentStartDate)}
-          </p>
-        )}
 
         {party.status === "SCHEDULED" && (
           <p className="mt-2 text-xs font-bold text-amber-600">

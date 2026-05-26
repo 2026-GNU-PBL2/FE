@@ -217,10 +217,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                 <div className="rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 transition-all duration-500 sm:px-6 sm:py-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-bold tracking-[0.14em] text-[#00875A]">
-                        REQUIRED
-                      </p>
-                      <h2 className="mt-2 text-[24px] font-extrabold tracking-tight text-slate-950">
+                      <h2 className="text-[24px] font-extrabold tracking-tight text-slate-950">
                         자동승인 이용약관
                       </h2>
                     </div>
@@ -431,10 +428,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                       <div className="rounded-[28px] bg-white px-5 py-5 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100 transition-all duration-500 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <p className="text-xs font-bold tracking-[0.14em] text-[#00875A]">
-                              REQUIRED
-                            </p>
-                            <h2 className="mt-2 text-[24px] font-extrabold tracking-tight text-slate-950 sm:text-[28px]">
+                            <h2 className="text-[24px] font-extrabold tracking-tight text-slate-950 sm:text-[28px]">
                               자동승인 이용약관
                             </h2>
                           </div>

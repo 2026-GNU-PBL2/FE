@@ -23,7 +23,7 @@ export function getOttMeta(ott: OttType): OttMeta {
       };
     case "애플티비":
       return {
-        image: "/images/apple.svg",
+        image: "/images/ott/apple.png",
         imageClassName: "h-3.5 w-3.5 object-contain",
         chipClassName: "bg-slate-100 text-slate-700 ring-slate-200",
       };

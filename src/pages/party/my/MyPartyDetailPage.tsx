@@ -1009,10 +1009,7 @@ export default function MyPartyDetailPage() {
         {isHost && provision && (
           <section className="mt-8">
             <div>
-              <p className="text-[13px] font-extrabold text-brand-main">
-                Members
-              </p>
-              <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
+              <h2 className="text-[22px] font-extrabold tracking-tight text-slate-950">
                 파티원 이용 확인
               </h2>
             </div>

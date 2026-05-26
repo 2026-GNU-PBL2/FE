@@ -128,10 +128,7 @@ export default function MyPageLayout() {
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-[13px] font-extrabold text-rose-700">
-                      MY PAGE
-                    </p>
-                    <h1 className="mt-2 truncate text-[28px] font-extrabold leading-tight tracking-tight text-slate-950">
+                    <h1 className="truncate text-[28px] font-extrabold leading-tight tracking-tight text-slate-950">
                       {displayName}
                     </h1>
                     <p className="mt-2 truncate text-sm font-semibold leading-6 text-slate-500">
@@ -149,10 +146,7 @@ export default function MyPageLayout() {
               <div className="rounded-[28px] bg-white p-4 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
                 <div className="flex items-center justify-between px-2 pb-3">
                   <div>
-                    <p className="text-[11px] font-semibold tracking-[0.18em] text-slate-400">
-                      DASHBOARD
-                    </p>
-                    <h2 className="mt-1 text-lg font-bold text-slate-900">
+                    <h2 className="text-lg font-bold text-slate-900">
                       메뉴
                     </h2>
                   </div>
@@ -200,10 +194,7 @@ export default function MyPageLayout() {
                     </div>
 
                     <div className="min-w-0">
-                      <p className="text-[10px] font-semibold tracking-[0.18em] text-slate-400 sm:text-xs">
-                        ACCOUNT
-                      </p>
-                      <h3 className="mt-1 truncate text-lg font-bold text-slate-900 sm:text-xl lg:text-2xl">
+                      <h3 className="truncate text-lg font-bold text-slate-900 sm:text-xl lg:text-2xl">
                         {currentMenu.title}
                       </h3>
                     </div>

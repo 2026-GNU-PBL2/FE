@@ -194,9 +194,6 @@ export default function PartyMemberCardRegisterPage() {
                 <div className="rounded-[28px] bg-linear-to-br from-[#00A86B] to-[#00875A] p-5 text-white shadow-xl shadow-emerald-900/20">
                   <div className="flex items-center justify-between">
                     <Icon icon="solar:card-bold" className="h-6 w-6" />
-                    <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold">
-                      SECURE
-                    </span>
                   </div>
 
                   <div className="mt-12">
