@@ -6,10 +6,11 @@ import { api } from "@/api/axios";
 import {
   getApiErrorMessage,
   getConcurrentIssueHistory,
+  getPartyMemberDevices,
   reportDeviceAlert,
   resolveConcurrentIssue,
   type ConcurrentIssueHistoryItem,
-  type DeviceAlertReportResponse,
+  type PartyMemberDevice,
 } from "@/api/concurrent";
 
 type ProvisionType = "INVITE_CODE" | "ACCOUNT_SHARE" | string;
@@ -177,6 +178,14 @@ function formatDateTime(value: string | null) {
   }).format(date);
 }
 
+function getDeviceOwnerLabel(device: PartyMemberDevice) {
+  return (
+    device.nickname?.trim() ||
+    device.email?.trim() ||
+    `user #${device.userId}`
+  );
+}
+
 function formatDate(value?: string | null) {
   if (!value) return "-";
 
@@ -208,6 +217,9 @@ export default function PartyProvisionDashboardPage() {
   const [issueHistory, setIssueHistory] = useState<
     ConcurrentIssueHistoryItem[]
   >([]);
+  const [registeredDevices, setRegisteredDevices] = useState<
+    PartyMemberDevice[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [resolvingIncidentId, setResolvingIncidentId] = useState<number | null>(
     null,
@@ -216,8 +228,6 @@ export default function PartyProvisionDashboardPage() {
   const [isDeviceAlertSubmitting, setIsDeviceAlertSubmitting] = useState(false);
   const [detectedDevice, setDetectedDevice] = useState("");
   const [detectedLocation, setDetectedLocation] = useState("");
-  const [deviceAlertResult, setDeviceAlertResult] =
-    useState<DeviceAlertReportResponse | null>(null);
 
   const progressPercent = useMemo(() => {
     if (!provision || provision.totalMemberCount <= 0) return 0;
@@ -309,13 +319,21 @@ export default function PartyProvisionDashboardPage() {
         setProvision(data);
         if (isAccountShareProvisionType(data.provisionType)) {
           try {
-            setIssueHistory(await getConcurrentIssueHistory(partyId));
-          } catch (historyError) {
-            console.error(historyError);
+            const [history, devices] = await Promise.all([
+              getConcurrentIssueHistory(partyId),
+              getPartyMemberDevices(partyId),
+            ]);
+
+            setIssueHistory(history);
+            setRegisteredDevices(devices);
+          } catch (concurrentError) {
+            console.error(concurrentError);
             setIssueHistory([]);
+            setRegisteredDevices([]);
           }
         } else {
           setIssueHistory([]);
+          setRegisteredDevices([]);
         }
       } catch (error) {
         console.error(error);
@@ -354,13 +372,13 @@ export default function PartyProvisionDashboardPage() {
 
     try {
       setIsDeviceAlertSubmitting(true);
-      const result = await reportDeviceAlert(partyId, {
+      await reportDeviceAlert(partyId, {
         detectedDevice: detectedDevice.trim(),
         detectedLocation: detectedLocation.trim(),
       });
 
-      setDeviceAlertResult(result);
-      toast.success("전체 파티원에게 내 기기인지 확인 요청 알림이 발송되었습니다.");
+      setIsDeviceAlertModalOpen(false);
+      toast.success("낯선 기기 신고가 접수되었습니다.");
     } catch (error) {
       console.error(error);
       toast.error(getApiErrorMessage(error, "낯선 기기 신고에 실패했습니다."));
@@ -520,9 +538,9 @@ export default function PartyProvisionDashboardPage() {
         {isAccountShareProvisionType(provision.provisionType) && (
           <HostConcurrentTools
             issueHistory={issueHistory}
+            registeredDevices={registeredDevices}
             resolvingIncidentId={resolvingIncidentId}
             onOpenDeviceAlert={() => {
-              setDeviceAlertResult(null);
               setIsDeviceAlertModalOpen(true);
             }}
             onResolveIssue={handleResolveIssue}
@@ -586,7 +604,6 @@ export default function PartyProvisionDashboardPage() {
         <DeviceAlertReportModal
           detectedDevice={detectedDevice}
           detectedLocation={detectedLocation}
-          result={deviceAlertResult}
           isSubmitting={isDeviceAlertSubmitting}
           onDetectedDeviceChange={setDetectedDevice}
           onDetectedLocationChange={setDetectedLocation}
@@ -614,11 +631,13 @@ function MetricTile({ label, value }: { label: string; value: string }) {
 
 function HostConcurrentTools({
   issueHistory,
+  registeredDevices,
   resolvingIncidentId,
   onOpenDeviceAlert,
   onResolveIssue,
 }: {
   issueHistory: ConcurrentIssueHistoryItem[];
+  registeredDevices: PartyMemberDevice[];
   resolvingIncidentId: number | null;
   onOpenDeviceAlert: () => void;
   onResolveIssue: (incidentId: number) => void;
@@ -649,6 +668,53 @@ function HostConcurrentTools({
       </div>
 
       <div className="mt-5 space-y-2">
+        <p className="text-xs font-bold text-slate-400">파티 등록 기기</p>
+        {registeredDevices.length > 0 ? (
+          registeredDevices.map((device) => (
+            <div
+              key={device.id}
+              className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100"
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-slate-900">
+                    {getDeviceOwnerLabel(device)}
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    {device.deviceType} · {device.os}
+                    {device.browser ? ` · ${device.browser}` : ""}
+                  </p>
+                  {(device.ipLocation || device.vpn !== null) && (
+                    <p className="mt-1 text-xs font-semibold text-slate-400">
+                      {device.ipLocation || "위치 미확인"}
+                      {device.vpn !== null
+                        ? ` · VPN ${device.vpn ? "사용" : "미사용"}`
+                        : ""}
+                    </p>
+                  )}
+                </div>
+                <div className="shrink-0 text-left sm:text-right">
+                  <span className="text-xs font-semibold text-slate-400">
+                    {formatDateTime(device.registeredAt)}
+                  </span>
+                  <p className="mt-1 text-[11px] font-bold text-slate-400">
+                    {device.registrationMethod}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="rounded-2xl bg-slate-50 px-4 py-4 text-center ring-1 ring-slate-100">
+            <p className="text-sm font-semibold text-slate-500">
+              아직 등록된 기기가 없습니다.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-5 space-y-2">
+        <p className="text-xs font-bold text-slate-400">경고 이력</p>
         {issueHistory.length > 0 ? (
           issueHistory.map((issue) => (
             <article
@@ -729,7 +795,6 @@ function getDetectionSourceLabel(source: string) {
 function DeviceAlertReportModal({
   detectedDevice,
   detectedLocation,
-  result,
   isSubmitting,
   onDetectedDeviceChange,
   onDetectedLocationChange,
@@ -738,7 +803,6 @@ function DeviceAlertReportModal({
 }: {
   detectedDevice: string;
   detectedLocation: string;
-  result: DeviceAlertReportResponse | null;
   isSubmitting: boolean;
   onDetectedDeviceChange: (value: string) => void;
   onDetectedLocationChange: (value: string) => void;
@@ -760,51 +824,20 @@ function DeviceAlertReportModal({
         aria-modal="true"
       >
         <h2 className="text-lg font-bold text-slate-950">낯선 기기 신고</h2>
-        {result ? (
-          <div className="mt-5">
-            <div className="rounded-2xl bg-teal-50 px-4 py-4 ring-1 ring-teal-100">
-              <p className="text-sm font-bold text-teal-800">
-                전체 파티원에게 내 기기인지 확인 요청 알림이 발송되었습니다.
-              </p>
-              <p className="mt-2 text-sm font-semibold text-teal-700">
-                알림 {result.notifiedCount}명 · 응답 기한{" "}
-                {formatDateTime(result.expiresAt)}
-              </p>
-            </div>
-
-            <div className="mt-4 space-y-2">
-              {result.registeredDevices.map((device, index) => (
-                <div
-                  key={`${device.userId}-${index}`}
-                  className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100"
-                >
-                  <p className="text-sm font-bold text-slate-900">
-                    user #{device.userId}
-                  </p>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">
-                    {device.deviceType} · {device.os}
-                    {device.browser ? ` · ${device.browser}` : ""}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="mt-5 space-y-3">
-            <DeviceInput
-              label="감지된 기기"
-              value={detectedDevice}
-              placeholder="Windows PC"
-              onChange={onDetectedDeviceChange}
-            />
-            <DeviceInput
-              label="감지 위치"
-              value={detectedLocation}
-              placeholder="부산"
-              onChange={onDetectedLocationChange}
-            />
-          </div>
-        )}
+        <div className="mt-5 space-y-3">
+          <DeviceInput
+            label="감지된 기기"
+            value={detectedDevice}
+            placeholder="Windows PC"
+            onChange={onDetectedDeviceChange}
+          />
+          <DeviceInput
+            label="감지 위치"
+            value={detectedLocation}
+            placeholder="부산"
+            onChange={onDetectedLocationChange}
+          />
+        </div>
 
         <div className="mt-6 grid grid-cols-2 gap-2">
           <button
@@ -815,16 +848,14 @@ function DeviceAlertReportModal({
           >
             닫기
           </button>
-          {!result && (
-            <button
-              type="button"
-              onClick={onSubmit}
-              disabled={isSubmitting}
-              className="flex h-11 items-center justify-center rounded-2xl bg-amber-600 text-sm font-bold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-            >
-              {isSubmitting ? "신고 중" : "신고하기"}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+            className="flex h-11 items-center justify-center rounded-2xl bg-amber-600 text-sm font-bold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            {isSubmitting ? "신고 중" : "신고하기"}
+          </button>
         </div>
       </section>
     </div>

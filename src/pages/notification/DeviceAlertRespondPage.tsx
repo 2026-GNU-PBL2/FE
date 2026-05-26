@@ -50,10 +50,36 @@ function formatDateTime(value?: string | null) {
 
 function getStatusLabel(status: string) {
   if (status === "PENDING") return "응답 집계 중";
-  if (status === "CONFIRMED_MINE") return "내 기기로 확인";
-  if (status === "REPORTED_UNKNOWN") return "모르는 기기로 신고";
+  if (status === "CONFIRMED_MINE") return "파티원 기기로 확인";
+  if (status === "REPORTED_UNKNOWN") return "알 수 없는 기기로 확인";
   if (status === "EXPIRED") return "응답 만료";
   return status;
+}
+
+function isPastDate(value?: string | null) {
+  if (!value) return false;
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return false;
+
+  return date.getTime() <= Date.now();
+}
+
+function getResultMessage(result: DeviceAlertRespondResponse) {
+  if (result.status === "CONFIRMED_MINE") {
+    return "파티원 기기로 확인되었습니다.";
+  }
+
+  if (result.status === "REPORTED_UNKNOWN") {
+    return "알 수 없는 기기로 확인되어 동시접속 위반 신고가 접수되었습니다.";
+  }
+
+  if (result.status === "EXPIRED") {
+    return "응답 기한이 만료된 기기 확인 요청입니다.";
+  }
+
+  return "응답이 완료됐습니다.";
 }
 
 export default function DeviceAlertRespondPage() {
@@ -68,6 +94,7 @@ export default function DeviceAlertRespondPage() {
     useState<DeviceAlertRespondResponse | null>(null);
 
   const providerName = getProviderDisplayName(state?.ottProviderType);
+  const isExpired = isPastDate(state?.expiresAt);
 
   const handleRespond = async (isMyDevice: boolean) => {
     if (!alertId || isSubmitting) return;
@@ -124,7 +151,7 @@ export default function DeviceAlertRespondPage() {
             <div className="mt-5">
               <div className="rounded-2xl bg-teal-50 px-4 py-4 text-center ring-1 ring-teal-100">
                 <p className="text-sm font-bold text-teal-800">
-                  응답이 완료됐습니다.
+                  {getResultMessage(respondResult)}
                 </p>
                 <p className="mt-2 text-sm font-semibold text-teal-700">
                   현재 {respondResult.responseCount}명이 응답했습니다.
@@ -161,7 +188,7 @@ export default function DeviceAlertRespondPage() {
                 <button
                   type="button"
                   onClick={() => handleRespond(true)}
-                  disabled={isSubmitting || !alertId}
+                  disabled={isSubmitting || !alertId || isExpired}
                   className="flex h-12 items-center justify-center rounded-2xl bg-brand-main text-sm font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   {isSubmitting ? "처리 중" : "내 기기입니다"}
@@ -169,14 +196,16 @@ export default function DeviceAlertRespondPage() {
                 <button
                   type="button"
                   onClick={() => handleRespond(false)}
-                  disabled={isSubmitting || !alertId}
+                  disabled={isSubmitting || !alertId || isExpired}
                   className="flex h-12 items-center justify-center rounded-2xl bg-rose-50 text-sm font-bold text-rose-600 ring-1 ring-rose-100 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                 >
                   모르는 기기입니다
                 </button>
               </div>
               <p className="mt-3 text-center text-xs font-semibold text-slate-400">
-                응답 기한이 지난 알림에는 응답할 수 없습니다.
+                {isExpired
+                  ? "응답 기한이 지난 알림입니다."
+                  : "응답 기한이 지난 알림에는 응답할 수 없습니다."}
               </p>
             </>
           )}

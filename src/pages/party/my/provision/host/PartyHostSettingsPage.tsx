@@ -410,10 +410,6 @@ export default function PartyHostSettingsPage() {
         provisionMessage: message,
       });
 
-      if (isAccountShareProvisionType(provisionType)) {
-        await api.post(`/api/v1/credentials/${partyId}/notify-update`);
-      }
-
       setIsResetModalOpen(false);
       toast.success("파티 이용 정보가 재설정되었습니다.");
 

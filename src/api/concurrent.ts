@@ -1,11 +1,15 @@
 import { api } from "@/api/axios";
 
 export type PartyMemberDevice = {
-  deviceId: number;
-  partyId: number;
+  id: number;
+  userId: number;
+  nickname: string | null;
+  email: string | null;
   deviceType: string;
   os: string;
   browser: string | null;
+  ipLocation: string | null;
+  vpn: boolean | null;
   registrationMethod: string;
   registeredAt: string;
 };
@@ -19,6 +23,7 @@ export type CreatePartyMemberDeviceRequest = {
 export type DeviceAlertReportRequest = {
   detectedDevice: string;
   detectedLocation: string;
+  detectedAt?: string | null;
 };
 
 export type DeviceAlertReportResponse = {
@@ -156,6 +161,11 @@ export async function createPartyMemberDevice(
   return unwrapResponse<PartyMemberDevice>(response.data);
 }
 
+export async function getPartyMemberDevices(partyId: string | number) {
+  const response = await api.get(`/api/v1/party-member-devices/${partyId}`);
+  return unwrapResponse<PartyMemberDevice[]>(response.data) ?? [];
+}
+
 export async function reportDeviceAlert(
   partyId: string | number,
   body: DeviceAlertReportRequest,
@@ -170,10 +180,6 @@ export async function respondDeviceAlert(
 ) {
   const response = await api.post(`/api/v1/device-alerts/${alertId}/respond`, body);
   return unwrapResponse<DeviceAlertRespondResponse>(response.data);
-}
-
-export async function notifyCredentialUpdate(partyId: string | number) {
-  await api.post(`/api/v1/credentials/${partyId}/notify-update`);
 }
 
 export async function reportConcurrentIssue(

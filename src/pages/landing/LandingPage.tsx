@@ -64,44 +64,44 @@ const serviceCards = [
 ];
 
 const flowEvents = [
-  ["파티원 카드 결제", "자동 승인", "solar:card-2-bold-duotone"],
-  ["Submate 정산 큐", "금액 분배", "solar:server-square-bold-duotone"],
-  ["파티장 계좌 입금", "정산 완료", "solar:wallet-money-bold-duotone"],
+  ["상품 선택", "월 이용권", "solar:ticket-bold-duotone"],
+  ["역할 선택", "파티장 · 파티원", "solar:users-group-rounded-bold-duotone"],
+  ["이용 안내", "등록 · 확인", "solar:clipboard-check-bold-duotone"],
 ];
 
 const featureCards = [
   {
-    icon: "solar:bolt-bold-duotone",
-    title: "자동 매칭",
-    body: "원하는 OTT와 시작일을 고르면 빈자리가 있는 파티로 빠르게 연결합니다.",
+    icon: "solar:widget-5-bold-duotone",
+    title: "OTT 상품 선택",
+    body: "원하는 상품을 고르고 파티장 또는 파티원으로 바로 시작합니다.",
   },
   {
-    icon: "solar:shield-check-bold-duotone",
-    title: "개인 이메일 보호",
-    body: "Submate 도메인 이메일로 참여해 개인 계정 노출 부담을 줄입니다.",
+    icon: "solar:card-2-bold-duotone",
+    title: "자동결제 참여",
+    body: "파티원은 약관 동의와 카드 등록 후 월 이용권으로 참여합니다.",
   },
   {
-    icon: "solar:bell-off-bold-duotone",
-    title: "독촉 없는 정산",
-    body: "카드 결제와 계좌 정산이 자동으로 이어져 매달 연락할 일이 줄어듭니다.",
+    icon: "solar:wallet-money-bold-duotone",
+    title: "정산 계좌 등록",
+    body: "파티장은 정산 계좌를 등록하고 생성 전 금액을 확인합니다.",
   },
 ];
 
 const faqItems = [
   {
-    question: "Submate에서는 무엇을 할 수 있나요?",
+    question: "Submate는 어떤 서비스인가요?",
     answer:
-      "원하는 OTT 파티를 찾고, 카드 자동결제로 참여하고, 파티장은 등록한 계좌로 정산받을 수 있습니다.",
+      "OTT 파티를 만들거나 참여하고, 결제와 정산에 필요한 정보를 한곳에서 관리하는 서비스입니다.",
   },
   {
-    question: "매달 송금 요청을 따로 해야 하나요?",
+    question: "파티장과 파티원은 무엇이 다른가요?",
     answer:
-      "파티원 결제와 파티장 정산 흐름을 자동화해 매달 금액을 맞추고 연락하는 번거로움을 줄입니다.",
+      "파티장은 구독을 운영하고 정산 계좌를 등록합니다. 파티원은 운영 중인 파티에 참여하고 자동결제를 등록합니다.",
   },
   {
-    question: "개인 이메일이 노출되지는 않나요?",
+    question: "파티 이용 정보는 어디서 확인하나요?",
     answer:
-      "Submate 도메인 이메일을 활용해 OTT 파티 참여 과정에서 개인 이메일 노출 부담을 줄일 수 있습니다.",
+      "파티장이 이용 정보를 등록하면 나의 파티 상세에서 안내와 확인 상태를 볼 수 있습니다.",
   },
 ];
 
@@ -400,7 +400,7 @@ function HeroStage() {
                 Submate Flow
               </p>
               <p className="text-[18px] font-black tracking-[-0.03em]">
-                자동결제 · 자동정산
+                파티 이용 흐름
               </p>
             </div>
           </div>
@@ -412,10 +412,10 @@ function HeroStage() {
         <div className="grid grid-cols-1 gap-4 py-5 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-3">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#858585]">
-              Party Members
+              Party List
             </p>
             <div className="mt-3 flex -space-x-2">
-              {["김", "박", "이", "최"].map((name, index) => (
+              {["넷", "티", "디", "왓"].map((name, index) => (
                 <span
                   key={name}
                   className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-[#f5f5f7] text-sm font-black text-[#1d1d1f] shadow-sm ring-1 ring-[#d6d6d6]/70"
@@ -426,7 +426,7 @@ function HeroStage() {
               ))}
             </div>
             <p className="mt-3 text-[13px] font-bold text-[#707070]">
-              4명 결제 완료
+              모집 파티 보기
             </p>
           </div>
 
@@ -437,20 +437,20 @@ function HeroStage() {
                 className="landing-packet absolute left-1/2 top-1/2 flex h-9 w-[76px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[12px] font-black text-[#0071e3] shadow-[0_12px_28px_rgba(0,113,227,0.18)] ring-1 ring-blue-100"
                 style={{ "--delay": `${item * 0.72}s` } as React.CSSProperties}
               >
-                5,240원
+                월 이용권
               </span>
             ))}
           </div>
 
           <div className="text-left sm:text-right">
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#858585]">
-              Host Account
+              Host Setup
             </p>
             <p className="mt-2 text-[30px] font-black leading-none tracking-[-0.05em] text-[#1d1d1f] sm:mt-3 sm:text-[34px]">
-              20,960
+              정산 계좌
             </p>
             <p className="mt-2 text-[13px] font-bold text-emerald-700">
-              정산 예정
+              생성 전 확인
             </p>
           </div>
         </div>
@@ -480,15 +480,15 @@ function HeroStage() {
 
       <div className="absolute bottom-[7%] left-1/2 z-40 grid w-[min(92vw,560px)] -translate-x-1/2 grid-cols-3 overflow-hidden rounded-[28px] border border-[#d6d6d6]/70 bg-white/82 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-2xl">
         {[
-          ["68%", "최대 절약"],
-          ["990원", "파티원 수수료"],
-          ["490원", "파티장 수수료"],
+          ["상품 목록", "홈에서 선택"],
+          ["정산 계좌", "파티장 단계"],
+          ["이용 안내", "파티 상세"],
         ].map(([value, label]) => (
           <div
             key={label}
             className="border-r border-white/10 px-4 py-4 text-center last:border-r-0"
           >
-            <p className="text-[24px] font-black tracking-[-0.04em] text-[#1d1d1f] md:text-[30px]">
+            <p className="text-[18px] font-black tracking-[-0.03em] text-[#1d1d1f] md:text-[22px]">
               {value}
             </p>
             <p className="mt-1 text-[11px] font-bold text-[#707070] md:text-[12px]">
@@ -554,21 +554,20 @@ export default function LandingPage() {
           <div className="relative z-20 max-w-[650px]">
             <p className="landing-reveal inline-flex items-center gap-2 rounded-full border border-[#d6d6d6]/70 bg-white/72 px-3.5 py-2 text-[12px] font-black uppercase tracking-[0.16em] text-[#474747] shadow-sm backdrop-blur-xl">
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              OTT Party Payment OS
+              OTT Party Service
             </p>
 
             <h1 className="landing-reveal mt-7 text-[44px] font-black leading-[1.02] tracking-[-0.045em] text-[#1d1d1f] sm:text-[54px] lg:text-[62px] xl:text-[66px]">
-              OTT 파티,
+              OTT 파티 만들기
               <br />
-              결제부터 정산까지
-              <span className="block bg-gradient-to-r from-[#4f46e5] via-[#0071e3] to-[#12b981] bg-clip-text text-transparent">
-                자동으로 흐르게.
+              <span className="bg-gradient-to-r from-[#4f46e5] via-[#0071e3] to-[#12b981] bg-clip-text text-transparent">
+                참여부터 정산까지
               </span>
             </h1>
 
             <p className="landing-reveal mt-7 max-w-[560px] text-[18px] font-medium leading-[1.72] tracking-[-0.01em] text-[#474747] md:text-[20px]">
-              파티원은 카드로 자동 결제하고, 파티장은 계좌로 자동 정산받습니다.
-              빈자리 매칭과 개인 이메일 보호까지 한 화면에서 이어집니다.
+              OTT 상품을 선택하고 파티장 또는 파티원으로 시작하세요. 결제 등록,
+              정산 계좌, 이용 안내까지 역할에 맞게 이어집니다.
             </p>
 
             <div className="landing-reveal mt-9 flex flex-wrap gap-3">
@@ -588,9 +587,9 @@ export default function LandingPage() {
 
             <div className="landing-reveal mt-10 grid max-w-[520px] grid-cols-3 gap-3">
               {[
-                ["7개", "OTT 지원"],
-                ["4명", "파티 자동관리"],
-                ["0회", "정산 독촉"],
+                ["8개", "OTT 상품"],
+                ["2가지", "참여 방식"],
+                ["월", "이용권"],
               ].map(([value, label]) => (
                 <div
                   key={label}
@@ -621,13 +620,12 @@ export default function LandingPage() {
                 Why Submate
               </p>
               <h2 className="mt-4 text-[34px] font-black leading-[1.04] tracking-[-0.04em] text-[#1d1d1f] md:text-[54px]">
-                공유 구독에서 제일 귀찮은 일을 먼저 없앴습니다.
+                파티 시작에 필요한 단계만 담았습니다.
               </h2>
             </div>
             <p className="max-w-[620px] text-[18px] font-medium leading-[1.75] tracking-[-0.01em] text-[#474747] lg:ml-auto">
-              사람을 모으는 것보다 매달 돈을 맞추고, 결제 실패를 확인하고, 중도
-              변경을 처리하는 일이 더 피곤합니다. Submate는 그 흐름을 결제
-              시스템처럼 다룹니다.
+              상품 선택부터 역할 선택, 결제 등록, 정산 계좌, 이용 안내까지 실제
+              서비스에서 쓰는 흐름으로 정리했습니다.
             </p>
           </div>
 
@@ -659,13 +657,13 @@ export default function LandingPage() {
               Real Flow
             </p>
             <h2 className="mt-4 text-[40px] font-black leading-[1.02] tracking-[-0.045em] md:text-[62px]">
-              가격은 가볍게,
+              금액은 나누고,
               <br />
-              운영은 조용하게.
+              이용은 분명하게.
             </h2>
             <p className="mt-6 max-w-[560px] text-[18px] font-medium leading-[1.75] text-[#474747]">
-              파티원은 매달 자동결제로 참여하고, 파티장은 정산 내역을 확인하며
-              안정적으로 파티를 운영할 수 있습니다.
+              파티원은 자동결제로 참여하고, 파티장은 정산 계좌와 이용 안내를
+              등록합니다. 진행 상태는 파티 상세에서 확인할 수 있습니다.
             </p>
           </div>
 
@@ -677,18 +675,18 @@ export default function LandingPage() {
                     Netflix Premium
                   </p>
                   <p className="mt-1 text-[26px] font-black tracking-[-0.04em]">
-                    파티 4 / 4
+                    파티 생성 전 확인
                   </p>
                 </div>
                 <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-[12px] font-black text-emerald-700">
-                  정산 정상
+                  계정공유형
                 </span>
               </div>
 
               <div className="mt-7 rounded-[24px] bg-[#f5f5f7] p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-[14px] font-bold text-[#707070]">
-                    월 부담 금액
+                    월 이용권
                   </span>
                   <div className="landing-price-switch relative h-9 w-36 overflow-hidden text-right text-[32px] font-black leading-none tracking-[-0.05em]">
                     <span className="absolute inset-0 line-through opacity-30">
@@ -706,10 +704,10 @@ export default function LandingPage() {
 
               <div className="mt-4 grid grid-cols-2 gap-3">
                 {[
-                  ["결제일", "매월 15일"],
-                  ["이메일", "submate.cloud"],
-                  ["파티원", "4명 완료"],
-                  ["정산", "자동 입금"],
+                  ["역할", "파티장 · 파티원"],
+                  ["결제", "자동결제"],
+                  ["정산", "계좌 등록"],
+                  ["이용 안내", "등록 · 확인"],
                 ].map(([label, value]) => (
                   <div key={label} className="rounded-[20px] bg-[#f5f5f7] p-4">
                     <p className="text-[12px] font-bold text-[#707070]">
@@ -757,11 +755,10 @@ export default function LandingPage() {
 
           <div className="landing-panel mt-12 rounded-[32px] border border-[#d6d6d6]/70 bg-white/78 p-6 text-center shadow-[0_26px_90px_rgba(15,23,42,0.10)] md:p-8">
             <h3 className="text-[28px] font-black tracking-[-0.04em] md:text-[38px]">
-              OTT 구독료, 함께 나누고 자동으로 관리하세요.
+              OTT 파티를 더 쉽게 시작하세요.
             </h3>
             <p className="mx-auto mt-3 max-w-[560px] text-[16px] font-medium leading-7 text-[#5f6368]">
-              원하는 파티를 찾고 결제 수단을 등록하면, 다음 달부터 반복되는
-              결제와 정산 흐름을 더 편하게 관리할 수 있습니다.
+              상품을 고르고 역할을 선택하면 필요한 단계가 차례로 이어집니다.
             </p>
             <Link
               to="/log-in"
