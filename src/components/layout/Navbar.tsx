@@ -118,7 +118,7 @@ export default function Navbar() {
           </span>
 
           <span className="text-lg font-extrabold tracking-tight text-[#1d1d1f]">
-            <span className="text-[#4f46e5]">Sub</span>mate
+            <span className="text-brand-main">Sub</span>mate
           </span>
         </Link>
 

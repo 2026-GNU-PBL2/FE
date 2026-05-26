@@ -162,8 +162,7 @@ export default function PartyInviteCodeGuidePage() {
         <section className="mt-5 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.28)] sm:px-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-bold text-sky-600">MEMBERS</p>
-              <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+              <h2 className="text-lg font-extrabold text-slate-950">
                 OTT 초대에 사용할 이메일
               </h2>
             </div>

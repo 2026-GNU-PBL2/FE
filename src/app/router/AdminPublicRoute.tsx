@@ -3,11 +3,16 @@ import { Navigate } from "react-router-dom";
 import { api } from "@/api/axios";
 import { useAuthStore } from "@/stores/authStore";
 
+type AdminCheckState = {
+  accessToken: string;
+  allowed: boolean;
+};
+
 export default function AdminPublicRoute() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const authStatus = useAuthStore((state) => state.authStatus);
   const clearAuth = useAuthStore((state) => state.clearAuth);
-  const [isAdminAllowed, setIsAdminAllowed] = useState<boolean | null>(null);
+  const [adminCheck, setAdminCheck] = useState<AdminCheckState | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -17,11 +22,10 @@ export default function AdminPublicRoute() {
     }
 
     if (!accessToken) {
-      setIsAdminAllowed(false);
       return;
     }
 
-    setIsAdminAllowed(null);
+    const checkedAccessToken = accessToken;
 
     async function checkAdminPermission() {
       try {
@@ -33,7 +37,7 @@ export default function AdminPublicRoute() {
         if (!isMounted) return;
 
         if (response.status === 200) {
-          setIsAdminAllowed(true);
+          setAdminCheck({ accessToken: checkedAccessToken, allowed: true });
           return;
         }
 
@@ -41,12 +45,12 @@ export default function AdminPublicRoute() {
           clearAuth();
         }
 
-        setIsAdminAllowed(false);
+        setAdminCheck({ accessToken: checkedAccessToken, allowed: false });
       } catch (error) {
         console.error(error);
 
         if (isMounted) {
-          setIsAdminAllowed(false);
+          setAdminCheck({ accessToken: checkedAccessToken, allowed: false });
         }
       }
     }
@@ -61,12 +65,12 @@ export default function AdminPublicRoute() {
   if (
     authStatus === "idle" ||
     authStatus === "checking" ||
-    isAdminAllowed === null
+    (accessToken && adminCheck?.accessToken !== accessToken)
   ) {
     return null;
   }
 
-  if (isAdminAllowed) {
+  if (adminCheck?.allowed) {
     return <Navigate to="/admin/dashboard" replace />;
   }
 

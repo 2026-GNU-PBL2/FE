@@ -83,15 +83,19 @@ function getStatusLabel(status: PartyHistoryStatus) {
 
 function getRoleClassName(role: PartyRole) {
   if (role === "HOST") {
-    return "bg-slate-100 text-slate-700 ring-slate-200";
+    return "bg-blue-50 text-brand-main ring-blue-100";
   }
 
-  return "bg-rose-50 text-rose-700 ring-rose-100";
+  if (role === "MEMBER") {
+    return "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]";
+  }
+
+  return "bg-slate-100 text-slate-600 ring-slate-200";
 }
 
 function getStatusClassName(status: PartyHistoryStatus) {
   if (status === "USING") {
-    return "bg-emerald-50 text-emerald-700 ring-emerald-100";
+    return "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]";
   }
 
   if (status === "SCHEDULED") {

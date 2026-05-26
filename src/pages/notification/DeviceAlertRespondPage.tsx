@@ -127,10 +127,7 @@ export default function DeviceAlertRespondPage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
               <Icon icon="solar:smartphone-bold" className="h-7 w-7" />
             </div>
-            <p className="mt-4 text-xs font-bold text-amber-700">
-              DEVICE CHECK
-            </p>
-            <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-[28px]">
+            <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-[28px]">
               새 기기 로그인을 확인해주세요
             </h1>
             <p className="mt-2 max-w-sm text-sm font-semibold leading-6 text-slate-500">
@@ -149,11 +146,11 @@ export default function DeviceAlertRespondPage() {
 
           {respondResult ? (
             <div className="mt-5">
-              <div className="rounded-2xl bg-teal-50 px-4 py-4 text-center ring-1 ring-teal-100">
-                <p className="text-sm font-bold text-teal-800">
+              <div className="rounded-2xl bg-emerald-50 px-4 py-4 text-center ring-1 ring-[#A9E6C9]">
+                <p className="text-sm font-bold text-[#00875A]">
                   {getResultMessage(respondResult)}
                 </p>
-                <p className="mt-2 text-sm font-semibold text-teal-700">
+                <p className="mt-2 text-sm font-semibold text-[#00875A]">
                   현재 {respondResult.responseCount}명이 응답했습니다.
                 </p>
               </div>

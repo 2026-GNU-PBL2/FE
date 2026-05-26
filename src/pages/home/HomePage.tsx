@@ -33,9 +33,24 @@ type ApiEnvelope<T> = {
 
 const homeBanners = [
   {
-    id: "settlement-party",
+    id: "1",
     image: "/images/banners/banner.png",
-    alt: "",
+    mobileImage: "/images/banners/banner_mobile.png",
+    alt: "Submate 배너 1",
+    to: "/",
+  },
+  {
+    id: "2",
+    image: "/images/banners/banner2.png",
+    mobileImage: "/images/banners/banner2_mobile.png",
+    alt: "Submate 배너 2",
+    to: "/",
+  },
+  {
+    id: "3",
+    image: "/images/banners/banner3.png",
+    mobileImage: "/images/banners/banner3_mobile.png",
+    alt: "Submate 배너 3",
     to: "/",
   },
 ];
@@ -185,7 +200,12 @@ function mapVacancyToWaitingParty(
       role === "HOST"
         ? `${item.productName} 파티장 모집`
         : `${item.productName} 파티원 모집`,
-    host: role === "HOST" ? "운영 예정 파티" : item.hostNickname || "파티장",
+    host:
+      role === "HOST"
+        ? "파티장 모집 중"
+        : item.hostNickname
+          ? `파티장 ${item.hostNickname}`
+          : "파티장 정보 없음",
     currentMembers: item.currentMemberCount,
     maxMembers: item.totalCapacity,
     price: formatVacancyPaymentAmount(item.monthlyPaymentAmount),
@@ -332,7 +352,7 @@ function RecruitPartyCard({
       className={[
         "group overflow-hidden rounded-[28px] border bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-xl sm:p-5",
         isMint
-          ? "border-[#D7F8EE] shadow-teal-900/5 hover:border-[#14B8A6] hover:shadow-teal-900/10"
+          ? "border-[#A9E6C9] shadow-emerald-900/5 hover:border-[#00A86B] hover:shadow-emerald-900/10"
           : "border-blue-100 shadow-blue-900/5 hover:border-brand-sub hover:shadow-blue-900/10",
       ].join(" ")}
     >
@@ -374,7 +394,7 @@ function RecruitPartyCard({
                 className={[
                   "inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1",
                   isMint
-                    ? "bg-[#ECFEF8] text-[#0F766E] ring-[#C9F7EA]"
+                    ? "bg-[#EAF8F1] text-[#00875A] ring-[#A9E6C9]"
                     : "bg-blue-50 text-brand-main ring-blue-100",
                 ].join(" ")}
               >
@@ -396,7 +416,7 @@ function RecruitPartyCard({
             className={[
               "inline-flex h-11 shrink-0 items-center justify-center rounded-full px-5 text-sm font-bold text-white shadow-md transition group-hover:scale-[1.02]",
               isMint
-                ? "bg-[#14B8A6] shadow-teal-900/20 hover:bg-[#0D9488]"
+                ? "bg-[#00A86B] shadow-emerald-900/20 hover:bg-[#00875A]"
                 : "bg-brand-main shadow-blue-900/20 hover:bg-blue-800",
             ].join(" ")}
           >
@@ -460,7 +480,7 @@ function RecruitSection({
             className={[
               "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold",
               isMint
-                ? "bg-[#ECFEF8] text-[#0F766E]"
+                ? "bg-[#EAF8F1] text-[#00875A]"
                 : "bg-blue-50 text-brand-main",
             ].join(" ")}
           >
@@ -482,7 +502,7 @@ function RecruitSection({
           className={[
             "inline-flex h-11 items-center justify-center gap-2 rounded-full border bg-white px-5 text-sm font-bold transition hover:-translate-y-0.5 hover:shadow-md",
             isMint
-              ? "border-[#C9F7EA] text-[#0F766E] hover:bg-[#F7FFFD]"
+              ? "border-[#A9E6C9] text-[#00875A] hover:bg-[#EAF8F1]"
               : "border-slate-200 text-slate-700 hover:border-sky-200 hover:bg-slate-50",
           ].join(" ")}
         >
@@ -509,7 +529,7 @@ function RecruitSection({
               icon="solar:document-text-search-bold"
               className={[
                 "h-7 w-7",
-                isMint ? "text-[#0F766E]" : "text-brand-main",
+                isMint ? "text-[#00875A]" : "text-brand-main",
               ].join(" ")}
             />
           </div>
@@ -661,7 +681,7 @@ export default function HomePage() {
     <div className="min-h-full bg-brand-bg">
       <section className="bg-brand-bg px-4 pb-4 pt-5 sm:px-6 sm:pb-6 sm:pt-7 lg:px-8">
         <div className="mx-auto w-full max-w-6xl">
-          <div className="relative overflow-hidden rounded-[24px] bg-blue-50 shadow-xl shadow-blue-900/8 ring-1 ring-blue-100 sm:rounded-[32px]">
+          <div className="group relative overflow-hidden rounded-[24px] bg-blue-50 shadow-xl shadow-blue-900/8 ring-1 ring-blue-100 sm:rounded-[32px]">
             <div
               className="flex transition-transform duration-500 ease-out"
               style={{
@@ -672,23 +692,29 @@ export default function HomePage() {
                 <Link
                   key={banner.id}
                   to={banner.to}
-                  className="block w-full shrink-0"
+                  className="block min-w-0 basis-full flex-none"
                   aria-label={banner.alt}
                 >
                   {banner.image && !failedBannerImages[banner.id] ? (
-                    <img
-                      src={banner.image}
-                      alt={banner.alt}
-                      onError={() =>
-                        setFailedBannerImages((current) => ({
-                          ...current,
-                          [banner.id]: true,
-                        }))
-                      }
-                      className="aspect-[1.15/1] w-full object-cover object-left sm:aspect-[2.9/1] lg:aspect-[3.35/1]"
-                    />
+                    <picture>
+                      <source
+                        media="(max-width: 639px)"
+                        srcSet={banner.mobileImage}
+                      />
+                      <img
+                        src={banner.image}
+                        alt={banner.alt}
+                        onError={() =>
+                          setFailedBannerImages((current) => ({
+                            ...current,
+                            [banner.id]: true,
+                          }))
+                        }
+                        className="aspect-square w-full object-cover object-left sm:aspect-[2.9/1] lg:aspect-[3.35/1]"
+                      />
+                    </picture>
                   ) : (
-                    <div className="flex aspect-[1.15/1] w-full items-center justify-center bg-slate-100 text-base font-extrabold text-slate-400 sm:aspect-[2.9/1] sm:text-xl lg:aspect-[3.35/1]">
+                    <div className="flex aspect-square w-full items-center justify-center bg-slate-100 text-base font-extrabold text-slate-400 sm:aspect-[2.9/1] sm:text-xl lg:aspect-[3.35/1]">
                       AD banner
                     </div>
                   )}
@@ -705,7 +731,7 @@ export default function HomePage() {
                       current === 0 ? homeBanners.length - 1 : current - 1,
                     )
                   }
-                  className="absolute left-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg transition hover:bg-white md:inline-flex"
+                  className="absolute left-3 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg transition hover:bg-white sm:left-4 sm:h-10 sm:w-10 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
                   aria-label="이전 배너"
                 >
                   <Icon
@@ -721,7 +747,7 @@ export default function HomePage() {
                       (current) => (current + 1) % homeBanners.length,
                     )
                   }
-                  className="absolute right-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg transition hover:bg-white md:inline-flex"
+                  className="absolute right-3 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg transition hover:bg-white sm:right-4 sm:h-10 sm:w-10 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
                   aria-label="다음 배너"
                 >
                   <Icon
@@ -774,7 +800,7 @@ export default function HomePage() {
           )}
         </div>
 
-        <div className="no-scrollbar -mx-4 mt-6 overflow-x-auto px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <div className="no-scrollbar -mx-4 -my-2 mt-4 overflow-x-auto px-4 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div className="flex min-w-max gap-3">
             {products.map((product) => {
               const isSelected = selectedProduct?.id === product.id;
@@ -822,7 +848,7 @@ export default function HomePage() {
                         {getProductSubtitle(product)}
                       </p>
 
-                      <p className="mt-3 text-sm font-extrabold text-[#0F766E]">
+                      <p className="mt-3 text-sm font-extrabold text-[#00875A]">
                         {formatPrice(product.pricePerMember)}
                       </p>
                     </div>

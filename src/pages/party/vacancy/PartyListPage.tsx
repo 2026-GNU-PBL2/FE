@@ -163,7 +163,12 @@ function mapVacancyToWaitingParty(
       role === "HOST"
         ? `${item.productName} 파티장 모집`
         : `${item.productName} 파티원 모집`,
-    host: role === "HOST" ? "운영 예정 파티" : item.hostNickname || "파티장",
+    host:
+      role === "HOST"
+        ? "파티장 모집 중"
+        : item.hostNickname
+          ? `파티장 ${item.hostNickname}`
+          : "파티장 정보 없음",
     currentMembers: item.currentMemberCount,
     maxMembers: item.totalCapacity,
     price: formatPaymentAmount(item.monthlyPaymentAmount),
@@ -193,8 +198,7 @@ export default function PartyListPage() {
       ? "파티장 자리가 비어 있는 모집을 서비스별로 확인할 수 있습니다."
       : "파티원 자리가 비어 있는 모집을 서비스별로 확인할 수 있습니다.";
 
-  const actionLabel =
-    recruitRole === "HOST" ? "파티장으로 참여" : "파티원으로 참여";
+  const actionLabel = recruitRole === "HOST" ? "파티장 참여" : "파티원 참여";
 
   const categoryParam = searchParams.get("category") as PartyCategory | null;
   const selectedCategory: PartyCategory =
@@ -295,7 +299,7 @@ export default function PartyListPage() {
             className={[
               "overflow-hidden rounded-[32px] border bg-white px-5 py-6 shadow-xl sm:px-7 sm:py-8 lg:px-10",
               isMember
-                ? "border-[#D7F8EE] shadow-teal-900/5"
+                ? "border-[#A9E6C9] shadow-emerald-900/5"
                 : "border-blue-100 shadow-blue-900/5",
             ].join(" ")}
           >
@@ -305,7 +309,7 @@ export default function PartyListPage() {
                   className={[
                     "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold",
                     isMember
-                      ? "bg-[#ECFEF8] text-[#0F766E]"
+                      ? "bg-[#EAF8F1] text-[#00875A]"
                       : "bg-blue-50 text-brand-main",
                   ].join(" ")}
                 >
@@ -349,7 +353,7 @@ export default function PartyListPage() {
             </div>
 
             <div className="mt-7 flex flex-col gap-4 border-t border-slate-100 pt-5 lg:flex-row lg:items-center lg:justify-between">
-              <div className="no-scrollbar -mx-1 overflow-x-auto px-1">
+              <div className="no-scrollbar -mx-1 -my-1.5 overflow-x-auto px-1 py-1.5">
                 <div className="flex min-w-max gap-2">
                   {categoryFilterList.map((category) => {
                     const isSelected = selectedCategory === category;
@@ -362,11 +366,11 @@ export default function PartyListPage() {
                           "inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-bold transition",
                           isSelected
                             ? isMember
-                              ? "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/15"
+                              ? "bg-[#00A86B] text-white shadow-lg shadow-emerald-900/15"
                               : "bg-brand-main text-white shadow-lg shadow-blue-900/15"
                             : isMember
-                              ? "bg-[#F7FFFD] text-[#0F766E] ring-1 ring-[#D7F8EE] hover:bg-[#ECFEF8]"
-                              : "bg-slate-50 text-slate-600 ring-1 ring-slate-200 hover:bg-white hover:text-brand-main",
+                              ? "bg-slate-50 text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-white hover:text-[#00875A]"
+                              : "bg-slate-50 text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-white hover:text-brand-main",
                         ].join(" ")}
                       >
                         {categoryLabels[category]}
@@ -382,7 +386,7 @@ export default function PartyListPage() {
                   "inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border bg-white px-5 text-sm font-bold transition hover:-translate-y-0.5 hover:shadow-md",
                   isMember
                     ? "border-blue-100 text-brand-main hover:bg-blue-50"
-                    : "border-[#D7F8EE] text-[#0F766E] hover:bg-[#F7FFFD]",
+                    : "border-[#A9E6C9] text-[#00875A] hover:bg-[#EAF8F1]",
                 ].join(" ")}
               >
                 {roleSwitchLabel}
@@ -401,7 +405,7 @@ export default function PartyListPage() {
                   className={[
                     "group overflow-hidden rounded-[28px] border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl sm:p-5",
                     isMember
-                      ? "border-[#D7F8EE] shadow-teal-900/5 hover:border-[#14B8A6] hover:shadow-teal-900/10"
+                      ? "border-[#A9E6C9] shadow-emerald-900/5 hover:border-[#00A86B] hover:shadow-emerald-900/10"
                       : "border-blue-100 shadow-blue-900/5 hover:border-brand-sub hover:shadow-blue-900/10",
                   ].join(" ")}
                 >
@@ -444,7 +448,7 @@ export default function PartyListPage() {
                             className={[
                               "inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1",
                               isMember
-                                ? "bg-[#ECFEF8] text-[#0F766E] ring-[#C9F7EA]"
+                                ? "bg-[#EAF8F1] text-[#00875A] ring-[#A9E6C9]"
                                 : "bg-blue-50 text-brand-main ring-blue-100",
                             ].join(" ")}
                           >
@@ -468,7 +472,7 @@ export default function PartyListPage() {
                         className={[
                           "inline-flex h-11 shrink-0 items-center justify-center rounded-full px-5 text-sm font-bold text-white shadow-md transition group-hover:scale-[1.02]",
                           isMember
-                            ? "bg-[#14B8A6] shadow-teal-900/20 hover:bg-[#0D9488]"
+                            ? "bg-[#00A86B] shadow-emerald-900/20 hover:bg-[#00875A]"
                             : "bg-brand-main shadow-blue-900/20 hover:bg-blue-800",
                         ].join(" ")}
                       >
@@ -516,7 +520,7 @@ export default function PartyListPage() {
                 className={[
                   "mx-auto inline-flex h-14 w-14 items-center justify-center rounded-3xl",
                   isMember
-                    ? "bg-[#ECFEF8] text-[#0F766E]"
+                    ? "bg-[#EAF8F1] text-[#00875A]"
                     : "bg-slate-50 text-brand-main",
                 ].join(" ")}
               >

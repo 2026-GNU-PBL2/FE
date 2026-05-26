@@ -174,7 +174,7 @@ function getMemberStatusLabel(status: MemberStatus) {
 
 function getStatusStyle(status: MemberStatus) {
   if (status === "ACTIVE") {
-    return "bg-teal-50 text-teal-700 ring-teal-100";
+    return "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]";
   }
 
   if (status === "REQUIRED") {
@@ -507,8 +507,7 @@ export default function PartyHostInviteSetupPage() {
             <section className="mt-6 rounded-[24px] bg-white px-5 py-5 ring-1 ring-slate-100">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold text-brand-main">MEMBERS</p>
-                  <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+                  <h2 className="text-lg font-extrabold text-slate-950">
                     OTT 초대에 사용할 이메일
                   </h2>
                 </div>
@@ -589,7 +588,7 @@ function ChecklistItem({ text }: { text: string }) {
     <div className="flex items-start gap-2.5">
       <Icon
         icon="solar:check-circle-bold"
-        className="mt-0.5 h-5 w-5 shrink-0 text-teal-500"
+        className="mt-0.5 h-5 w-5 shrink-0 text-[#00875A]"
       />
       <p className="text-sm font-semibold leading-6 text-slate-600">{text}</p>
     </div>

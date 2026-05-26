@@ -113,7 +113,7 @@ export default function PartyMemberProvisionConfirmPage() {
       description:
         "확인 버튼을 누르면 대시보드에서 공유 계정 정보를 확인할 수 있습니다.",
       cardTitle: "확인 전 체크사항",
-      toneClassName: "text-teal-600",
+      toneClassName: "text-[#00875A]",
       icon: "solar:checklist-bold",
       checks: [
         "확인 후 열리는 대시보드에서 계정 정보를 확인해주세요.",
@@ -291,7 +291,7 @@ export default function PartyMemberProvisionConfirmPage() {
                 <div className="inline-flex max-w-full items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-100">
                   <Icon
                     icon="solar:verified-check-bold"
-                    className="h-4 w-4 shrink-0 text-[#14B8A6]"
+                    className="h-4 w-4 shrink-0 text-[#00875A]"
                   />
                   <span className="truncate">{guideContent.label}</span>
                 </div>
@@ -304,7 +304,7 @@ export default function PartyMemberProvisionConfirmPage() {
                 </p>
               </div>
 
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-slate-50 text-[#0F766E] ring-1 ring-slate-100">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-slate-50 text-[#00875A] ring-1 ring-slate-100">
                 <Icon icon={guideContent.icon} className="h-8 w-8" />
               </div>
             </div>
@@ -314,7 +314,7 @@ export default function PartyMemberProvisionConfirmPage() {
             <div className="rounded-[28px] bg-slate-50 p-4 ring-1 ring-slate-100 sm:p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[13px] font-extrabold text-[#14B8A6]">
+                  <p className="text-[13px] font-extrabold text-[#00875A]">
                     READY CHECK
                   </p>
                   <h2 className="mt-1 text-xl font-extrabold tracking-tight text-slate-950">
@@ -322,7 +322,7 @@ export default function PartyMemberProvisionConfirmPage() {
                   </h2>
                 </div>
 
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0F766E] ring-1 ring-teal-100">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#00875A] ring-1 ring-[#A9E6C9]">
                   <Icon icon="solar:checklist-minimalistic-bold" className="h-6 w-6" />
                 </div>
               </div>
@@ -333,7 +333,7 @@ export default function PartyMemberProvisionConfirmPage() {
                     key={check}
                     className="flex items-start gap-3 rounded-[20px] bg-white px-4 py-4 ring-1 ring-slate-100"
                   >
-                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#14B8A6] text-white">
+                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#00A86B] text-white">
                       <Icon icon="meteor-icons:check" className="h-3.5 w-3.5" />
                     </div>
                     <p className="text-sm font-semibold leading-6 text-slate-600">
@@ -344,9 +344,9 @@ export default function PartyMemberProvisionConfirmPage() {
               </div>
             </div>
 
-            <div className="mt-5 rounded-[24px] bg-teal-50/80 px-4 py-4 ring-1 ring-teal-100 sm:px-5">
+            <div className="mt-5 rounded-[24px] bg-emerald-50/80 px-4 py-4 ring-1 ring-[#A9E6C9] sm:px-5">
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#0F766E] ring-1 ring-teal-100">
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#00875A] ring-1 ring-[#A9E6C9]">
                   <Icon icon="solar:info-circle-bold" className="h-5 w-5" />
                 </div>
                 <div>
@@ -376,7 +376,7 @@ export default function PartyMemberProvisionConfirmPage() {
                 type="button"
                 onClick={() => setIsConfirmModalOpen(true)}
                 disabled={isSubmitting}
-                className="flex h-14 items-center justify-center gap-2 rounded-full bg-[#14B8A6] px-6 text-base font-bold text-white shadow-lg shadow-teal-900/20 transition hover:-translate-y-0.5 hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none disabled:hover:translate-y-0"
+                className="flex h-14 items-center justify-center gap-2 rounded-full bg-[#00A86B] px-6 text-base font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-[#00875A] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none disabled:hover:translate-y-0"
               >
                 확인했어요
                 <Icon icon="solar:alt-arrow-right-linear" className="h-5 w-5" />
@@ -419,7 +419,7 @@ export default function PartyMemberProvisionConfirmPage() {
                 type="button"
                 onClick={handleConfirm}
                 disabled={isSubmitting}
-                className="flex h-12 items-center justify-center gap-2 rounded-full bg-[#14B8A6] text-sm font-bold text-white shadow-lg shadow-teal-900/20 transition hover:bg-[#0D9488] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                className="flex h-12 items-center justify-center gap-2 rounded-full bg-[#00A86B] text-sm font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:bg-[#00875A] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
               >
                 {isSubmitting ? (
                   <>

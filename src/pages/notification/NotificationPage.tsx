@@ -364,22 +364,43 @@ function getDeviceAlertTextInfo(notification: NotificationItem) {
   };
 }
 
+const notificationTone = {
+  info: {
+    badgeClassName: "bg-blue-50 text-blue-700 ring-blue-100",
+    iconClassName: "bg-blue-50 text-brand-main",
+  },
+  success: {
+    badgeClassName: "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]",
+    iconClassName: "bg-emerald-50 text-[#00875A]",
+  },
+  warning: {
+    badgeClassName: "bg-[#FFF4CC] text-[#B77900] ring-[#FFE29A]",
+    iconClassName: "bg-[#FFF4CC] text-[#D99A00]",
+  },
+  danger: {
+    badgeClassName: "bg-rose-50 text-rose-700 ring-rose-100",
+    iconClassName: "bg-rose-50 text-rose-600",
+  },
+  neutral: {
+    badgeClassName: "bg-slate-100 text-slate-700 ring-slate-200",
+    iconClassName: "bg-slate-100 text-slate-500",
+  },
+};
+
 function getNotificationMeta(type: NotificationType) {
   switch (type) {
     case "PARTY_MATCHED":
       return {
         label: "파티 매칭",
         icon: "solar:users-group-rounded-bold",
-        badgeClassName: "bg-sky-50 text-sky-700 ring-sky-100",
-        iconClassName: "bg-sky-50 text-sky-500",
+        ...notificationTone.info,
       };
 
     case "HOST_PARTY_MATCHED":
       return {
         label: "모집 완료",
         icon: "solar:crown-star-bold",
-        badgeClassName: "bg-blue-50 text-blue-700 ring-blue-100",
-        iconClassName: "bg-blue-50 text-blue-900",
+        ...notificationTone.info,
       };
 
     case "HOST_PROVISION_REQUIRED":
@@ -388,8 +409,7 @@ function getNotificationMeta(type: NotificationType) {
       return {
         label: "이용 정보",
         icon: "solar:shield-keyhole-bold",
-        badgeClassName: "bg-teal-50 text-teal-700 ring-teal-100",
-        iconClassName: "bg-teal-50 text-teal-500",
+        ...notificationTone.info,
       };
 
     case "PROVISION_ACCOUNT_SHARED_REQUIRED":
@@ -400,16 +420,14 @@ function getNotificationMeta(type: NotificationType) {
       return {
         label: "이용 확인",
         icon: "solar:checklist-minimalistic-bold",
-        badgeClassName: "bg-cyan-50 text-cyan-700 ring-cyan-100",
-        iconClassName: "bg-cyan-50 text-cyan-500",
+        ...notificationTone.info,
       };
 
     case "PAYMENT_FAILED":
       return {
         label: "결제 실패",
         icon: "solar:cardholder-bold",
-        badgeClassName: "bg-rose-50 text-rose-700 ring-rose-100",
-        iconClassName: "bg-rose-50 text-rose-500",
+        ...notificationTone.danger,
       };
 
     case "CONCURRENT_WARNING_1":
@@ -420,8 +438,7 @@ function getNotificationMeta(type: NotificationType) {
       return {
         label: "동시접속 경고",
         icon: "solar:danger-triangle-bold",
-        badgeClassName: "bg-amber-50 text-amber-700 ring-amber-100",
-        iconClassName: "bg-amber-50 text-amber-600",
+        ...notificationTone.warning,
       };
 
     case "DEVICE_ALERT":
@@ -429,56 +446,49 @@ function getNotificationMeta(type: NotificationType) {
       return {
         label: "새 기기 감지",
         icon: "solar:smartphone-bold",
-        badgeClassName: "bg-orange-50 text-orange-700 ring-orange-100",
-        iconClassName: "bg-orange-50 text-orange-600",
+        ...notificationTone.warning,
       };
 
     case "DEVICE_CONFIRMED_MINE":
       return {
         label: "기기 확인",
         icon: "solar:smartphone-update-bold",
-        badgeClassName: "bg-teal-50 text-teal-700 ring-teal-100",
-        iconClassName: "bg-teal-50 text-teal-600",
+        ...notificationTone.success,
       };
 
     case "CREDENTIALS_UPDATED":
       return {
         label: "이용정보 변경",
         icon: "solar:lock-password-bold",
-        badgeClassName: "bg-sky-50 text-sky-700 ring-sky-100",
-        iconClassName: "bg-sky-50 text-sky-600",
+        ...notificationTone.info,
       };
 
     case "PARTY_DISSOLVING":
       return {
         label: "해체 예정",
         icon: "solar:shield-warning-bold",
-        badgeClassName: "bg-rose-50 text-rose-700 ring-rose-100",
-        iconClassName: "bg-rose-50 text-rose-600",
+        ...notificationTone.danger,
       };
 
     case "PARTY_DISSOLVED_FINAL":
       return {
         label: "파티 해체",
         icon: "solar:logout-3-bold",
-        badgeClassName: "bg-slate-100 text-slate-700 ring-slate-200",
-        iconClassName: "bg-slate-100 text-slate-500",
+        ...notificationTone.neutral,
       };
 
     case "PAYMENT_SUCCEEDED":
       return {
         label: "결제 완료",
         icon: "solar:card-2-bold",
-        badgeClassName: "bg-teal-50 text-teal-700 ring-teal-100",
-        iconClassName: "bg-teal-50 text-teal-500",
+        ...notificationTone.success,
       };
 
     case "SETTLEMENT_COMPLETED":
       return {
         label: "정산 완료",
         icon: "solar:wallet-money-bold",
-        badgeClassName: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-        iconClassName: "bg-emerald-50 text-emerald-500",
+        ...notificationTone.success,
       };
 
     case "PARTY_TERMINATED":
@@ -487,16 +497,14 @@ function getNotificationMeta(type: NotificationType) {
       return {
         label: "파티 해체",
         icon: "solar:logout-3-bold",
-        badgeClassName: "bg-slate-100 text-slate-700 ring-slate-200",
-        iconClassName: "bg-slate-100 text-slate-500",
+        ...notificationTone.neutral,
       };
 
     default:
       return {
         label: "알림",
         icon: "solar:bell-bing-bold",
-        badgeClassName: "bg-slate-100 text-slate-700 ring-slate-200",
-        iconClassName: "bg-slate-100 text-slate-500",
+        ...notificationTone.neutral,
       };
   }
 }
@@ -744,10 +752,6 @@ export default function NotificationPage() {
     }
   };
 
-  const handleGoPartyDashboard = async (notification: NotificationItem) => {
-    navigate(await resolvePartyDashboardPath(notification));
-  };
-
   const handleNotificationClick = async (notification: NotificationItem) => {
     const readSuccess = await markNotificationRead(notification);
 
@@ -824,15 +828,12 @@ export default function NotificationPage() {
           <div className="px-5 py-6 sm:px-8">
             <div className="flex items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-4">
-                <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
+                <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-[#FFF4CC] text-[#D99A00] ring-1 ring-[#FFE29A]">
                   <Icon icon="solar:bell-bing-bold" className="h-7 w-7" />
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-[13px] font-extrabold text-amber-700">
-                    NOTIFICATION
-                  </p>
-                  <h1 className="mt-2 text-[28px] font-extrabold leading-tight tracking-tight text-slate-950">
+                  <h1 className="text-[28px] font-extrabold leading-tight tracking-tight text-slate-950">
                     알림
                   </h1>
                   <p className="mt-2 max-w-[500px] text-sm font-semibold leading-6 text-slate-500">
@@ -930,26 +931,8 @@ export default function NotificationPage() {
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="flex min-w-0 items-center gap-2">
-                            <span
-                              className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${meta.badgeClassName}`}
-                            >
-                              {meta.label}
-                            </span>
-
-                            {unread && (
-                              <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400" />
-                            )}
-                          </div>
-
-                          <span className="shrink-0 text-xs font-medium text-slate-400">
-                            {formatRelativeTime(notification.createdAt)}
-                          </span>
-                        </div>
-
-                        <div className="mt-3">
-                          <div className="min-w-0">
+                        <div>
+                          <div className="flex min-w-0 items-start justify-between gap-3">
                             <h3
                               className={`line-clamp-1 text-base font-bold ${
                                 unread ? "text-slate-950" : "text-slate-700"
@@ -958,10 +941,19 @@ export default function NotificationPage() {
                               {notification.title || "알림"}
                             </h3>
 
-                            <p className="mt-1 line-clamp-2 text-sm font-medium leading-6 text-slate-500">
-                              {content}
-                            </p>
+                            <div className="flex shrink-0 items-center gap-2">
+                              {unread && (
+                                <span className="h-2 w-2 rounded-full bg-amber-400" />
+                              )}
+                              <span className="text-xs font-medium text-slate-400">
+                                {formatRelativeTime(notification.createdAt)}
+                              </span>
+                            </div>
                           </div>
+
+                          <p className="mt-1 line-clamp-2 text-sm font-medium leading-6 text-slate-500">
+                            {content}
+                          </p>
                         </div>
 
                         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
@@ -991,9 +983,6 @@ export default function NotificationPage() {
                           onHostAction={() =>
                             navigate(getNotificationTargetPath(notification))
                           }
-                          onParty={() =>
-                            void handleGoPartyDashboard(notification)
-                          }
                           onFindParty={() => navigate("/parties")}
                         />
                       </div>
@@ -1014,14 +1003,12 @@ function NotificationActions({
   onFaq,
   onReport,
   onHostAction,
-  onParty,
   onFindParty,
 }: {
   notification: NotificationItem;
   onFaq: () => void;
   onReport: () => void;
   onHostAction: () => void;
-  onParty: () => void;
   onFindParty: () => void;
 }) {
   const stop = (handler: () => void) => {
@@ -1066,20 +1053,6 @@ function NotificationActions({
           className="inline-flex h-9 items-center justify-center rounded-full bg-brand-main px-3 text-xs font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
           조치하러 가기
-        </button>
-      </div>
-    );
-  }
-
-  if (notification.type === "DEVICE_CONFIRMED_MINE") {
-    return (
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={stop(onParty)}
-          className="inline-flex h-9 items-center justify-center rounded-full bg-teal-50 px-3 text-xs font-bold text-teal-700 ring-1 ring-teal-100 transition hover:bg-teal-100"
-        >
-          파티 확인하기
         </button>
       </div>
     );

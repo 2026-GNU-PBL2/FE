@@ -156,8 +156,8 @@ export default function PartyMemberCardRegisterPage() {
           <div className="px-5 py-6 sm:px-8 sm:py-8">
             <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_220px] md:items-center">
               <div className="min-w-0">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-[#0F766E]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-[#00875A]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#00A86B]" />
                   카드 등록
                 </div>
 
@@ -178,7 +178,7 @@ export default function PartyMemberCardRegisterPage() {
                     "mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full text-[15px] font-bold transition sm:w-auto sm:min-w-[220px] sm:px-7",
                     !isReady || loading || requesting
                       ? "cursor-not-allowed bg-slate-200 text-slate-400"
-                      : "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/20 hover:-translate-y-0.5 hover:bg-[#0D9488]",
+                      : "bg-[#00A86B] text-white shadow-lg shadow-emerald-900/20 hover:-translate-y-0.5 hover:bg-[#00875A]",
                   ].join(" ")}
                 >
                   <Icon icon="solar:card-send-bold" className="h-5 w-5" />
@@ -191,12 +191,9 @@ export default function PartyMemberCardRegisterPage() {
               </div>
 
               <div className="relative hidden md:block">
-                <div className="rounded-[28px] bg-linear-to-br from-[#14B8A6] to-[#0F766E] p-5 text-white shadow-xl shadow-teal-900/20">
+                <div className="rounded-[28px] bg-linear-to-br from-[#00A86B] to-[#00875A] p-5 text-white shadow-xl shadow-emerald-900/20">
                   <div className="flex items-center justify-between">
                     <Icon icon="solar:card-bold" className="h-6 w-6" />
-                    <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold">
-                      SECURE
-                    </span>
                   </div>
 
                   <div className="mt-12">
@@ -215,7 +212,7 @@ export default function PartyMemberCardRegisterPage() {
           <div className="border-t border-slate-100 px-5 py-5 sm:px-8 sm:py-6">
             <div className="rounded-[24px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100 sm:px-5">
               <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#0F766E] shadow-sm ring-1 ring-teal-100">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#00875A] shadow-sm ring-1 ring-[#A9E6C9]">
                   <Icon
                     icon="solar:lock-keyhole-bold"
                     className="h-5 w-5"
@@ -258,7 +255,7 @@ export default function PartyMemberCardRegisterPage() {
                   className="rounded-2xl bg-white px-4 py-3 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100"
                 >
                   <div className="flex items-start gap-3 sm:block">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-[#0F766E]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#00875A]">
                       <Icon icon={item.icon} className="h-4 w-4" />
                     </div>
 
@@ -275,11 +272,11 @@ export default function PartyMemberCardRegisterPage() {
               ))}
             </div>
 
-            <div className="mt-4 rounded-2xl bg-teal-50/80 px-4 py-3 ring-1 ring-teal-100">
+            <div className="mt-4 rounded-2xl bg-emerald-50/80 px-4 py-3 ring-1 ring-[#A9E6C9]">
               <div className="flex items-start gap-3">
                 <Icon
                   icon="solar:info-circle-linear"
-                  className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-[#00875A]"
                 />
 
                 <div>

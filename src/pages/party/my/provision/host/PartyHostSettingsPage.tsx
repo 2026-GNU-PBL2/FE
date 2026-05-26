@@ -509,8 +509,7 @@ export default function PartyHostSettingsPage() {
         <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 sm:px-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-bold text-amber-700">LEAVE RESERVED</p>
-              <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+              <h2 className="text-lg font-extrabold text-slate-950">
                 다음 회차 결원 예정
               </h2>
               <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
@@ -549,14 +548,14 @@ export default function PartyHostSettingsPage() {
 
         <section
           className={`mt-5 rounded-[24px] bg-white px-4 py-4 shadow-lg shadow-slate-900/5 ring-1 sm:px-5 ${
-            hasHostReservation ? "ring-teal-100" : "ring-rose-100"
+            hasHostReservation ? "ring-[#A9E6C9]" : "ring-rose-100"
           }`}
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1 ${
                 hasHostReservation
-                  ? "bg-teal-50 text-teal-700 ring-teal-100"
+                  ? "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]"
                   : "bg-rose-50 text-rose-600 ring-rose-100"
               }`}
             >
@@ -589,7 +588,7 @@ export default function PartyHostSettingsPage() {
               disabled={isSubmitting}
               className={`flex h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-bold ring-1 transition disabled:cursor-not-allowed sm:w-auto ${
                 hasHostReservation
-                  ? "bg-teal-50 text-teal-700 ring-teal-100 hover:bg-teal-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
+                  ? "bg-emerald-50 text-[#00875A] ring-[#A9E6C9] hover:bg-[#EAF8F1] disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
                   : "bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200"
               }`}
             >
@@ -671,7 +670,6 @@ function ProvisionResetSection({
   const description = isInvite
     ? "초대 링크를 다시 발송하고 파티원이 이용 확인을 다시 진행하도록 요청합니다."
     : "공유 계정 정보를 다시 입력하고 파티원이 이용 확인을 다시 진행하도록 요청합니다.";
-  const label = isInvite ? "INVITE RESEND" : "ACCOUNT RESET";
 
   return (
     <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 sm:px-6">
@@ -680,8 +678,7 @@ function ProvisionResetSection({
           <Icon icon="solar:restart-bold" className="h-6 w-6" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-bold text-brand-main">{label}</p>
-          <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+          <h2 className="text-lg font-extrabold text-slate-950">
             {title}
           </h2>
           <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
@@ -723,8 +720,7 @@ function SettlementSection({
       <div className="px-5 py-5 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-[13px] font-extrabold text-brand-main">SETTLEMENT</p>
-            <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
+            <h2 className="text-[22px] font-extrabold tracking-tight text-slate-950">
               정산 정보
             </h2>
             <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
@@ -781,8 +777,7 @@ function SettlementAccountSection({
     <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 sm:px-6">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[13px] font-extrabold text-brand-main">ACCOUNT</p>
-          <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
+          <h2 className="text-[22px] font-extrabold tracking-tight text-slate-950">
             정산 계좌
           </h2>
           <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
@@ -856,11 +851,10 @@ function FeeDetailModal({
       >
         <div className="px-5 py-6 sm:px-7">
           <div className="flex items-start justify-between gap-5">
-            <div>
-              <p className="text-xs font-extrabold text-brand-main">SETTLEMENT</p>
+          <div>
               <h2
                 id="fee-detail-title"
-                className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950"
+                className="text-2xl font-extrabold tracking-tight text-slate-950"
               >
                 정산 내역 자세히 보기
               </h2>
@@ -1124,10 +1118,10 @@ function LeaveReserveConfirmModal({
 }) {
   const isSuccess = variant === "success";
   const iconClassName = isSuccess
-    ? "bg-teal-50 text-teal-700 ring-teal-100"
+    ? "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]"
     : "bg-rose-50 text-rose-600 ring-rose-100";
   const buttonClassName = isSuccess
-    ? "bg-teal-50 text-teal-700 ring-teal-100 hover:bg-teal-100"
+    ? "bg-emerald-50 text-[#00875A] ring-[#A9E6C9] hover:bg-[#EAF8F1]"
     : "bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-100";
   const icon = isSuccess ? "solar:refresh-bold" : "solar:logout-3-bold";
 

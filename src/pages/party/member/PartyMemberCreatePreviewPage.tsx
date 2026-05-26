@@ -3,11 +3,26 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import { ottServices } from "@/mocks/ott";
+import type { OttSlug } from "@/types/ott";
 import { getApiErrorMessage } from "@/utils/api-error";
+
+type ProductCategory =
+  | "NETFLIX"
+  | "TVING"
+  | "WATCHA"
+  | "DISNEY_PLUS"
+  | "APPLE_TV"
+  | "WAVVE"
+  | "LAFTEL"
+  | string;
 
 type PartyJoinPreviewResponse = {
   productId: string;
   productName: string;
+  category?: ProductCategory | null;
+  productCategory?: ProductCategory | null;
+  ottProviderType?: ProductCategory | null;
   thumbnailUrl: string;
   productPricePerMember: number;
   platformFee: number;
@@ -53,6 +68,136 @@ function unwrapResponse<T>(
 function formatPrice(value?: number | null) {
   if (typeof value !== "number") return "-";
   return `${value.toLocaleString("ko-KR")}원`;
+}
+
+function normalizeProductName(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/\+/g, "plus")
+    .replace(/플러스/g, "plus");
+}
+
+function resolveOttSlugByCategory(
+  category?: ProductCategory | null,
+): OttSlug | null {
+  const normalizedCategory = String(category ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/-/g, "_");
+
+  if (normalizedCategory === "NETFLIX") return "netflix";
+  if (normalizedCategory === "TVING") return "tving";
+  if (normalizedCategory === "WATCHA") return "watcha";
+  if (
+    normalizedCategory === "DISNEY_PLUS" ||
+    normalizedCategory === "DISNEYPLUS"
+  ) {
+    return "disney-plus";
+  }
+  if (normalizedCategory === "APPLE_TV" || normalizedCategory === "APPLETV") {
+    return "apple-tv";
+  }
+  if (normalizedCategory === "WAVVE" || normalizedCategory === "WAVE") {
+    return "wavve";
+  }
+  if (normalizedCategory === "LAFTEL") return "laftel";
+
+  return null;
+}
+
+function resolveOttServiceByCategory(category?: ProductCategory | null) {
+  const slug = resolveOttSlugByCategory(category);
+  if (!slug) return null;
+  return ottServices.find((service) => service.slug === slug) ?? null;
+}
+
+function resolveOttServiceByProductName(productName: string) {
+  const normalizedName = normalizeProductName(productName);
+
+  return (
+    ottServices.find((service) => {
+      const normalizedServiceName = normalizeProductName(service.name);
+      const normalizedSlug = service.slug.replace("-", "");
+      const aliases: Record<OttSlug, string[]> = {
+        youtube: ["youtube", "유튜브"],
+        watcha: ["watcha", "왓챠", "와챠"],
+        "apple-tv": ["appletv", "apple티비", "애플tv", "애플티비"],
+        netflix: ["netflix", "넷플릭스"],
+        tving: ["tving", "티빙"],
+        "disney-plus": ["disneyplus", "디즈니plus", "디즈니+"],
+        wavve: ["wavve", "wave", "웨이브"],
+        laftel: ["laftel", "라프텔"],
+      };
+
+      return (
+        normalizedName.includes(normalizedServiceName) ||
+        normalizedName.includes(normalizedSlug) ||
+        aliases[service.slug].some((alias) =>
+          normalizedName.includes(normalizeProductName(alias)),
+        )
+      );
+    }) ?? null
+  );
+}
+
+function getProductLogoFillClassName(slug: OttSlug) {
+  if (slug === "watcha") {
+    return "h-full w-full scale-105 object-cover";
+  }
+
+  if (slug === "apple-tv") {
+    return "h-[82%] w-[82%] object-contain";
+  }
+
+  if (slug === "netflix" || slug === "wavve") {
+    return "h-full w-full scale-125 object-cover";
+  }
+
+  return "h-full w-full object-cover";
+}
+
+function ProductLogo({
+  productName,
+  category,
+  fallbackImage,
+}: {
+  productName: string;
+  category?: ProductCategory | null;
+  fallbackImage?: string | null;
+}) {
+  const service =
+    resolveOttServiceByCategory(category) ??
+    resolveOttServiceByProductName(productName);
+
+  if (service) {
+    return (
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200">
+        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+          <img
+            src={service.image}
+            alt={productName}
+            className={getProductLogoFillClassName(service.slug)}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100">
+      {fallbackImage ? (
+        <img
+          src={fallbackImage}
+          alt={productName}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <Icon icon="solar:play-circle-bold" className="h-6 w-6 text-[#00875A]" />
+      )}
+    </div>
+  );
 }
 
 export default function PartyMemberCreatePreviewPage() {
@@ -112,7 +257,7 @@ export default function PartyMemberCreatePreviewPage() {
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-2xl items-center justify-center">
           <section className="w-full rounded-[28px] bg-white px-6 py-10 text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-[#0F766E]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-[#00875A]">
               <Icon icon="solar:refresh-bold" className="h-7 w-7 animate-spin" />
             </div>
             <p className="mt-4 text-[18px] font-extrabold text-slate-950">
@@ -129,7 +274,7 @@ export default function PartyMemberCreatePreviewPage() {
       <div className="min-h-screen bg-brand-bg px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-2xl items-center justify-center">
           <section className="w-full rounded-[28px] bg-white px-6 py-10 text-center shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-[#0F766E]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-[#00875A]">
               <Icon icon="solar:info-circle-bold" className="h-7 w-7" />
             </div>
             <h1 className="mt-5 text-[24px] font-extrabold tracking-tight text-slate-950">
@@ -191,24 +336,19 @@ export default function PartyMemberCreatePreviewPage() {
           <div className="bg-white px-5 py-5 sm:px-8 sm:py-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100">
-                  {preview.thumbnailUrl ? (
-                    <img
-                      src={preview.thumbnailUrl}
-                      alt={preview.productName}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <Icon
-                      icon="solar:play-circle-bold"
-                      className="h-6 w-6 text-[#0F766E]"
-                    />
-                  )}
-                </div>
+                <ProductLogo
+                  productName={preview.productName}
+                  category={
+                    preview.category ??
+                    preview.productCategory ??
+                    preview.ottProviderType
+                  }
+                  fallbackImage={preview.thumbnailUrl}
+                />
 
                 <div className="min-w-0 flex-1">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-[#0F766E]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-[#00875A]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#00A86B]" />
                     파티원 최종 확인
                   </div>
 
@@ -236,13 +376,13 @@ export default function PartyMemberCreatePreviewPage() {
                   </p>
                 </div>
 
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0F766E] shadow-sm ring-1 ring-teal-100">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#00875A] shadow-sm ring-1 ring-[#A9E6C9]">
                   <Icon icon="solar:card-bold" className="h-5 w-5" />
                 </div>
               </div>
 
               <div className="mt-4 h-2 overflow-hidden rounded-full bg-white">
-                <div className="h-full w-full rounded-full bg-[#14B8A6]" />
+                <div className="h-full w-full rounded-full bg-[#00A86B]" />
               </div>
 
               <div className="mt-2.5 flex items-center justify-between text-[12px] font-bold text-slate-400">
@@ -298,18 +438,18 @@ export default function PartyMemberCreatePreviewPage() {
                   <span className="text-[16px] font-extrabold text-slate-950">
                     최초 결제 예정 금액
                   </span>
-                  <strong className="text-right text-[22px] font-extrabold text-[#0F766E]">
+                  <strong className="text-right text-[22px] font-extrabold text-[#00875A]">
                     {formatPrice(preview.firstPaymentAmount)}
                   </strong>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 rounded-2xl bg-teal-50/80 px-4 py-3 ring-1 ring-teal-100">
+            <div className="mt-4 rounded-2xl bg-emerald-50/80 px-4 py-3 ring-1 ring-[#A9E6C9]">
               <div className="flex gap-3">
                 <Icon
                   icon="solar:shield-check-bold"
-                  className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-[#00875A]"
                 />
                 <p className="text-[13px] font-semibold leading-6 text-slate-600">
                   등록된 카드로 파티 참여 결제가 진행됩니다.
@@ -318,11 +458,11 @@ export default function PartyMemberCreatePreviewPage() {
             </div>
 
             {preview.paymentNotice ? (
-              <div className="mt-3 rounded-2xl bg-orange-50 px-4 py-3 ring-1 ring-orange-100">
+              <div className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 ring-1 ring-[#A9E6C9]">
                 <div className="flex gap-3">
                   <Icon
                     icon="solar:shield-warning-bold"
-                    className="mt-0.5 h-4 w-4 shrink-0 text-orange-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[#00875A]"
                   />
                   <p className="text-[13px] font-semibold leading-6 text-slate-600">
                     {preview.paymentNotice}
@@ -330,11 +470,11 @@ export default function PartyMemberCreatePreviewPage() {
                 </div>
               </div>
             ) : (
-              <div className="mt-3 rounded-2xl bg-orange-50 px-4 py-3 ring-1 ring-orange-100">
+              <div className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 ring-1 ring-[#A9E6C9]">
                 <div className="flex gap-3">
                   <Icon
                     icon="solar:shield-warning-bold"
-                    className="mt-0.5 h-4 w-4 shrink-0 text-orange-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[#00875A]"
                   />
                   <p className="text-[13px] font-semibold leading-6 text-slate-600">
                     결제 금액과 참여 조건을 확인한 뒤 다음 단계로 진행해 주세요.
@@ -351,7 +491,7 @@ export default function PartyMemberCreatePreviewPage() {
                 "mt-5 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full px-6 text-[15px] font-bold transition",
                 isApplying
                   ? "cursor-not-allowed bg-slate-200 text-slate-400"
-                  : "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/20 hover:-translate-y-0.5 hover:bg-[#0D9488]",
+                  : "bg-[#00A86B] text-white shadow-lg shadow-emerald-900/20 hover:-translate-y-0.5 hover:bg-[#00875A]",
               ].join(" ")}
             >
               {isApplying ? "파티 참여 신청 중..." : "파티 참여 신청"}

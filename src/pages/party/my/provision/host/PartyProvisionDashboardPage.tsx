@@ -120,7 +120,7 @@ function isAccountShareProvisionType(type?: ProvisionType | null) {
 
 function getStatusStyle(status: string) {
   if (status === "ACTIVE") {
-    return "bg-teal-50 text-teal-700 ring-teal-100";
+    return "bg-emerald-50 text-[#00875A] ring-[#A9E6C9]";
   }
 
   if (status === "IN_PROGRESS" || status === "REQUIRED") {
@@ -462,10 +462,7 @@ export default function PartyProvisionDashboardPage() {
           <div className="px-5 py-6 sm:px-8">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-[13px] font-extrabold text-brand-main">
-                  HOST PARTY
-                </p>
-                <h1 className="mt-2 truncate text-[28px] font-extrabold tracking-tight text-slate-950">
+                <h1 className="truncate text-[28px] font-extrabold tracking-tight text-slate-950">
                   {partySettings?.ottServiceName || "파티 정보"}
                 </h1>
                 <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
@@ -485,10 +482,7 @@ export default function PartyProvisionDashboardPage() {
           <div className="px-5 py-5 sm:px-8 sm:py-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-[13px] font-extrabold text-brand-main">
-                  파티 이용 현황
-                </p>
-                <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
+                <h2 className="text-[22px] font-extrabold tracking-tight text-slate-950">
                   이용 확인 현황
                 </h2>
                 <p className="mt-1.5 text-sm font-semibold leading-6 text-slate-500">
@@ -550,8 +544,7 @@ export default function PartyProvisionDashboardPage() {
         <section className="mt-7">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="text-[13px] font-extrabold text-brand-main">Members</p>
-              <h2 className="mt-1 text-[22px] font-extrabold tracking-tight text-slate-950">
+              <h2 className="text-[22px] font-extrabold tracking-tight text-slate-950">
                 파티원 확인 상태
               </h2>
             </div>
@@ -646,10 +639,7 @@ function HostConcurrentTools({
     <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[13px] font-extrabold text-brand-main">
-            Concurrent
-          </p>
-          <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+          <h2 className="text-xl font-extrabold text-slate-950">
             동시접속 관리
           </h2>
           <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">

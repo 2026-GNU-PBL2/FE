@@ -72,12 +72,12 @@ const roleContents: Record<PartyRole, RoleContent> = {
     footer: "복잡한 운영 없이 편하게 이용하고 싶다면 파티원이 적합합니다.",
     icon: "solar:user-plus-bold",
     iconWrapClassName:
-      "bg-teal-50 text-[#0F766E] ring-1 ring-inset ring-teal-100",
-    softBadgeClassName: "bg-[#ECFEF8] text-[#0F766E]",
+      "bg-emerald-50 text-[#00875A] ring-1 ring-inset ring-[#A9E6C9]",
+    softBadgeClassName: "bg-[#EAF8F1] text-[#00875A]",
     selectedRingClassName:
-      "ring-[10px] ring-teal-100 border-[#14B8A6] bg-white",
+      "ring-[10px] ring-[#A9E6C9] border-[#00A86B] bg-white",
     buttonClassName:
-      "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/20 hover:bg-[#0D9488]",
+      "bg-[#00A86B] text-white shadow-lg shadow-emerald-900/20 hover:bg-[#00875A]",
   },
 };
 

@@ -303,16 +303,7 @@ export default function MyPageAccountRegisterPage() {
     <div className="min-h-[calc(100vh-160px)] bg-brand-bg px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
       <section className="mx-auto w-full max-w-2xl overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-100">
         <div className="border-b border-slate-100 px-5 py-6 sm:px-6">
-          <div className="flex items-center gap-2">
-            <div className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">
-              SETTLEMENT ACCOUNT
-            </div>
-            <div className="inline-flex items-center rounded-full bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700">
-              MY PAGE
-            </div>
-          </div>
-
-          <div className="mt-5">
+          <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
               정산 계좌를 설정해 주세요
             </h1>

@@ -127,7 +127,7 @@ function AgreementModal({
       <div className="flex h-[88vh] w-full max-w-[680px] flex-col overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-slate-950/20 sm:h-auto sm:max-h-[85vh] sm:rounded-[32px]">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-7 sm:py-5">
           <div className="pr-4">
-            <div className="inline-flex items-center rounded-full bg-teal-50 px-3 py-1.5 text-[11px] font-bold text-[#0F766E]">
+            <div className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-[#00875A]">
               필수 동의
             </div>
             <h2 className="mt-3 text-[20px] font-extrabold tracking-tight text-slate-950 sm:text-[24px]">
@@ -167,8 +167,8 @@ function AgreementModal({
               className={[
                 "inline-flex h-13 w-full items-center justify-center gap-2 rounded-2xl px-5 text-[15px] font-semibold transition",
                 agreed
-                  ? "bg-teal-50 text-[#0F766E]"
-                  : "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/20 hover:bg-[#0D9488]",
+                  ? "bg-emerald-50 text-[#00875A]"
+                  : "bg-[#00A86B] text-white shadow-lg shadow-emerald-900/20 hover:bg-[#00875A]",
               ].join(" ")}
             >
               <Icon
@@ -202,8 +202,8 @@ function AgreementCard({
       className={[
         "group w-full rounded-[22px] border px-4 py-4 text-left transition hover:-translate-y-0.5 hover:shadow-md sm:px-5",
         checked
-          ? "border-teal-100 bg-teal-50/70 shadow-teal-900/5"
-          : "border-slate-100 bg-white shadow-sm shadow-slate-900/5 hover:border-teal-100",
+          ? "border-emerald-100 bg-emerald-50/70 shadow-emerald-900/5"
+          : "border-slate-100 bg-white shadow-sm shadow-slate-900/5 hover:border-emerald-100",
       ].join(" ")}
     >
       <div className="flex items-start gap-4">
@@ -211,8 +211,8 @@ function AgreementCard({
           className={[
             "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition",
             checked
-              ? "bg-[#14B8A6] text-white"
-              : "bg-slate-100 text-slate-400 group-hover:bg-[#ECFEF8] group-hover:text-[#0F766E]",
+              ? "bg-[#00A86B] text-white"
+              : "bg-slate-100 text-slate-400 group-hover:bg-[#EAF8F1] group-hover:text-[#00875A]",
           ].join(" ")}
         >
           <Icon
@@ -228,7 +228,7 @@ function AgreementCard({
             </p>
 
             {item.required ? (
-              <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-[#0F766E] ring-1 ring-teal-100">
+              <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-[#00875A] ring-1 ring-[#A9E6C9]">
                 필수
               </span>
             ) : null}
@@ -238,7 +238,7 @@ function AgreementCard({
             {item.summary}
           </p>
 
-          <div className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-[#0F766E]">
+          <div className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-[#00875A]">
             {checked ? "동의 완료" : "자세히 보기"}
             <Icon icon="solar:alt-arrow-right-linear" className="h-4 w-4" />
           </div>
@@ -312,8 +312,8 @@ export default function PartyMemberAgreementPage() {
             <div className="bg-white px-5 py-5 sm:px-8 sm:py-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-[#0F766E]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-[#00875A]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#00A86B]" />
                     파티원 약관 동의
                   </div>
 
@@ -331,7 +331,7 @@ export default function PartyMemberAgreementPage() {
             <div className="border-t border-slate-100 px-5 py-5 sm:px-8 sm:py-6">
               <div className="rounded-[24px] bg-slate-50 px-4 py-4 ring-1 ring-slate-100 sm:px-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#0F766E] shadow-sm ring-1 ring-teal-100">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#00875A] shadow-sm ring-1 ring-[#A9E6C9]">
                     <Icon icon="solar:shield-check-bold" className="h-5 w-5" />
                   </div>
 
@@ -347,7 +347,7 @@ export default function PartyMemberAgreementPage() {
                   <button
                     type="button"
                     onClick={handleAgreeAll}
-                    className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-white px-4 text-[13px] font-bold text-[#0F766E] shadow-sm ring-1 ring-teal-100 transition hover:-translate-y-0.5 hover:bg-teal-50"
+                    className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-white px-4 text-[13px] font-bold text-[#00875A] shadow-sm ring-1 ring-[#A9E6C9] transition hover:-translate-y-0.5 hover:bg-[#EAF8F1]"
                   >
                     전체 동의
                   </button>
@@ -368,7 +368,7 @@ export default function PartyMemberAgreementPage() {
               <div className="mt-5 rounded-[24px] bg-white px-4 py-4 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100 sm:px-5">
                 <div className="mb-4 h-2 overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className="h-full rounded-full bg-[#14B8A6] transition-all"
+                    className="h-full rounded-full bg-[#00A86B] transition-all"
                     style={{
                       width: `${(agreedRequiredCount / requiredItems.length) * 100}%`,
                     }}
@@ -392,7 +392,7 @@ export default function PartyMemberAgreementPage() {
                     className={[
                       "inline-flex h-13 shrink-0 items-center justify-center gap-2 rounded-full px-6 text-[15px] font-bold transition sm:min-w-[220px]",
                       allRequiredChecked
-                        ? "bg-[#14B8A6] text-white shadow-lg shadow-teal-900/20 hover:-translate-y-0.5 hover:bg-[#0D9488]"
+                        ? "bg-[#00A86B] text-white shadow-lg shadow-emerald-900/20 hover:-translate-y-0.5 hover:bg-[#00875A]"
                         : "cursor-not-allowed bg-slate-200 text-slate-400",
                     ].join(" ")}
                   >
