@@ -26,12 +26,28 @@ type PartyHistoryItem = {
   category?: ProductCategory | null;
   productCategory?: ProductCategory | null;
   ottProviderType?: ProductCategory | null;
+  thumbnailUrl?: string | null;
   role: PartyRole;
   status: PartyHistoryStatus;
   startAt: string | null;
   endAt: string | null;
   warningLevel?: null | 1;
   dissolutionDate?: string | null;
+};
+
+type ProductDetailResponse = {
+  id: string;
+  serviceName: string;
+  description: string;
+  thumbnailUrl: string;
+  operationType: string;
+  category: ProductCategory;
+  maxMemberCount: number;
+  basePrice: number;
+  pricePerMember: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type PartyJoinStatus = "WAITING" | "ACTIVE" | "CANCELED" | string;
@@ -102,6 +118,13 @@ function unwrapResponse<T>(
   }
 
   return value as T;
+}
+
+function resolveProductDetail(
+  value: ProductDetailResponse | ProductDetailResponse[] | null,
+) {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value;
 }
 
 function getRoleLabel(role: PartyRole) {
@@ -251,7 +274,9 @@ function normalizeProductName(value: string) {
     .replace(/플러스/g, "plus");
 }
 
-function resolveOttSlugByCategory(category?: ProductCategory | null): OttSlug | null {
+function resolveOttSlugByCategory(
+  category?: ProductCategory | null,
+): OttSlug | null {
   const normalizedCategory = String(category ?? "")
     .trim()
     .toUpperCase()
@@ -260,7 +285,10 @@ function resolveOttSlugByCategory(category?: ProductCategory | null): OttSlug | 
   if (normalizedCategory === "NETFLIX") return "netflix";
   if (normalizedCategory === "TVING") return "tving";
   if (normalizedCategory === "WATCHA") return "watcha";
-  if (normalizedCategory === "DISNEY_PLUS" || normalizedCategory === "DISNEYPLUS")
+  if (
+    normalizedCategory === "DISNEY_PLUS" ||
+    normalizedCategory === "DISNEYPLUS"
+  )
     return "disney-plus";
   if (normalizedCategory === "APPLE_TV" || normalizedCategory === "APPLETV")
     return "apple-tv";
@@ -330,11 +358,15 @@ function getProductLogoFillClassName(slug: OttSlug) {
   }
 
   if (slug === "apple-tv") {
-    return "h-[82%] w-[82%] object-contain";
+    return "h-full w-full scale-125 object-cover";
   }
 
-  if (slug === "netflix" || slug === "wavve") {
+  if (slug === "netflix") {
     return "h-full w-full scale-125 object-cover";
+  }
+
+  if (slug === "wavve") {
+    return "h-full w-full object-cover";
   }
 
   return "h-full w-full object-cover";
@@ -364,7 +396,11 @@ function ProductLogo({
         ].join(" ")}
       >
         {fallbackImage ? (
-          <img src={fallbackImage} alt={productName} className="h-full w-full object-cover" />
+          <img
+            src={fallbackImage}
+            alt={productName}
+            className="h-full w-full object-cover"
+          />
         ) : (
           <Icon icon={getProductIcon(productName)} className="h-7 w-7" />
         )}
@@ -373,6 +409,8 @@ function ProductLogo({
   }
 
   if (shouldUseNestedCircle(service.slug)) {
+    const image = fallbackImage || service.image;
+
     return (
       <div
         className={[
@@ -382,7 +420,7 @@ function ProductLogo({
       >
         <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
           <img
-            src={service.image}
+            src={image}
             alt={productName}
             className={getProductLogoFillClassName(service.slug)}
           />
@@ -399,7 +437,7 @@ function ProductLogo({
       ].join(" ")}
     >
       <img
-        src={service.image}
+        src={fallbackImage || service.image}
         alt={productName}
         className={getProductImageClassName(service.slug)}
       />
@@ -470,9 +508,56 @@ export default function MyParty() {
         const response = await api.get("/api/v1/me/party-history");
         const data = unwrapResponse<PartyHistoryItem[]>(response.data) ?? [];
 
-        setParties(data);
+        const productIds = Array.from(
+          new Set(
+            data
+              .map((party) => party.productId)
+              .filter((productId) => Boolean(productId)),
+          ),
+        );
 
-        const activeParties = data.filter((party) => party.status === "USING");
+        const productResults = await Promise.allSettled(
+          productIds.map(async (productId) => {
+            const productResponse = await api.get<
+              ProductDetailResponse | ProductDetailResponse[]
+            >(`/api/v1/products/${productId}`);
+
+            return {
+              productId,
+              product: resolveProductDetail(
+                unwrapResponse<ProductDetailResponse | ProductDetailResponse[]>(
+                  productResponse.data,
+                ),
+              ),
+            };
+          }),
+        );
+
+        const productMap = new Map<string, ProductDetailResponse>();
+        productResults.forEach((result) => {
+          if (result.status === "fulfilled" && result.value.product) {
+            productMap.set(result.value.productId, result.value.product);
+          }
+        });
+
+        const partiesWithProducts = data.map((party) => {
+          const product = productMap.get(party.productId);
+
+          if (!product) return party;
+
+          return {
+            ...party,
+            category: party.category ?? product.category,
+            productName: party.productName || product.serviceName,
+            thumbnailUrl: party.thumbnailUrl ?? product.thumbnailUrl,
+          };
+        });
+
+        setParties(partiesWithProducts);
+
+        const activeParties = partiesWithProducts.filter(
+          (party) => party.status === "USING",
+        );
         const usagePeriodResults = await Promise.allSettled(
           activeParties.map(async (party) => {
             const usageResponse = await api.get(
@@ -570,9 +655,7 @@ export default function MyParty() {
       const response = await api.get(
         `/api/v1/parties/${party.partyId}/provision`,
       );
-      const provision = unwrapResponse<PartyProvisionResponse>(
-        response.data,
-      );
+      const provision = unwrapResponse<PartyProvisionResponse>(response.data);
       const hasProvision = Boolean(provision);
 
       if (!hasProvision) {
@@ -1132,7 +1215,7 @@ function PartyListItem({
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-start gap-4 px-5 py-5 text-left transition hover:bg-slate-50 sm:px-6"
+      className="flex w-full items-center gap-4 px-5 py-5 text-left transition hover:bg-slate-50 sm:px-6"
     >
       <div
         className={[
@@ -1144,6 +1227,7 @@ function PartyListItem({
           category={
             party.category ?? party.productCategory ?? party.ottProviderType
           }
+          fallbackImage={party.thumbnailUrl}
           className="h-13 w-13"
         />
 
@@ -1206,7 +1290,7 @@ function PartyListItem({
 
       <Icon
         icon="solar:alt-arrow-right-linear"
-        className="h-6 w-6 text-slate-300"
+        className="h-6 w-6 shrink-0 text-slate-300"
       />
     </button>
   );

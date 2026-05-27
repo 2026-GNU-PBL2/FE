@@ -61,8 +61,8 @@ function LeftAgreementItem({
       className={[
         "group flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all duration-500",
         opened
-          ? "border-emerald-100 bg-emerald-50/70 shadow-emerald-900/5"
-          : "border-slate-100 bg-white shadow-sm shadow-slate-900/5 hover:border-emerald-100 hover:bg-white",
+          ? "border-[#A9E6C9] bg-emerald-50/70 shadow-emerald-900/5"
+          : "border-slate-200 bg-white shadow-sm shadow-slate-900/5 hover:border-[#A9E6C9] hover:bg-white",
       ].join(" ")}
     >
       <div className="flex min-w-0 items-center gap-3">
@@ -149,7 +149,7 @@ export default function PartyMemberAutoPayAgreementPage() {
           <div className="mx-auto flex min-h-190 w-full max-w-105 flex-col justify-center">
             <aside
               className={[
-                "rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 transition-all duration-500",
+                "rounded-[28px] border border-slate-200 bg-white shadow-xl shadow-slate-900/6 transition-all duration-500",
                 isAgreementOpened ? "mb-5" : "",
               ].join(" ")}
             >
@@ -214,7 +214,7 @@ export default function PartyMemberAutoPayAgreementPage() {
               ].join(" ")}
             >
               <section id="auto-pay-terms">
-                <div className="rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/6 ring-1 ring-slate-100 transition-all duration-500 sm:px-6 sm:py-6">
+                <div className="rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-xl shadow-slate-900/6 transition-all duration-500 sm:px-6 sm:py-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h2 className="text-[24px] font-extrabold tracking-tight text-slate-950">
@@ -234,7 +234,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                     {agreementParagraphs.intro}
                   </p>
 
-                  <div className="mt-8 rounded-2xl bg-emerald-50/70 px-4 py-4 ring-1 ring-[#A9E6C9]">
+                  <div className="mt-8 rounded-2xl border border-[#A9E6C9] bg-emerald-50/70 px-4 py-4">
                     <h3 className="text-[18px] font-extrabold tracking-tight text-slate-950">
                       {agreementParagraphs.consentTitle}
                     </h3>
@@ -266,7 +266,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-[20px] bg-emerald-50/70 px-5 py-5 ring-1 ring-[#A9E6C9]">
+                <div className="mt-5 rounded-[20px] border border-[#A9E6C9] bg-emerald-50/70 px-5 py-5">
                   <div className="flex items-start gap-4">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#EAF8F1] text-[#00875A]">
                       <Icon
@@ -288,7 +288,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-[20px] bg-white px-5 py-4 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100">
+                <div className="mt-5 rounded-[20px] border border-slate-200 bg-white px-5 py-4 shadow-sm shadow-slate-900/5">
                   <label className="flex cursor-pointer items-center justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-3">
                       <div
@@ -341,13 +341,13 @@ export default function PartyMemberAutoPayAgreementPage() {
         <div className="relative hidden min-h-190 lg:block">
           <div
             className={[
-              "absolute inset-y-0 z-20 w-90 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                "absolute inset-y-0 z-20 w-90 transform-gpu transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform",
               isAgreementOpened
                 ? "left-0 translate-x-0"
                 : "left-1/2 -translate-x-1/2",
             ].join(" ")}
           >
-            <aside className="flex h-full flex-col overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+            <aside className="flex h-full flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-xl shadow-slate-900/6">
               <div className="px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
                 <div className="mt-2">
                   <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold tracking-tight text-[#00875A]">
@@ -401,13 +401,13 @@ export default function PartyMemberAutoPayAgreementPage() {
 
           <div
             className={[
-              "absolute inset-y-0 right-0 w-[calc(100%-392px)] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                "absolute inset-y-0 right-0 w-[calc(100%-392px)] transform-gpu transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform",
               isAgreementOpened
                 ? "translate-x-0 opacity-100"
                 : "pointer-events-none translate-x-10 opacity-0",
             ].join(" ")}
           >
-            <main className="h-full overflow-hidden rounded-[28px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
+            <main className="h-full overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-xl shadow-slate-900/6">
               <div className="flex h-full flex-col">
                 <div className="border-b border-slate-100 bg-white px-5 py-4 sm:px-6 lg:px-8">
                   <div className="flex items-center gap-3">
@@ -423,9 +423,9 @@ export default function PartyMemberAutoPayAgreementPage() {
                 </div>
 
                 <div className="min-h-0 flex-1 overflow-hidden px-5 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8">
-                  <div className="mx-auto h-full w-full max-w-190 overflow-y-auto">
+                  <div className="no-scrollbar mx-auto h-full w-full max-w-190 overflow-y-auto px-1 py-1">
                     <section id="auto-pay-terms">
-                      <div className="rounded-[28px] bg-white px-5 py-5 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100 transition-all duration-500 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+                      <div className="rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-sm shadow-slate-900/5 transition-all duration-500 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
                         <div className="flex items-start justify-between gap-4">
                           <div>
                             <h2 className="text-[24px] font-extrabold tracking-tight text-slate-950 sm:text-[28px]">
@@ -445,7 +445,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                           {agreementParagraphs.intro}
                         </p>
 
-                        <div className="mt-8 rounded-2xl bg-emerald-50/70 px-4 py-4 ring-1 ring-[#A9E6C9] sm:px-5 sm:py-5">
+                        <div className="mt-8 rounded-2xl border border-[#A9E6C9] bg-emerald-50/70 px-4 py-4 sm:px-5 sm:py-5">
                           <h3 className="text-[18px] font-extrabold tracking-tight text-slate-950 sm:text-[20px]">
                             {agreementParagraphs.consentTitle}
                           </h3>
@@ -477,7 +477,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                         </div>
                       </div>
 
-                      <div className="mt-5 rounded-[20px] bg-emerald-50/70 px-5 py-5 ring-1 ring-[#A9E6C9] sm:px-6 sm:py-6">
+                      <div className="mt-5 rounded-[20px] border border-[#A9E6C9] bg-emerald-50/70 px-5 py-5 sm:px-6 sm:py-6">
                         <div className="flex items-start gap-4">
                           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#EAF8F1] text-[#00875A]">
                             <Icon
@@ -499,7 +499,7 @@ export default function PartyMemberAutoPayAgreementPage() {
                         </div>
                       </div>
 
-                      <div className="mt-5 rounded-[20px] bg-white px-5 py-4 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
+                      <div className="mt-5 rounded-[20px] border border-slate-200 bg-white px-5 py-4 shadow-sm shadow-slate-900/5 sm:px-6">
                         <label className="flex cursor-pointer items-center justify-between gap-4">
                           <div className="flex min-w-0 items-center gap-3">
                             <div

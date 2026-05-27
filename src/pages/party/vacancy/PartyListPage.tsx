@@ -266,6 +266,26 @@ export default function PartyListPage() {
     );
   };
 
+  const getProductLogoFillClassName = (slug: OttSlug) => {
+    if (slug === "watcha") {
+      return "h-full w-full scale-105 object-cover";
+    }
+
+    if (slug === "apple-tv") {
+      return "h-full w-full scale-125 object-cover";
+    }
+
+    if (slug === "netflix") {
+      return "h-full w-full scale-125 object-cover";
+    }
+
+    if (slug === "wavve") {
+    return "h-full w-full object-cover";
+  }
+
+    return "h-full w-full object-cover";
+  };
+
   const getFilterPath = (category: PartyCategory) => {
     const basePath =
       recruitRole === "HOST" ? "/parties/hosts" : "/parties/members";
@@ -425,7 +445,9 @@ export default function PartyListPage() {
                                   <img
                                     src={ottMeta.image}
                                     alt={party.ott}
-                                    className="h-full w-full object-contain"
+                                    className={getProductLogoFillClassName(
+                                      ottMeta.slug,
+                                    )}
                                   />
                                 </span>
                               </span>

@@ -9,7 +9,7 @@ import {
   getPartyRecruitListPath,
 } from "@/mocks/ott";
 import type { OttSlug, WaitingParty } from "@/types/ott";
-import type { ProductListItem } from "@/types/product";
+import type { ProductCategory, ProductListItem } from "@/types/product";
 
 type PartyVacancyItem = {
   partyId: number;
@@ -80,6 +80,34 @@ function shouldUseNestedCircle(slug: OttSlug) {
     slug === "wavve" ||
     slug === "laftel"
   );
+}
+
+function resolveOttSlugByCategory(
+  category?: ProductCategory | null,
+): OttSlug | null {
+  const normalizedCategory = String(category ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/-/g, "_");
+
+  if (normalizedCategory === "NETFLIX") return "netflix";
+  if (normalizedCategory === "TVING") return "tving";
+  if (normalizedCategory === "WATCHA") return "watcha";
+  if (
+    normalizedCategory === "DISNEY_PLUS" ||
+    normalizedCategory === "DISNEYPLUS"
+  ) {
+    return "disney-plus";
+  }
+  if (normalizedCategory === "APPLE_TV" || normalizedCategory === "APPLETV") {
+    return "apple-tv";
+  }
+  if (normalizedCategory === "WAVVE" || normalizedCategory === "WAVE") {
+    return "wavve";
+  }
+  if (normalizedCategory === "LAFTEL") return "laftel";
+
+  return null;
 }
 
 function resolveOttSlugByServiceName(serviceName: string): OttSlug | null {
@@ -241,11 +269,15 @@ function getProductLogoFillClassName(slug: OttSlug) {
   }
 
   if (slug === "apple-tv") {
-    return "h-[82%] w-[82%] object-contain";
+    return "h-full w-full scale-125 object-cover";
   }
 
-  if (slug === "netflix" || slug === "wavve") {
+  if (slug === "netflix") {
     return "h-full w-full scale-125 object-cover";
+  }
+
+  if (slug === "wavve") {
+    return "h-full w-full object-cover";
   }
 
   return "h-full w-full object-cover";
@@ -298,15 +330,19 @@ function renderOttLogo({
 function renderProductLogo({
   image,
   alt,
+  category,
   serviceName,
   outerClassName,
 }: {
   image: string;
   alt: string;
+  category?: ProductCategory | null;
   serviceName: string;
   outerClassName: string;
 }) {
-  const slug = resolveOttSlugByServiceName(serviceName);
+  const slug =
+    resolveOttSlugByCategory(category) ??
+    resolveOttSlugByServiceName(serviceName);
   const imageClassName = getProductImageClassName(serviceName);
 
   if (slug) {
@@ -372,7 +408,7 @@ function RecruitPartyCard({
                       <img
                         src={ottMeta.image}
                         alt={party.ott}
-                        className="h-full w-full object-contain"
+                        className={getProductLogoFillClassName(ottMeta.slug)}
                       />
                     </span>
                   </span>
@@ -570,7 +606,6 @@ export default function HomePage() {
         setIsLoadingProducts(true);
 
         const response = await api.get<ProductListItem[]>("/api/v1/products");
-
         const nextProducts = Array.isArray(response.data) ? response.data : [];
 
         if (!isMounted) {
@@ -822,6 +857,7 @@ export default function HomePage() {
                       {renderProductLogo({
                         image: product.thumbnailUrl,
                         alt: product.serviceName,
+                        category: product.category,
                         serviceName: product.serviceName,
                         outerClassName: [
                           "h-12 w-12 shrink-0",

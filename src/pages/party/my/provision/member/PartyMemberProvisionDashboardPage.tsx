@@ -196,11 +196,12 @@ function formatDateTime(value?: string | null) {
   }).format(date);
 }
 
-function getDeviceOwnerLabel(device: PartyMemberDevice) {
+function DeviceInfoCell({ label, value }: { label: string; value: string }) {
   return (
-    device.nickname?.trim() ||
-    device.email?.trim() ||
-    `user #${device.userId}`
+    <div className="rounded-2xl bg-white px-3 py-2.5 ring-1 ring-slate-100">
+      <p className="text-[11px] font-extrabold text-slate-400">{label}</p>
+      <p className="mt-1 truncate text-sm font-bold text-slate-800">{value}</p>
+    </div>
   );
 }
 
@@ -860,39 +861,43 @@ function MemberDeviceTools({
       )}
 
       <div className="mt-4 space-y-2">
-        <p className="text-xs font-bold text-slate-400">등록된 기기 목록</p>
         {registeredDevices.length > 0 ? (
           registeredDevices.map((device) => (
             <div
               key={device.id}
-              className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100"
+              className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100"
             >
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-slate-900">
-                    {getDeviceOwnerLabel(device)}
-                  </p>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">
-                    {device.deviceType} · {device.os}
-                    {device.browser ? ` · ${device.browser}` : ""}
-                  </p>
-                  {(device.ipLocation || device.vpn !== null) && (
-                    <p className="mt-1 text-xs font-semibold text-slate-400">
-                      {device.ipLocation || "위치 미확인"}
-                      {device.vpn !== null
-                        ? ` · VPN ${device.vpn ? "사용" : "미사용"}`
-                        : ""}
-                    </p>
-                  )}
-                </div>
-                <div className="shrink-0 text-left sm:text-right">
-                  <span className="text-xs font-semibold text-slate-400">
-                    {formatDateTime(device.registeredAt)}
-                  </span>
-                  <p className="mt-1 text-[11px] font-bold text-slate-400">
-                    {device.registrationMethod}
+                  <p className="text-xs font-semibold text-slate-400">
+                    등록 {formatDateTime(device.registeredAt)}
                   </p>
                 </div>
+
+                <span className="w-fit shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-slate-500 ring-1 ring-slate-200">
+                  VPN{" "}
+                  {device.vpn === null
+                    ? "확인 불가"
+                    : device.vpn
+                      ? "사용"
+                      : "미사용"}
+                </span>
+              </div>
+
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <DeviceInfoCell
+                  label="디바이스 타입"
+                  value={device.deviceType || "-"}
+                />
+                <DeviceInfoCell label="OS" value={device.os || "-"} />
+                <DeviceInfoCell
+                  label="브라우저"
+                  value={device.browser || "-"}
+                />
+                <DeviceInfoCell
+                  label="접속 위치"
+                  value={device.ipLocation || "위치 미확인"}
+                />
               </div>
             </div>
           ))

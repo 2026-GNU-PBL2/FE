@@ -53,8 +53,7 @@ const roleContents: Record<PartyRole, RoleContent> = {
     iconWrapClassName:
       "bg-blue-50 text-brand-main ring-1 ring-inset ring-blue-100",
     softBadgeClassName: "bg-blue-50 text-brand-main",
-    selectedRingClassName:
-      "ring-[10px] ring-blue-100 border-brand-main bg-white",
+    selectedRingClassName: "border-brand-main bg-white ring-4 ring-blue-100",
     buttonClassName:
       "bg-brand-main text-white shadow-lg shadow-blue-900/20 hover:bg-blue-800",
   },
@@ -74,8 +73,7 @@ const roleContents: Record<PartyRole, RoleContent> = {
     iconWrapClassName:
       "bg-emerald-50 text-[#00875A] ring-1 ring-inset ring-[#A9E6C9]",
     softBadgeClassName: "bg-[#EAF8F1] text-[#00875A]",
-    selectedRingClassName:
-      "ring-[10px] ring-[#A9E6C9] border-[#00A86B] bg-white",
+    selectedRingClassName: "border-[#00A86B] bg-white ring-4 ring-[#A9E6C9]",
     buttonClassName:
       "bg-[#00A86B] text-white shadow-lg shadow-emerald-900/20 hover:bg-[#00875A]",
   },
@@ -111,17 +109,17 @@ function RoleCircleCard({
       type="button"
       onClick={() => onSelect(role)}
       className={[
-        "group flex flex-col items-center text-center transition-all duration-500 ease-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100",
-        isDimmed ? "scale-[0.96] opacity-40" : "scale-100 opacity-100",
+        "group flex flex-col items-center text-center transition-all duration-500 ease-out will-change-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100",
+        isDimmed ? "scale-[0.96] opacity-45" : "scale-100 opacity-100",
       ].join(" ")}
     >
       <div
         className={[
-          "relative flex items-center justify-center rounded-full border bg-white transition-all duration-500 ease-out",
+          "relative flex items-center justify-center rounded-full border-2 bg-white transition-all duration-500 ease-out",
           compact ? "h-36 w-36 sm:h-40 sm:w-40" : "h-44 w-44 sm:h-48 sm:w-48",
           isSelected
-            ? `${content.selectedRingClassName} shadow-xl shadow-slate-900/10`
-            : "border-slate-100 shadow-xl shadow-slate-900/6 hover:-translate-y-1 hover:border-sky-100 hover:shadow-xl hover:shadow-blue-900/8",
+            ? `${content.selectedRingClassName} shadow-lg shadow-slate-900/10`
+            : "border-slate-100 shadow-lg shadow-slate-900/6 hover:-translate-y-1 hover:border-sky-100 hover:shadow-xl hover:shadow-blue-900/8",
         ].join(" ")}
       >
         <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.92),transparent_55%)]" />
@@ -190,8 +188,6 @@ export default function PartyRoleSelectPage() {
         { productId },
       );
 
-      console.log("party join preview response:", response.data);
-
       navigate(getMemberPreviewPath(productId), {
         state: response.data,
       });
@@ -206,14 +202,14 @@ export default function PartyRoleSelectPage() {
     <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
       <div className="mx-auto flex min-h-[calc(100vh-96px)] w-full max-w-6xl items-center justify-center">
         <section className="w-full overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-          <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+          <div className="border-b border-slate-100 bg-white px-5 py-7 sm:px-8 lg:px-10">
             <div className="mx-auto max-w-2xl text-center">
-              <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-brand-main shadow-sm ring-1 ring-blue-100">
+              <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-bold text-brand-main ring-1 ring-slate-200">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand-accent" />
                 파티 역할 선택
               </div>
 
-              <h1 className="mt-4 text-[30px] font-extrabold tracking-tight text-slate-950 sm:text-[38px]">
+              <h1 className="mt-4 text-[28px] font-extrabold tracking-tight text-slate-950 sm:text-[34px]">
                 어떤 방식으로 시작할까요?
               </h1>
               <p className="mt-3 text-base leading-7 text-slate-500">
@@ -223,19 +219,19 @@ export default function PartyRoleSelectPage() {
           </div>
 
           <div className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
-            <div className="mx-auto max-w-[960px] overflow-hidden">
+            <div className="mx-auto max-w-[960px] overflow-visible px-2 py-3 sm:px-4">
               <div
                 className={[
-                  "grid items-center gap-8 transition-all duration-500 ease-out lg:gap-10",
+                  "grid items-center gap-8 overflow-visible transition-all duration-500 ease-out lg:gap-10",
                   selectedRole
                     ? "grid-cols-1 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,0.92fr)]"
                     : "grid-cols-1",
                 ].join(" ")}
               >
-                <div className="transition-all duration-500 ease-out">
+                <div className="overflow-visible transition-all duration-500 ease-out">
                   <div
                     className={[
-                      "grid items-center justify-items-center gap-8 transition-all duration-500 ease-out",
+                      "grid items-center justify-items-center gap-8 overflow-visible transition-all duration-500 ease-out",
                       selectedRole
                         ? "grid-cols-1"
                         : "grid-cols-1 md:grid-cols-2",
@@ -292,7 +288,7 @@ export default function PartyRoleSelectPage() {
                             {selectedContent.badge}
                           </div>
 
-                          <h2 className="mt-4 text-[24px] font-extrabold tracking-tight text-slate-950 sm:text-[28px]">
+                          <h2 className="mt-4 text-[24px] font-extrabold tracking-tight text-slate-950">
                             {selectedContent.title}
                           </h2>
                         </div>
@@ -318,7 +314,7 @@ export default function PartyRoleSelectPage() {
                         {selectedContent.points.map((point) => (
                           <div
                             key={point.title}
-                            className="flex items-center gap-3 rounded-[20px] bg-slate-50 px-4 py-3"
+                            className="flex items-center gap-3 rounded-[18px] bg-slate-50 px-4 py-3 ring-1 ring-slate-100"
                           >
                             <div
                               className={[
@@ -336,7 +332,14 @@ export default function PartyRoleSelectPage() {
                         ))}
                       </div>
 
-                      <div className="mt-5 rounded-[20px] bg-blue-50/60 px-4 py-4 ring-1 ring-blue-100/70">
+                      <div
+                        className={[
+                          "mt-5 rounded-[20px] px-4 py-4 ring-1",
+                          selectedRole === "HOST"
+                            ? "bg-blue-50/60 ring-blue-100/70"
+                            : "bg-emerald-50/60 ring-[#A9E6C9]/70",
+                        ].join(" ")}
+                      >
                         <p className="text-sm font-medium leading-6 text-slate-600">
                           {selectedContent.footer}
                         </p>
