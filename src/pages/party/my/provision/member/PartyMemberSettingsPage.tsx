@@ -3,10 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
-import {
-  getApiErrorMessage,
-  isExpectedClientError,
-} from "@/utils/api-error";
+import { getApiErrorMessage, isExpectedClientError } from "@/utils/api-error";
 import { loadTossPaymentsScript } from "@/utils/loadTossPayments";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -249,15 +246,14 @@ export default function PartyMemberSettingsPage() {
           billingResult,
           paymentHistoryResult,
           leaveReservationResult,
-        ] =
-          await Promise.allSettled([
-            api.get(`/api/v1/parties/${partyId}/settings`),
-            api.get("/api/v1/payments/billing/me"),
-            api.get("/api/v1/payments/me/history", {
-              params: { page: 0, size: 20 },
-            }),
-            api.get(`/api/v1/party-leave/${partyId}/reservations`),
-          ]);
+        ] = await Promise.allSettled([
+          api.get(`/api/v1/parties/${partyId}/settings`),
+          api.get("/api/v1/payments/billing/me"),
+          api.get("/api/v1/payments/me/history", {
+            params: { page: 0, size: 20 },
+          }),
+          api.get(`/api/v1/party-leave/${partyId}/reservations`),
+        ]);
 
         if (settingsResult.status === "fulfilled") {
           const data = unwrapResponse<PartySettingsResponse>(
@@ -450,9 +446,7 @@ export default function PartyMemberSettingsPage() {
       setIsSubmitting(true);
 
       const response = await api.post(`/api/v1/party-leave/${partyId}/reserve`);
-      const data = unwrapResponse<PartyLeaveReservationResponse>(
-        response.data,
-      );
+      const data = unwrapResponse<PartyLeaveReservationResponse>(response.data);
       const reservedReservation = getFirstLeaveReservation(data);
 
       await fetchSettings(false);
@@ -464,9 +458,7 @@ export default function PartyMemberSettingsPage() {
       if (!isExpectedClientError(error)) {
         console.error(error);
       }
-      toast.error(
-        getApiErrorMessage(error, "파티 해지 예약에 실패했습니다."),
-      );
+      toast.error(getApiErrorMessage(error, "파티 해지 예약에 실패했습니다."));
     } finally {
       setIsSubmitting(false);
     }
@@ -493,9 +485,7 @@ export default function PartyMemberSettingsPage() {
       if (!isExpectedClientError(error)) {
         console.error(error);
       }
-      toast.error(
-        getApiErrorMessage(error, "파티 해지 취소에 실패했습니다."),
-      );
+      toast.error(getApiErrorMessage(error, "파티 해지 취소에 실패했습니다."));
     } finally {
       setIsSubmitting(false);
     }
@@ -545,9 +535,6 @@ export default function PartyMemberSettingsPage() {
         <section className="mt-5 rounded-[32px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-xs font-bold text-[#00875A]">
-                {partySettings?.ottServiceName || "파티"}
-              </p>
               <h1 className="mt-1 text-xl font-bold text-slate-950">
                 결제 및 파티 설정
               </h1>
@@ -672,7 +659,9 @@ function LeaveActionCard({
           >
             <Icon
               icon={
-                isSubmitting ? "solar:refresh-circle-bold" : "solar:refresh-bold"
+                isSubmitting
+                  ? "solar:refresh-circle-bold"
+                  : "solar:refresh-bold"
               }
               className={`h-4 w-4 ${isSubmitting ? "animate-spin" : ""}`}
             />
@@ -707,9 +696,7 @@ function LeaveActionCard({
         >
           <Icon
             icon={
-              isSubmitting
-                ? "solar:refresh-circle-bold"
-                : "solar:logout-3-bold"
+              isSubmitting ? "solar:refresh-circle-bold" : "solar:logout-3-bold"
             }
             className={`h-4 w-4 ${isSubmitting ? "animate-spin" : ""}`}
           />
@@ -800,11 +787,7 @@ function LeaveReserveConfirmModal({
             className={`flex h-11 items-center justify-center gap-2 rounded-2xl text-sm font-semibold ring-1 transition disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:ring-slate-200 ${buttonClassName}`}
           >
             <Icon
-              icon={
-                isSubmitting
-                  ? "solar:refresh-circle-bold"
-                  : icon
-              }
+              icon={isSubmitting ? "solar:refresh-circle-bold" : icon}
               className={`h-4 w-4 ${isSubmitting ? "animate-spin" : ""}`}
             />
             {isSubmitting ? submittingLabel : confirmLabel}
@@ -837,9 +820,7 @@ function BillingMethodCard({
       <div className="px-5 py-5 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-lg font-bold text-slate-950">
-              내 결제 수단
-            </h2>
+            <h2 className="text-lg font-bold text-slate-950">내 결제 수단</h2>
             <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
               자동결제에 사용할 등록 카드 정보를 확인합니다.
             </p>

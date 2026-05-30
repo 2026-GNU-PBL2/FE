@@ -32,7 +32,7 @@ function getProviderMeta(provider: DisplayProvider | null) {
   if (provider === "google") {
     return {
       icon: "logos:google-icon",
-      imageSrc: "/images/login/google.png",
+      imageSrc: "/images/setup/google.png",
       badgeClassName: "bg-white ring-1 ring-slate-200",
       iconWrapperClassName: "bg-white",
     };
@@ -41,7 +41,7 @@ function getProviderMeta(provider: DisplayProvider | null) {
   if (provider === "kakao") {
     return {
       icon: "simple-icons:kakaotalk",
-      imageSrc: "/images/login/kakao.png",
+      imageSrc: "/images/setup/kakao.png",
       badgeClassName: "bg-[#FEE500] ring-1 ring-black/5",
       iconWrapperClassName: "bg-[#FEE500] text-[#1F1F1F]",
     };
@@ -50,7 +50,7 @@ function getProviderMeta(provider: DisplayProvider | null) {
   if (provider === "naver") {
     return {
       icon: "simple-icons:naver",
-      imageSrc: "/images/login/naver.png",
+      imageSrc: "/images/setup/naver.svg",
       badgeClassName: "bg-[#03C75A] ring-1 ring-black/5",
       iconWrapperClassName: "bg-[#03C75A] text-white",
     };
