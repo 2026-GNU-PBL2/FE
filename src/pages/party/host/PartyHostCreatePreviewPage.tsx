@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import type { OttSlug } from "@/types/ott";
+import type { ProductCategory } from "@/types/product";
 
 type ProductResponse = {
   id: string;
@@ -10,7 +12,7 @@ type ProductResponse = {
   description: string;
   thumbnailUrl: string;
   operationType: string;
-  category: string;
+  category: ProductCategory;
   maxMemberCount: number;
   basePrice: number;
   pricePerMember: number;
@@ -46,6 +48,11 @@ type CreatePreviewResponse = {
   expectedSettlementAmount: number;
   settlementDateGuide: string;
   warningMessage: string;
+};
+
+type ProductLogoMeta = {
+  category?: ProductCategory | null;
+  thumbnailUrl?: string | null;
 };
 
 type ApiEnvelope<T> = {
@@ -85,11 +92,101 @@ function getCompletePath(productId: string) {
   return `/party/create/${productId}/host/complete`;
 }
 
+function resolveProductPayload(value: ProductResponse | ProductResponse[] | null) {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value;
+}
+
+function resolveOttSlugByCategory(
+  category?: ProductCategory | null,
+): OttSlug | null {
+  const normalizedCategory = String(category ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/-/g, "_");
+
+  if (normalizedCategory === "NETFLIX") return "netflix";
+  if (normalizedCategory === "TVING") return "tving";
+  if (normalizedCategory === "WATCHA") return "watcha";
+  if (
+    normalizedCategory === "DISNEY_PLUS" ||
+    normalizedCategory === "DISNEYPLUS"
+  ) {
+    return "disney-plus";
+  }
+  if (normalizedCategory === "APPLE_TV" || normalizedCategory === "APPLETV") {
+    return "apple-tv";
+  }
+  if (normalizedCategory === "WAVVE" || normalizedCategory === "WAVE") {
+    return "wavve";
+  }
+  if (normalizedCategory === "LAFTEL") return "laftel";
+
+  return null;
+}
+
+function getProductLogoFillClassName(slug: OttSlug) {
+  if (slug === "watcha") {
+    return "h-full w-full scale-105 object-cover";
+  }
+
+  if (slug === "apple-tv") {
+    return "h-full w-full scale-125 object-cover";
+  }
+
+  if (slug === "netflix") {
+    return "h-full w-full scale-125 object-cover";
+  }
+
+  if (slug === "wavve") {
+    return "h-full w-full object-cover";
+  }
+
+  return "h-full w-full object-cover";
+}
+
+function ProductLogo({
+  image,
+  alt,
+  category,
+}: {
+  image?: string | null;
+  alt: string;
+  category?: ProductCategory | null;
+}) {
+  const slug = resolveOttSlugByCategory(category);
+
+  if (slug && image) {
+    return (
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200">
+        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+          <img
+            src={image}
+            alt={alt}
+            className={getProductLogoFillClassName(slug)}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100">
+      {image ? (
+        <img src={image} alt={alt} className="h-full w-full object-cover" />
+      ) : (
+        <Icon icon="solar:play-circle-bold" className="h-6 w-6 text-brand-main" />
+      )}
+    </div>
+  );
+}
+
 export default function PartyHostCreatePreviewPage() {
   const navigate = useNavigate();
   const { productId = "" } = useParams();
 
   const [preview, setPreview] = useState<CreatePreviewResponse | null>(null);
+  const [productLogoMeta, setProductLogoMeta] = useState<ProductLogoMeta>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -116,11 +213,15 @@ export default function PartyHostCreatePreviewPage() {
         setIsLoading(true);
 
         const productResponse = await api.get<
-          ProductResponse | ApiEnvelope<ProductResponse>
+          | ProductResponse
+          | ProductResponse[]
+          | ApiEnvelope<ProductResponse | ProductResponse[]>
         >(`/api/v1/products/${productId}`);
 
-        const productPayload = unwrapResponse<ProductResponse>(
-          productResponse.data,
+        const productPayload = resolveProductPayload(
+          unwrapResponse<ProductResponse | ProductResponse[]>(
+            productResponse.data,
+          ),
         );
 
         if (!productPayload?.id || !productPayload.maxMemberCount) {
@@ -128,6 +229,11 @@ export default function PartyHostCreatePreviewPage() {
           navigate("/parties", { replace: true });
           return;
         }
+
+        setProductLogoMeta({
+          category: productPayload.category,
+          thumbnailUrl: productPayload.thumbnailUrl,
+        });
 
         const previewRequest: CreatePreviewRequest = {
           productId: productPayload.id,
@@ -141,8 +247,6 @@ export default function PartyHostCreatePreviewPage() {
         const previewPayload = unwrapResponse<CreatePreviewResponse>(
           previewResponse.data,
         );
-        console.log(previewPayload);
-
         if (!previewPayload) {
           toast.error("파티 생성 요약 정보를 불러오지 못했습니다.");
           return;
@@ -238,20 +342,11 @@ export default function PartyHostCreatePreviewPage() {
           <div className="bg-white px-5 py-5 sm:px-8 sm:py-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100">
-                  {preview.thumbnailUrl ? (
-                    <img
-                      src={preview.thumbnailUrl}
-                      alt={preview.productName}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <Icon
-                      icon="solar:play-circle-bold"
-                      className="h-6 w-6 text-brand-main"
-                    />
-                  )}
-                </div>
+                <ProductLogo
+                  image={productLogoMeta.thumbnailUrl ?? preview.thumbnailUrl}
+                  alt={preview.productName}
+                  category={productLogoMeta.category}
+                />
 
                 <div className="min-w-0 flex-1">
                   <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-brand-main">

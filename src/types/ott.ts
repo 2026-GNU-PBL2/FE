@@ -42,6 +42,7 @@ export interface WaitingParty {
   settlementDate: string;
   status: string;
   recruitRole: RecruitRole;
+  thumbnailUrl?: string;
 }
 
 export interface OttDetailPriceCard {

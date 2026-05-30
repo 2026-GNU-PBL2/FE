@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "@/api/axios";
 import { getOttServicePlans, type OttServicePlan } from "@/api/concurrent";
+import type { OttSlug } from "@/types/ott";
+import type { ProductCategory } from "@/types/product";
 
 type ProductDetailResponse = {
   id: string;
@@ -12,6 +14,7 @@ type ProductDetailResponse = {
   description: string;
   thumbnailUrl: string;
   operationType: string;
+  category: ProductCategory;
   maxMemberCount: number;
   basePrice: number;
   pricePerMember: number;
@@ -20,7 +23,7 @@ type ProductDetailResponse = {
   updatedAt: string;
 };
 
-function resolveServiceSlug(serviceName: string) {
+function resolveServiceSlug(serviceName: string): OttSlug | null {
   const normalized = serviceName.trim().toLowerCase();
 
   if (normalized.includes("youtube") || normalized.includes("유튜브")) {
@@ -67,12 +70,38 @@ function resolveServiceSlug(serviceName: string) {
     return "laftel";
   }
 
-  return "";
+  return null;
 }
 
-function shouldUseNestedCircle(serviceName: string) {
-  const slug = resolveServiceSlug(serviceName);
+function resolveOttSlugByCategory(
+  category?: ProductCategory | null,
+): OttSlug | null {
+  const normalizedCategory = String(category ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/-/g, "_");
 
+  if (normalizedCategory === "NETFLIX") return "netflix";
+  if (normalizedCategory === "TVING") return "tving";
+  if (normalizedCategory === "WATCHA") return "watcha";
+  if (
+    normalizedCategory === "DISNEY_PLUS" ||
+    normalizedCategory === "DISNEYPLUS"
+  ) {
+    return "disney-plus";
+  }
+  if (normalizedCategory === "APPLE_TV" || normalizedCategory === "APPLETV") {
+    return "apple-tv";
+  }
+  if (normalizedCategory === "WAVVE" || normalizedCategory === "WAVE") {
+    return "wavve";
+  }
+  if (normalizedCategory === "LAFTEL") return "laftel";
+
+  return null;
+}
+
+function shouldUseNestedCircle(slug: OttSlug | null) {
   return (
     slug === "netflix" ||
     slug === "tving" ||
@@ -84,9 +113,7 @@ function shouldUseNestedCircle(serviceName: string) {
   );
 }
 
-function getImageClassName(serviceName: string) {
-  const slug = resolveServiceSlug(serviceName);
-
+function getImageClassName(slug: OttSlug | null) {
   if (slug === "disney-plus") {
     return "h-5 w-8 object-contain";
   }
@@ -94,19 +121,21 @@ function getImageClassName(serviceName: string) {
   return "h-6 w-6 object-contain";
 }
 
-function getLogoFillClassName(serviceName: string) {
-  const slug = resolveServiceSlug(serviceName);
-
+function getLogoFillClassName(slug: OttSlug) {
   if (slug === "watcha") {
     return "h-full w-full scale-105 object-cover";
   }
 
   if (slug === "apple-tv") {
-    return "h-[82%] w-[82%] object-contain";
+    return "h-full w-full scale-125 object-cover";
   }
 
-  if (slug === "netflix" || slug === "wavve") {
+  if (slug === "netflix") {
     return "h-full w-full scale-125 object-cover";
+  }
+
+  if (slug === "wavve") {
+    return "h-full w-full object-cover";
   }
 
   return "h-full w-full object-cover";
@@ -114,12 +143,17 @@ function getLogoFillClassName(serviceName: string) {
 
 function ProductLogo({
   image,
+  category,
   serviceName,
 }: {
   image: string;
+  category?: ProductCategory | null;
   serviceName: string;
 }) {
-  if (shouldUseNestedCircle(serviceName)) {
+  const slug =
+    resolveOttSlugByCategory(category) ?? resolveServiceSlug(serviceName);
+
+  if (shouldUseNestedCircle(slug) && slug) {
     return (
       <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[24px] bg-white shadow-sm ring-1 ring-slate-100 sm:h-20 sm:w-20">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200 sm:h-16 sm:w-16">
@@ -127,7 +161,7 @@ function ProductLogo({
             <img
               src={image}
               alt={serviceName}
-              className={getLogoFillClassName(serviceName)}
+              className={getLogoFillClassName(slug)}
             />
           </div>
         </div>
@@ -141,7 +175,7 @@ function ProductLogo({
         <img
           src={image}
           alt={serviceName}
-          className={getImageClassName(serviceName)}
+          className={getImageClassName(slug)}
         />
       </div>
     </div>
@@ -270,7 +304,9 @@ export default function PartyCreatePage() {
         .replace(/_/g, "");
       return (
         productService.includes(serviceName) ||
-        serviceName.includes(resolveServiceSlug(product.serviceName).replace("-", ""))
+        serviceName.includes(
+          (resolveServiceSlug(product.serviceName) ?? "").replace("-", ""),
+        )
       );
     });
   }, [ottPlans, product]);
@@ -349,11 +385,12 @@ export default function PartyCreatePage() {
       <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
           <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-            <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 p-6 sm:p-8 lg:p-10">
+            <div className="bg-white p-6 sm:p-8 lg:p-10">
               <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex min-w-0 items-start gap-4 sm:gap-5">
                   <ProductLogo
                     image={product.thumbnailUrl}
+                    category={product.category}
                     serviceName={product.serviceName}
                   />
 
