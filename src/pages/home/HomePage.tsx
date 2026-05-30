@@ -9,7 +9,7 @@ import {
   getPartyRecruitListPath,
 } from "@/mocks/ott";
 import type { OttSlug, WaitingParty } from "@/types/ott";
-import type { ProductListItem } from "@/types/product";
+import type { ProductCategory, ProductListItem } from "@/types/product";
 
 type PartyVacancyItem = {
   partyId: number;
@@ -80,6 +80,34 @@ function shouldUseNestedCircle(slug: OttSlug) {
     slug === "wavve" ||
     slug === "laftel"
   );
+}
+
+function resolveOttSlugByCategory(
+  category?: ProductCategory | null,
+): OttSlug | null {
+  const normalizedCategory = String(category ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/-/g, "_");
+
+  if (normalizedCategory === "NETFLIX") return "netflix";
+  if (normalizedCategory === "TVING") return "tving";
+  if (normalizedCategory === "WATCHA") return "watcha";
+  if (
+    normalizedCategory === "DISNEY_PLUS" ||
+    normalizedCategory === "DISNEYPLUS"
+  ) {
+    return "disney-plus";
+  }
+  if (normalizedCategory === "APPLE_TV" || normalizedCategory === "APPLETV") {
+    return "apple-tv";
+  }
+  if (normalizedCategory === "WAVVE" || normalizedCategory === "WAVE") {
+    return "wavve";
+  }
+  if (normalizedCategory === "LAFTEL") return "laftel";
+
+  return null;
 }
 
 function resolveOttSlugByServiceName(serviceName: string): OttSlug | null {
@@ -179,6 +207,10 @@ function formatSettlementDate(value: string | null) {
   ).padStart(2, "0")} 정산`;
 }
 
+function getMobileSettlementDate(value: string) {
+  return value.replace(/\s*정산$/, "");
+}
+
 function getVacancyStatus(role: "HOST" | "MEMBER", remainingSeatCount: number) {
   const seatCount = Math.max(remainingSeatCount, 0);
 
@@ -189,6 +221,39 @@ function getVacancyStatus(role: "HOST" | "MEMBER", remainingSeatCount: number) {
   return `파티원 ${seatCount || 1}자리`;
 }
 
+function getRemainingSeatLabel(party: WaitingParty) {
+  const remainingSeatCount = Math.max(
+    party.maxMembers - party.currentMembers,
+    0,
+  );
+
+  return remainingSeatCount > 0 ? `${remainingSeatCount}자리 남음` : "마감 임박";
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getRecruitPartyDisplayTitle(party: WaitingParty) {
+  const cleanedTitle = party.title
+    .trim()
+    .replace(/\s*(파티장|파티원)\s*모집\s*$/, "")
+    .replace(/\s*모집\s*$/, "")
+    .trim();
+
+  if (!cleanedTitle) {
+    return party.recruitRole === "HOST"
+      ? `${party.ott} 운영 자리`
+      : `${party.ott} 참여 자리`;
+  }
+
+  if (new RegExp(`^${escapeRegExp(party.ott)}(\\s|$)`).test(cleanedTitle)) {
+    return cleanedTitle;
+  }
+
+  return `${party.ott} ${cleanedTitle}`;
+}
+
 function mapVacancyToWaitingParty(
   item: PartyVacancyItem,
   role: "HOST" | "MEMBER",
@@ -196,10 +261,7 @@ function mapVacancyToWaitingParty(
   return {
     id: item.partyId,
     ott: resolveOttNameByServiceName(item.productName),
-    title:
-      role === "HOST"
-        ? `${item.productName} 파티장 모집`
-        : `${item.productName} 파티원 모집`,
+    title: item.productName.trim(),
     host:
       role === "HOST"
         ? "파티장 모집 중"
@@ -212,6 +274,7 @@ function mapVacancyToWaitingParty(
     settlementDate: formatSettlementDate(item.nextPaymentDate),
     status: getVacancyStatus(role, item.remainingSeatCount),
     recruitRole: role,
+    thumbnailUrl: item.thumbnailUrl,
   };
 }
 
@@ -241,11 +304,15 @@ function getProductLogoFillClassName(slug: OttSlug) {
   }
 
   if (slug === "apple-tv") {
-    return "h-[82%] w-[82%] object-contain";
+    return "h-full w-full scale-125 object-cover";
   }
 
-  if (slug === "netflix" || slug === "wavve") {
+  if (slug === "netflix") {
     return "h-full w-full scale-125 object-cover";
+  }
+
+  if (slug === "wavve") {
+    return "h-full w-full object-cover";
   }
 
   return "h-full w-full object-cover";
@@ -298,15 +365,19 @@ function renderOttLogo({
 function renderProductLogo({
   image,
   alt,
+  category,
   serviceName,
   outerClassName,
 }: {
   image: string;
   alt: string;
+  category?: ProductCategory | null;
   serviceName: string;
   outerClassName: string;
 }) {
-  const slug = resolveOttSlugByServiceName(serviceName);
+  const slug =
+    resolveOttSlugByCategory(category) ??
+    resolveOttSlugByServiceName(serviceName);
   const imageClassName = getProductImageClassName(serviceName);
 
   if (slug) {
@@ -337,49 +408,55 @@ function getProductCreatePath(product: ProductListItem) {
 
 function RecruitPartyCard({
   party,
-  actionLabel,
   tone = "blue",
 }: {
   party: WaitingParty;
-  actionLabel: string;
   tone?: "blue" | "mint";
 }) {
   const ottMeta = getOttMeta(party.ott);
   const isMint = tone === "mint";
+  const displayTitle = getRecruitPartyDisplayTitle(party);
+  const remainingSeatLabel = getRemainingSeatLabel(party);
+  const thumbnailSrc = party.thumbnailUrl || ottMeta.image;
 
   return (
-    <article
+    <Link
+      to={`/parties/${party.recruitRole === "HOST" ? "hosts" : "members"}/${party.id}`}
+      aria-label={`${displayTitle} 상세 보기`}
       className={[
-        "group overflow-hidden rounded-[28px] border bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-xl sm:p-5",
+        "group block overflow-hidden rounded-[28px] border bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-main/40 sm:p-6",
         isMint
           ? "border-[#A9E6C9] shadow-emerald-900/5 hover:border-[#00A86B] hover:shadow-emerald-900/10"
           : "border-blue-100 shadow-blue-900/5 hover:border-brand-sub hover:shadow-blue-900/10",
       ].join(" ")}
     >
       <div className="flex h-full flex-col">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            <div className="flex min-w-0 items-start gap-3">
               <span
-                className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${
+                className={[
+                  "inline-flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1",
                   ottMeta.chipClassName ??
-                  "bg-slate-50 text-slate-700 ring-slate-200"
-                }`}
+                    "bg-slate-50 text-slate-700 ring-slate-200",
+                ].join(" ")}
+                aria-label={party.ott}
+                title={party.ott}
               >
                 {shouldUseNestedCircle(ottMeta.slug) ? (
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/80">
-                    <span className="flex h-4 w-4 items-center justify-center overflow-hidden rounded-full">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/80">
+                    <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full">
                       <img
-                        src={ottMeta.image}
+                        src={thumbnailSrc}
                         alt={party.ott}
-                        className="h-full w-full object-contain"
+                        className={getProductLogoFillClassName(ottMeta.slug)}
                       />
                     </span>
                   </span>
                 ) : (
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-xl bg-white/80">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/80">
                     <img
-                      src={ottMeta.image}
+                      src={thumbnailSrc}
                       alt={party.ott}
                       className={
                         ottMeta.imageClassName ?? "h-3.5 w-3.5 object-contain"
@@ -387,45 +464,48 @@ function RecruitPartyCard({
                     />
                   </span>
                 )}
-                {party.ott}
               </span>
 
-              <span
-                className={[
-                  "inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1",
-                  isMint
-                    ? "bg-[#EAF8F1] text-[#00875A] ring-[#A9E6C9]"
-                    : "bg-blue-50 text-brand-main ring-blue-100",
-                ].join(" ")}
-              >
-                {party.status}
-              </span>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-lg font-bold leading-snug text-slate-950 sm:text-xl">
+                    {displayTitle}
+                  </h3>
+
+                  <span
+                    className={[
+                      "hidden shrink-0 rounded-full px-3 py-1 text-xs font-semibold ring-1 sm:inline-flex",
+                      isMint
+                        ? "bg-[#EAF8F1] text-[#00875A] ring-[#A9E6C9]"
+                        : "bg-blue-50 text-brand-main ring-blue-100",
+                    ].join(" ")}
+                  >
+                    {remainingSeatLabel}
+                  </span>
+                </div>
+
+                <p className="mt-1.5 text-sm font-medium text-slate-500">
+                  {party.host}
+                </p>
+              </div>
             </div>
-
-            <h3 className="mt-4 text-lg font-bold leading-snug text-slate-950 sm:text-xl">
-              {party.title}
-            </h3>
-
-            <p className="mt-1.5 text-sm font-medium text-slate-500">
-              {party.host}
-            </p>
           </div>
 
-          <Link
-            to={`/parties/${party.recruitRole === "HOST" ? "hosts" : "members"}/${party.id}`}
+          <span
+            aria-hidden="true"
             className={[
-              "inline-flex h-11 shrink-0 items-center justify-center rounded-full px-5 text-sm font-bold text-white shadow-md transition group-hover:scale-[1.02]",
+              "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition group-hover:translate-x-0.5",
               isMint
-                ? "bg-[#00A86B] shadow-emerald-900/20 hover:bg-[#00875A]"
-                : "bg-brand-main shadow-blue-900/20 hover:bg-blue-800",
+                ? "text-[#00A86B] hover:text-[#00875A]"
+                : "text-brand-main hover:text-blue-800",
             ].join(" ")}
           >
-            {actionLabel}
-          </Link>
+            <Icon icon="solar:alt-arrow-right-linear" className="h-7 w-7" />
+          </span>
         </div>
 
-        <div className="mt-5 grid grid-cols-3 gap-2 rounded-3xl bg-slate-50 p-2">
-          <div className="px-2 py-2">
+        <div className="mt-6 grid grid-cols-3 gap-2 rounded-3xl bg-slate-50 p-3">
+          <div className="px-2 py-2.5">
             <p className="text-[11px] font-semibold text-slate-400">
               현재 인원
             </p>
@@ -434,14 +514,17 @@ function RecruitPartyCard({
             </p>
           </div>
 
-          <div className="border-x border-white px-2 py-2">
+          <div className="border-x border-white px-2 py-2.5">
             <p className="text-[11px] font-semibold text-slate-400">정산일</p>
             <p className="mt-1 text-sm font-extrabold text-slate-950">
-              {party.settlementDate}
+              <span className="sm:hidden">
+                {getMobileSettlementDate(party.settlementDate)}
+              </span>
+              <span className="hidden sm:inline">{party.settlementDate}</span>
             </p>
           </div>
 
-          <div className="px-2 py-2">
+          <div className="px-2 py-2.5">
             <p className="text-[11px] font-semibold text-slate-400">금액</p>
             <p className="mt-1 text-sm font-extrabold text-slate-950">
               {party.price}
@@ -449,7 +532,7 @@ function RecruitPartyCard({
           </div>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
 
@@ -459,7 +542,6 @@ function RecruitSection({
   description,
   viewAllPath,
   parties,
-  actionLabel,
   tone = "blue",
 }: {
   badge: string;
@@ -467,7 +549,6 @@ function RecruitSection({
   description: string;
   viewAllPath: string;
   parties: WaitingParty[];
-  actionLabel: string;
   tone?: "blue" | "mint";
 }) {
   const isMint = tone === "mint";
@@ -516,7 +597,6 @@ function RecruitSection({
           <RecruitPartyCard
             key={party.id}
             party={party}
-            actionLabel={actionLabel}
             tone={tone}
           />
         ))}
@@ -570,7 +650,6 @@ export default function HomePage() {
         setIsLoadingProducts(true);
 
         const response = await api.get<ProductListItem[]>("/api/v1/products");
-
         const nextProducts = Array.isArray(response.data) ? response.data : [];
 
         if (!isMounted) {
@@ -822,6 +901,7 @@ export default function HomePage() {
                       {renderProductLogo({
                         image: product.thumbnailUrl,
                         alt: product.serviceName,
+                        category: product.category,
                         serviceName: product.serviceName,
                         outerClassName: [
                           "h-12 w-12 shrink-0",
@@ -892,7 +972,6 @@ export default function HomePage() {
         description="기존 운영 공백으로 비어 있는 파티장 모집 현황만 모아봤어요."
         viewAllPath={getPartyRecruitListPath("HOST")}
         parties={hostParties}
-        actionLabel="파티장 참여"
         tone="blue"
       />
 
@@ -902,7 +981,6 @@ export default function HomePage() {
         description="현재 바로 참여할 수 있는 파티원 모집 현황만 모아봤어요."
         viewAllPath={getPartyRecruitListPath("MEMBER")}
         parties={memberParties}
-        actionLabel="파티원 참여"
         tone="mint"
       />
 

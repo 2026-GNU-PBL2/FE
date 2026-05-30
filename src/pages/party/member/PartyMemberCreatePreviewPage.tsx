@@ -148,11 +148,15 @@ function getProductLogoFillClassName(slug: OttSlug) {
   }
 
   if (slug === "apple-tv") {
-    return "h-[82%] w-[82%] object-contain";
+    return "h-full w-full scale-125 object-cover";
   }
 
-  if (slug === "netflix" || slug === "wavve") {
+  if (slug === "netflix") {
     return "h-full w-full scale-125 object-cover";
+  }
+
+  if (slug === "wavve") {
+    return "h-full w-full object-cover";
   }
 
   return "h-full w-full object-cover";
@@ -172,11 +176,13 @@ function ProductLogo({
     resolveOttServiceByProductName(productName);
 
   if (service) {
+    const image = fallbackImage || service.image;
+
     return (
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200">
         <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
           <img
-            src={service.image}
+            src={image}
             alt={productName}
             className={getProductLogoFillClassName(service.slug)}
           />

@@ -155,6 +155,46 @@ function formatDateTime(value: string | null | undefined) {
   }).format(date);
 }
 
+function parseIsoLikeDate(value: string) {
+  const normalized = value.replace(
+    /\.(\d{3})\d+(?=Z|[+-]\d{2}:?\d{2}|$)/,
+    ".$1",
+  );
+  const date = new Date(normalized);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatInlineDateTime(value: string) {
+  const date = parseIsoLikeDate(value);
+
+  if (!date) return value;
+
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((item) => item.type === type)?.value ?? "";
+  const dayPeriod = part("dayPeriod");
+  const localizedDayPeriod =
+    dayPeriod === "AM" ? "오전" : dayPeriod === "PM" ? "오후" : dayPeriod;
+
+  return `${part("month")} ${part("day")}일 ${localizedDayPeriod} ${part(
+    "hour",
+  )}:${part("minute")}`;
+}
+
+function formatNotificationContent(value: string) {
+  return value.replace(
+    /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}:?\d{2})?)\s*까지/g,
+    (_, dateText: string) => `${formatInlineDateTime(dateText)}까지`,
+  );
+}
+
 function formatRelativeTime(value: string | null | undefined) {
   if (!value) return "";
 
@@ -895,7 +935,7 @@ export default function NotificationPage() {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100">
+            <div className="space-y-3 p-4 sm:p-5">
               {notifications.map((notification) => {
                 const meta = getNotificationMeta(notification.type);
                 const unread = isUnread(notification);
@@ -903,6 +943,7 @@ export default function NotificationPage() {
                   notification.webContent ||
                   notification.content ||
                   "알림 내용을 확인해주세요.";
+                const displayContent = formatNotificationContent(content);
 
                 return (
                   <article
@@ -916,14 +957,16 @@ export default function NotificationPage() {
                         handleNotificationClick(notification);
                       }
                     }}
-                    className={`relative w-full px-5 py-5 text-left transition hover:bg-slate-50 ${
-                      unread ? "bg-amber-50/35" : "bg-white"
+                    className={`relative w-full overflow-hidden rounded-[26px] px-5 py-5 text-left ring-1 transition hover:bg-slate-50 sm:px-6 sm:py-6 ${
+                      unread
+                        ? "bg-amber-50/35 ring-amber-100"
+                        : "bg-white ring-slate-100"
                     }`}
                   >
                     {unread && (
                       <span className="absolute left-0 top-0 h-full w-1 bg-amber-400" />
                     )}
-                    <div className="flex gap-3 sm:gap-4">
+                    <div className="flex gap-4 sm:gap-5">
                       <div
                         className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${meta.iconClassName}`}
                       >
@@ -951,12 +994,12 @@ export default function NotificationPage() {
                             </div>
                           </div>
 
-                          <p className="mt-1 line-clamp-2 text-sm font-medium leading-6 text-slate-500">
-                            {content}
+                          <p className="mt-2 line-clamp-3 text-sm font-medium leading-6 text-slate-500">
+                            {displayContent}
                           </p>
                         </div>
 
-                        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+                        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
                           <span className="inline-flex items-center gap-1">
                             <Icon
                               icon="solar:calendar-mark-linear"
@@ -1020,18 +1063,18 @@ function NotificationActions({
 
   if (notification.type === "CONCURRENT_WARNING_1") {
     return (
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-5 flex flex-wrap gap-2.5">
         <button
           type="button"
           onClick={stop(onFaq)}
-          className="inline-flex h-9 items-center justify-center rounded-full bg-white px-3 text-xs font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
+          className="inline-flex h-10 items-center justify-center rounded-full bg-white px-4 text-xs font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
         >
           FAQ 확인하기
         </button>
         <button
           type="button"
           onClick={stop(onReport)}
-          className="inline-flex h-9 items-center justify-center rounded-full bg-amber-50 px-3 text-xs font-bold text-amber-700 ring-1 ring-amber-100 transition hover:bg-amber-100"
+          className="inline-flex h-10 items-center justify-center rounded-full bg-amber-50 px-4 text-xs font-bold text-amber-700 ring-1 ring-amber-100 transition hover:bg-amber-100"
         >
           문제 신고하기
         </button>
@@ -1046,11 +1089,11 @@ function NotificationActions({
     notification.type === "LEADER_ACTION_REQUIRED_24H"
   ) {
     return (
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-5 flex flex-wrap gap-2.5">
         <button
           type="button"
           onClick={stop(onHostAction)}
-          className="inline-flex h-9 items-center justify-center rounded-full bg-brand-main px-3 text-xs font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="inline-flex h-10 items-center justify-center rounded-full bg-brand-main px-4 text-xs font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
           조치하러 가기
         </button>
@@ -1063,11 +1106,11 @@ function NotificationActions({
     notification.type === "PARTY_DISSOLVED_FINAL"
   ) {
     return (
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-5 flex flex-wrap gap-2.5">
         <button
           type="button"
           onClick={stop(onFindParty)}
-          className="inline-flex h-9 items-center justify-center rounded-full bg-rose-50 px-3 text-xs font-bold text-rose-700 ring-1 ring-rose-100 transition hover:bg-rose-100"
+          className="inline-flex h-10 items-center justify-center rounded-full bg-rose-50 px-4 text-xs font-bold text-rose-700 ring-1 ring-rose-100 transition hover:bg-rose-100"
         >
           새 파티 찾기
         </button>

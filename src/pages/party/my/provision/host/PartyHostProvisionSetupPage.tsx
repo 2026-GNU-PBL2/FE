@@ -4,6 +4,8 @@ import type { FormEvent } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import type { OttSlug } from "@/types/ott";
+import type { ProductCategory } from "@/types/product";
 
 type ProductOperationType = "INVITE_CODE" | "ACCOUNT_SHARE" | string;
 
@@ -13,7 +15,7 @@ type ProductResponse = {
   description: string;
   thumbnailUrl: string;
   operationType: ProductOperationType;
-  category: string;
+  category: ProductCategory;
   maxMemberCount: number;
   basePrice: number;
   pricePerMember: number;
@@ -146,6 +148,93 @@ function getOttAccountLink(serviceName: string) {
         normalizeServiceName(serviceNameCandidate),
       ),
     ),
+  );
+}
+
+function resolveOttSlugByCategory(
+  category?: ProductCategory | null,
+): OttSlug | null {
+  const normalizedCategory = String(category ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/-/g, "_");
+
+  if (normalizedCategory === "NETFLIX") return "netflix";
+  if (normalizedCategory === "TVING") return "tving";
+  if (normalizedCategory === "WATCHA") return "watcha";
+  if (
+    normalizedCategory === "DISNEY_PLUS" ||
+    normalizedCategory === "DISNEYPLUS"
+  ) {
+    return "disney-plus";
+  }
+  if (normalizedCategory === "APPLE_TV" || normalizedCategory === "APPLETV") {
+    return "apple-tv";
+  }
+  if (normalizedCategory === "WAVVE" || normalizedCategory === "WAVE") {
+    return "wavve";
+  }
+  if (normalizedCategory === "LAFTEL") return "laftel";
+
+  return null;
+}
+
+function getProductLogoFillClassName(slug: OttSlug) {
+  if (slug === "watcha") {
+    return "h-full w-full scale-105 object-cover";
+  }
+
+  if (slug === "apple-tv") {
+    return "h-full w-full scale-125 object-cover";
+  }
+
+  if (slug === "netflix") {
+    return "h-full w-full scale-125 object-cover";
+  }
+
+  if (slug === "wavve") {
+    return "h-full w-full object-cover";
+  }
+
+  return "h-full w-full object-cover";
+}
+
+function ProductLogo({
+  image,
+  alt,
+  category,
+}: {
+  image?: string | null;
+  alt: string;
+  category?: ProductCategory | null;
+}) {
+  const slug = resolveOttSlugByCategory(category);
+
+  if (slug && image) {
+    return (
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200">
+        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+          <img
+            src={image}
+            alt={alt}
+            className={getProductLogoFillClassName(slug)}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-blue-100">
+      {image ? (
+        <img src={image} alt={alt} className="h-full w-full object-cover" />
+      ) : (
+        <Icon
+          icon="solar:play-circle-bold"
+          className="h-7 w-7 text-brand-main"
+        />
+      )}
+    </div>
   );
 }
 
@@ -301,23 +390,14 @@ export default function PartyHostProvisionSetupPage() {
     <div className="min-h-screen bg-brand-bg px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <div className="mx-auto w-full max-w-3xl">
         <section className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-900/6 ring-1 ring-slate-100">
-          <div className="bg-linear-to-br from-blue-50 via-white to-sky-50 px-5 py-6 sm:px-8 sm:py-7">
+          <div className="bg-white px-5 py-6 sm:px-8 sm:py-7">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-blue-100">
-                  {product.thumbnailUrl ? (
-                    <img
-                      src={product.thumbnailUrl}
-                      alt={product.serviceName}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <Icon
-                      icon="solar:play-circle-bold"
-                      className="h-7 w-7 text-brand-main"
-                    />
-                  )}
-                </div>
+                <ProductLogo
+                  image={product.thumbnailUrl}
+                  alt={product.serviceName}
+                  category={product.category}
+                />
 
                 <div className="min-w-0">
                   <p className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-extrabold text-brand-main ring-1 ring-blue-100">
@@ -345,15 +425,9 @@ export default function PartyHostProvisionSetupPage() {
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex min-w-0 gap-4">
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-brand-main ring-1 ring-blue-100">
-                        <Icon
-                          icon="solar:login-3-bold"
-                          className="h-6 w-6"
-                        />
+                        <Icon icon="solar:login-3-bold" className="h-6 w-6" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-brand-main">
-                          OTT 계정 준비
-                        </p>
                         <h2 className="mt-1 text-lg font-extrabold text-slate-950">
                           {ottAccountLink.title}
                         </h2>
@@ -413,7 +487,8 @@ export default function PartyHostProvisionSetupPage() {
                       className="mr-3 h-5 w-5 shrink-0 text-brand-main"
                     />
                     <p className="min-w-0 flex-1 truncate text-sm font-extrabold text-slate-900">
-                      {sharedAccountEmail || "계정 아이디를 불러오지 못했습니다"}
+                      {sharedAccountEmail ||
+                        "계정 아이디를 불러오지 못했습니다"}
                     </p>
                   </div>
                 </label>

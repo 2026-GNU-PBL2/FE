@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/api/axios";
+import { useAuthStore } from "@/stores/authStore";
 import {
   getApiErrorMessage,
   getConcurrentIssueHistory,
@@ -180,9 +181,47 @@ function formatDateTime(value: string | null) {
 
 function getDeviceOwnerLabel(device: PartyMemberDevice) {
   return (
-    device.nickname?.trim() ||
-    device.email?.trim() ||
-    `user #${device.userId}`
+    device.nickname?.trim() || device.email?.trim() || `user #${device.userId}`
+  );
+}
+
+function getGroupedDevices(devices: PartyMemberDevice[]) {
+  const grouped = new Map<
+    number,
+    { userId: number; ownerLabel: string; devices: PartyMemberDevice[] }
+  >();
+
+  devices.forEach((device) => {
+    const current = grouped.get(device.userId);
+
+    if (current) {
+      current.devices.push(device);
+      return;
+    }
+
+    grouped.set(device.userId, {
+      userId: device.userId,
+      ownerLabel: getDeviceOwnerLabel(device),
+      devices: [device],
+    });
+  });
+
+  return Array.from(grouped.values()).map((group) => ({
+    ...group,
+    devices: group.devices.sort(
+      (a, b) =>
+        new Date(b.registeredAt).getTime() -
+        new Date(a.registeredAt).getTime(),
+    ),
+  }));
+}
+
+function DeviceInfoCell({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white px-3 py-2.5 ring-1 ring-slate-100">
+      <p className="text-[11px] font-extrabold text-slate-400">{label}</p>
+      <p className="mt-1 truncate text-sm font-bold text-slate-800">{value}</p>
+    </div>
   );
 }
 
@@ -209,6 +248,7 @@ function formatDate(value?: string | null) {
 export default function PartyProvisionDashboardPage() {
   const navigate = useNavigate();
   const { partyId } = useParams<{ partyId: string }>();
+  const currentUserId = useAuthStore((state) => state.user?.id);
   const [provision, setProvision] = useState<PartyProvisionResponse | null>(
     null,
   );
@@ -356,7 +396,12 @@ export default function PartyProvisionDashboardPage() {
       setIssueHistory(await getConcurrentIssueHistory(partyId));
     } catch (error) {
       console.error(error);
-      toast.error(getApiErrorMessage(error, "조치 완료 처리에 실패했습니다."));
+      toast.error(
+        getApiErrorMessage(
+          error,
+          "공유 계정 재설정 후 조치 완료를 눌러주세요.",
+        ),
+      );
     } finally {
       setResolvingIncidentId(null);
     }
@@ -526,13 +571,13 @@ export default function PartyProvisionDashboardPage() {
               />
             </div>
           </div>
-
         </section>
 
         {isAccountShareProvisionType(provision.provisionType) && (
           <HostConcurrentTools
             issueHistory={issueHistory}
             registeredDevices={registeredDevices}
+            currentUserId={currentUserId}
             resolvingIncidentId={resolvingIncidentId}
             onOpenDeviceAlert={() => {
               setIsDeviceAlertModalOpen(true);
@@ -606,7 +651,6 @@ export default function PartyProvisionDashboardPage() {
           onSubmit={handleReportDeviceAlert}
         />
       )}
-
     </div>
   );
 }
@@ -625,16 +669,23 @@ function MetricTile({ label, value }: { label: string; value: string }) {
 function HostConcurrentTools({
   issueHistory,
   registeredDevices,
+  currentUserId,
   resolvingIncidentId,
   onOpenDeviceAlert,
   onResolveIssue,
 }: {
   issueHistory: ConcurrentIssueHistoryItem[];
   registeredDevices: PartyMemberDevice[];
+  currentUserId?: number;
   resolvingIncidentId: number | null;
   onOpenDeviceAlert: () => void;
   onResolveIssue: (incidentId: number) => void;
 }) {
+  const visibleDevices = registeredDevices.filter(
+    (device) => currentUserId == null || device.userId !== currentUserId,
+  );
+  const groupedDevices = getGroupedDevices(visibleDevices);
+
   return (
     <section className="mt-5 rounded-[28px] bg-white px-5 py-5 shadow-xl shadow-slate-900/5 ring-1 ring-slate-100 sm:px-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -659,45 +710,65 @@ function HostConcurrentTools({
 
       <div className="mt-5 space-y-2">
         <p className="text-xs font-bold text-slate-400">파티 등록 기기</p>
-        {registeredDevices.length > 0 ? (
-          registeredDevices.map((device) => (
+        {visibleDevices.length > 0 ? (
+          groupedDevices.map((group) => (
             <div
-              key={device.id}
-              className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100"
+              key={group.userId}
+              className="rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100"
             >
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-slate-900">
-                    {getDeviceOwnerLabel(device)}
-                  </p>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">
-                    {device.deviceType} · {device.os}
-                    {device.browser ? ` · ${device.browser}` : ""}
-                  </p>
-                  {(device.ipLocation || device.vpn !== null) && (
-                    <p className="mt-1 text-xs font-semibold text-slate-400">
-                      {device.ipLocation || "위치 미확인"}
-                      {device.vpn !== null
-                        ? ` · VPN ${device.vpn ? "사용" : "미사용"}`
-                        : ""}
-                    </p>
-                  )}
-                </div>
-                <div className="shrink-0 text-left sm:text-right">
-                  <span className="text-xs font-semibold text-slate-400">
-                    {formatDateTime(device.registeredAt)}
-                  </span>
-                  <p className="mt-1 text-[11px] font-bold text-slate-400">
-                    {device.registrationMethod}
+                    {group.ownerLabel}
                   </p>
                 </div>
+              </div>
+
+              <div className="mt-3 space-y-3">
+                {group.devices.map((device) => (
+                  <div
+                    key={device.id}
+                    className="rounded-2xl bg-white p-3 ring-1 ring-slate-100"
+                  >
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-xs font-semibold text-slate-400">
+                        등록 {formatDateTime(device.registeredAt)}
+                      </p>
+
+                      <span className="w-fit shrink-0 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-500 ring-1 ring-slate-200">
+                        VPN{" "}
+                        {device.vpn === null
+                          ? "확인 불가"
+                          : device.vpn
+                            ? "사용"
+                            : "미사용"}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                      <DeviceInfoCell
+                        label="디바이스 타입"
+                        value={device.deviceType || "-"}
+                      />
+                      <DeviceInfoCell label="OS" value={device.os || "-"} />
+                      <DeviceInfoCell
+                        label="브라우저"
+                        value={device.browser || "-"}
+                      />
+                      <DeviceInfoCell
+                        label="접속 위치"
+                        value={device.ipLocation || "위치 미확인"}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))
         ) : (
           <div className="rounded-2xl bg-slate-50 px-4 py-4 text-center ring-1 ring-slate-100">
             <p className="text-sm font-semibold text-slate-500">
-              아직 등록된 기기가 없습니다.
+              표시할 파티원 등록 기기가 없습니다.
             </p>
           </div>
         )}
