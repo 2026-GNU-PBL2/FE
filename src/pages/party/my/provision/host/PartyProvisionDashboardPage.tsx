@@ -721,9 +721,6 @@ function HostConcurrentTools({
                   <p className="truncate text-sm font-bold text-slate-900">
                     {group.ownerLabel}
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-slate-400">
-                    등록 기기 {group.devices.length}개
-                  </p>
                 </div>
               </div>
 
