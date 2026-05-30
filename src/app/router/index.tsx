@@ -17,6 +17,7 @@ import SetupPhonePage from "@/pages/setup/SetupPhonePage";
 import SetupCompletePage from "@/pages/setup/SetupCompletePage";
 import AboutPage from "@/pages/about/AboutPage";
 import EventPage from "@/pages/event/EventPage";
+import EventDetailPage from "@/pages/event/EventDetailPage";
 import SupportPage from "@/pages/support/SupportPage";
 import TermsPage from "@/pages/legal/TermsPage";
 import PrivacyPage from "@/pages/legal/PrivacyPage";
@@ -119,6 +120,7 @@ const router = createBrowserRouter([
           { path: "/home", element: <Navigate to="/" replace /> },
           { path: "/about", element: <AboutPage /> },
           { path: "/event", element: <EventPage /> },
+          { path: "/event/:eventId", element: <EventDetailPage /> },
           { path: "/support", element: <SupportPage /> },
           { path: "/parties", element: <PartyListPage /> },
           {
